@@ -1,0 +1,26 @@
+#!/bin/sh
+
+PYTHON=/beegfs/paracrawl/bin/python
+BITEXTOR=/beegfs/paracrawl/bitextor
+GIAWARC=/beegfs/paracrawl/bin/giawarc
+DATA="$1"
+INPUT="${DATA}"
+OUTPUT="${DATA}-html"
+PDFOUT="${DATA}-pdf"
+TXTOUT="${DATA}-text"
+COLLECTION="$2"
+
+mkdir -p $OUTPUT/$COLLECTION
+mkdir -p $PDFOUT/$COLLECTION
+rm -rf $TXTOUT/$COLLECTION
+mkdir -p $TXTOUT/$COLLECTION
+
+for warc in `ls $INPUT/$COLLECTION | grep '\.warc\.gz$'`; do
+    if test ! -f $OUTPUT/$COLLECTION/$warc; then
+        echo `date +%s` `date` "$INPUT/$COLLECTION/$warc extracting HTML and PDF"
+        $PYTHON $BITEXTOR/bitextor-warc2htmlwarc.py --input $INPUT/$COLLECTION/$warc --output $OUTPUT/$COLLECTION/$warc --pdfpass $PDFOUT/$COLLECTION/$warc --cleanhtml --ftfy
+    fi
+    echo `date +%s` `date` "$INPUT/$COLLECTION/$warc processing text"
+    $GIAWARC -f bilang -o $TXTOUT/$COLLECTION $OUTPUT/$COLLECTION/$warc
+    echo `date +%s` `date` "$INPUT/$COLLECTION/$warc done processing"
+done
