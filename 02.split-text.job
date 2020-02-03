@@ -1,6 +1,6 @@
 #!/bin/sh
 #PBS -A dc007
-#PBS -N preprocess
+#PBS -N sentences
 #PBS -l select=1:ncpus=36
 #PBS -l place=exclhost
 
