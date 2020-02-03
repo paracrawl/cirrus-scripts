@@ -17,7 +17,7 @@ for lang in $LANGS; do
     if test ! -d $TXTOUT/$COLLECTION/$lang; then continue; fi
     rm -f $TXTOUT/$COLLECTION/$lang/sentences.gz
     < $TXTOUT/$COLLECTION/$lang/plain_text.gz gzip -dc | while read doc; do
-        echo $doc | base64 -d | sed 's/$/\n/' | perl $SPLIT 2> /dev/null | base64 | gzip -9c >> $TXTOUT/$COLLECTION/$lang/sentences.gz
+        echo $doc | base64 -d | sed 's/$/\n/' | perl $SPLIT $lang 2> /dev/null | base64 | gzip -9c >> $TXTOUT/$COLLECTION/$lang/sentences.gz
     done
 done
 
