@@ -9,7 +9,7 @@ export PATH=/beegfs/paracrawl/bin:/beegfs/paracrawl/miniconda3/envs/paracrawl/bi
 
 COLLECTIONS=/beegfs/paracrawl/data/ia/ia_wide00006-todo/wide_todo_collections.txt.${PBS_ARRAY_INDEX}
 SPLIT=/beegfs/paracrawl/scripts/02.split-text
-DATA=/beegfs/paracrawl/data/ia/ia_wide00006-text
+DATA=/beegfs/paracrawl/data/ia/ia_wide00006
 
 echo `date` "Starting whole node job ${PBS_ARRAY_INDEX}"
 echo "Collections: ${COLLECTIONS}"
