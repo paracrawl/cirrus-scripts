@@ -5,10 +5,10 @@
 from sys import argv
 import fileinput
 
-nrows=72
+nrows=432
 
 slice=0
-n=72
+n=nrows
 ofp=None
 filebase=argv[1]
 for row in fileinput.input(filebase):
