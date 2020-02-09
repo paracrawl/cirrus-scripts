@@ -1,0 +1,48 @@
+#!/bin/sh
+
+SCRIPTS=`dirname $0`
+. ${SCRIPTS}/config.valhalla
+
+SLANG="$1"
+
+BATCH=${DATA}-batch/${SLANG}
+mkdir -p ${BATCH}
+
+limit=1000000
+total=0
+batch=0
+
+newbatch () {
+    batch=$(($batch + 1))
+    BATCHDIR=${BATCH}/`printf "%06d" $batch`
+    echo "starting new batch $batch in $BATCHDIR"
+    mkdir -p $BATCHDIR
+    total=0
+}
+
+newbatch 
+
+find -L ${DATA}-text -name ${SLANG} | while read dir; do
+    parent=`dirname $dir`
+    collection=`basename $parent`
+    if test ! -f $dir/sentences.gz; then
+        echo "skipping $collection - no sentences"
+        continue
+    else
+        echo -n "processing $collection... "
+    fi
+    lines=`< $dir/sentences.gz gzip -dc | base64 -d | sed '/^<P>$/d' | wc -l`
+    echo "$lines lines (out of $total so far in this batch)"
+    total=$(($total + $lines))
+    if test $total -gt $limit; then
+        newbatch
+        total=$lines
+    fi
+    cat $dir/mime.gz >> $BATCHDIR/mime.gz
+    cat $dir/plain_text.gz >> $BATCHDIR/plain_text.gz
+    cat $dir/sentences.gz >> $BATCHDIR/sentences.gz
+    cat $dir/url.gz >> $BATCHDIR/url.gz
+    i=0
+    ( while test $i -lt $lines; do echo $collection; i=$(($i+1)); done ) | gzip -9c - >> $BATCHDIR/collection.gz
+done
+

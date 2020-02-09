@@ -1,0 +1,8 @@
+PYTHON=/home/shared/wwaites/miniconda3/envs/bitextor/bin/python
+BITEXTOR=/home/shared/wwaites/bitextor
+GIAWARC=/home/shared/wwaites/bin/giawarc
+SCRIPTS=/home/shared/wwaites/cirrus-scripts
+MODELS=/home/shared/wwaites/moses-test
+MOSES=/home/shared/wwaites/moses-test/mosesdecoder
+MOSES_BIN=/home/shared/wwaites/moses-test/mosesdecoder/bin/moses
+DATA=/data/internet_archive/wide00006
