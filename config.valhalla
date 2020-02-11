@@ -4,5 +4,6 @@ GIAWARC=/home/shared/wwaites/bin/giawarc
 SCRIPTS=/home/shared/wwaites/cirrus-scripts
 MODELS=/home/shared/wwaites/moses-test
 MOSES=/home/shared/wwaites/moses-test/mosesdecoder
-MOSES_BIN=/home/shared/wwaites/moses-test/mosesdecoder/bin/moses
+MOSES_BIN=/home/shared/wwaites/moses-test/mosesdecoder/bin/moses2
+MOSES_INI=moses2.ini
 DATA=/data/internet_archive/wide00006

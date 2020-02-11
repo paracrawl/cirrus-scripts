@@ -42,7 +42,8 @@ find -L ${DATA}-text -name ${SLANG} | while read dir; do
     cat $dir/plain_text.gz >> $BATCHDIR/plain_text.gz
     cat $dir/sentences.gz >> $BATCHDIR/sentences.gz
     cat $dir/url.gz >> $BATCHDIR/url.gz
+    docs=`gzip -dc $dir/url.gz | wc -l`
     i=0
-    ( while test $i -lt $lines; do echo $collection; i=$(($i+1)); done ) | gzip -9c - >> $BATCHDIR/collection.gz
+    ( while test $i -lt $docs; do echo $collection; i=$(($i+1)); done ) | gzip -9c - >> $BATCHDIR/collection.gz
 done
 

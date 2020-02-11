@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SCRIPTS=`dirname $0`
+. ${SCRIPTS}/config.valhalla
+
+SLANG="$1"
+BATCHNO="$2"
+
+BATCH=${DATA}-batch/${SLANG}/${BATCHNO}
+
+i=0
+
+_sentences () {    
+    gzip -dc ${BATCH}/sentences.gz | awk '/==$/ { print $0 } /[a-zA-Z0-9]/ { printf("%s", $0); }' | head -20 | while read b64line; do
+        echo $b64line | base64 -d  | while read line; do
+            echo -e "${i}\t${line}"
+        done
+        i=$(($i+1))
+    done
+}
+
+cd ${SCRIPTS}
+_sentences > ${BATCH}/extracted
+paste <( < ${BATCH}/extracted cut -f1 ) <( < ${BATCH}/extracted cut -f2 | sh translate.sh $SLANG ) | gzip -9c > ${BATCH}/extracted_en.gz
+gzip -9 ${BATCH}/extracted
+
