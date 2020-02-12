@@ -1,5 +1,9 @@
 #!/bin/bash
 
+## takes sentences.gz which is one base64 encoded line per document and produces
+## (1) extracted.gz which has two columns, document number and sentence for all
+## sentences and (2) extracted_en.gz which is the same but with english translations.
+
 SCRIPTS=`dirname $0`
 . ${SCRIPTS}/config.valhalla
 
@@ -8,10 +12,8 @@ BATCHNO="$2"
 
 BATCH=${DATA}-batch/${SLANG}/${BATCHNO}
 
-i=0
-
 _sentences () {    
-    gzip -dc ${BATCH}/sentences.gz | awk '/==$/ { print $0 } /[a-zA-Z0-9]/ { printf("%s", $0); }' | while read b64line; do
+    gzip -dc ${BATCH}/sentences.gz | while read b64line; do
         echo $b64line | base64 -d  | while read line; do
             echo -e "${i}\t${line}"
         done
