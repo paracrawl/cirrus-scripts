@@ -1,23 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-PYTHON=/beegfs/paracrawl/bin/python
-BITEXTOR=/beegfs/paracrawl/bitextor
-GIAWARC=/beegfs/paracrawl/bin/giawarc
-DATA="$1"
-INPUT="${DATA}"
-OUTPUT="${DATA}-html"
-PDFOUT="${DATA}-pdf"
-TXTOUT="${DATA}-text"
-COLLECTION="$2"
+SLANG="$1"
+BATCH="$2"
 
-SPLIT=$BITEXTOR/preprocess/moses/ems/support/split-sentences.perl
-LANGS=$(cat `dirname $0`/languages)
+SPLIT=$MOSES/scripts/ems/support/split-sentences.perl
 
-for lang in $LANGS; do
-    if test ! -d $TXTOUT/$COLLECTION/$lang; then continue; fi
-    rm -f $TXTOUT/$COLLECTION/$lang/sentences.gz
-    < $TXTOUT/$COLLECTION/$lang/plain_text.gz gzip -dc | while read doc; do
-        echo $doc | base64 -d | sed 's/$/\n/' | $SPLIT -l $lang 2> /dev/null | base64 -w 0 | gzip -9c >> $TXTOUT/$COLLECTION/$lang/sentences.gz
-    done
-done
+echo "Processing (${SLANG}) ${BATCH}"
+
+rm -f ${BATCH}/sentences.gz
+< ${BATCH}/plain_text.gz gzip -dc | while read doc; do
+    echo $doc | base64 -d | sed 's/$/\n/' | $SPLIT -q -l $SLANG | sed '/^<P>$/d' | base64 -w 0
+    echo
+done | gzip -9c > ${BATCH}/sentences.gz
 

@@ -5,12 +5,12 @@
 from sys import argv
 import fileinput
 
-nrows=432
+nrows=int(argv[1])
 
 slice=0
 n=nrows
 ofp=None
-filebase=argv[1]
+filebase=argv[2]
 for row in fileinput.input(filebase):
     if n >= nrows:
         if ofp is not None:
