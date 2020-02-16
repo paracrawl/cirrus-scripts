@@ -5,8 +5,8 @@
 #SBATCH -N 1
 #SBATCH --exclusive
 #SBATCH --time 12:00:00
-#SBATCH -e /home/cs-wait1/logs/02.split-%A_%a.err
-#SBATCH -o /home/cs-wait1/logs/02.split-%A_%a.out
+#SBATCH -e /home/cs-wait1/logs/03.split-%A_%a.err
+#SBATCH -o /home/cs-wait1/logs/03.split-%A_%a.out
 
 ### To use this:
 ###
@@ -20,22 +20,23 @@
 ###
 ### 3. submit an array job according to the number of chunks
 ###
-###    sbatch -a 1-4 02.split.slurm is batches.is
+###    sbatch -a 1-4 03.split.slurm is batches.is
 ###
 
 . /home/cs-wait1/src/cirrus-scripts/config.csd3
 
 module load parallel
+module load perl/5.20.0
 
 SLANG="${1}"
 BATCHES="${2}"
-SPLIT=${SCRIPTS}/02.split-text
+SPLIT=${SCRIPTS}/03.split-text
 COLLECTIONS=${BATCHES}.${SLURM_ARRAY_TASK_ID}
 
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 echo "Collections: ${COLLECTIONS}"
 
-< ${COLLECTIONS} /bin/time -f "%E %M" parallel ${SPLIT} ${SLANG} '{}'
+< ${COLLECTIONS} /bin/time -f "%E %M" parallel ${SPLIT} ${SLANG} '{}' 2>&1
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 

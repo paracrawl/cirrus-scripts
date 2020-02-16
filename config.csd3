@@ -1,3 +1,4 @@
+export LD_LIBRARY_PATH=${HOME}/sw/lib:$LD_LIBRARY_PATH
 export PYTHON=/usr/bin/python3
 export BITEXTOR=/home/cs-wait1/sw/bitextor
 export GIAWARC=/home/cs-wait1/go/bin/giawarc
@@ -7,5 +8,6 @@ export SCRIPTS=/home/cs-wait1/src/cirrus-scripts
 export MODELS=/rds/project/t2_vol4/rds-t2-cs119/models
 export MOSES=/home/cs-wait1/src/mosesdecoder
 export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
+export MOSES_ARGS="--threads 8"
 export MOSES_INI=moses2.ini
 export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
