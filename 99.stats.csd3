@@ -1,0 +1,29 @@
+#!/bin/sh
+#SBATCH -J stats
+#SBATCH -p knl
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time 36:00:00
+#SBATCH -e /home/cs-wait1/logs/99.stats-%j.err
+#SBATCH -o /home/cs-wait1/logs/99.stats-%j.out
+
+## Calculate statistics for all shards, if they have been changed
+## Arguments: collection
+
+COLLECTION="${1}"
+
+. ./config.csd3
+
+module load parallel
+
+ulimit -n 2048
+
+batches () {
+	cat ${DATA}/${COLLECTION}-batches/[a-z][a-z] | shuf | while read batch; do
+		if test ${batch} -nt ${batch}/stats.json.gz; then
+			echo ${batch}
+		fi
+	done	
+}
+
+batches | parallel -j64 giastat -r -w '{}'

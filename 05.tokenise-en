@@ -1,0 +1,15 @@
+#!/bin/bash
+
+SLANG="en"
+BATCH="$1"
+
+TOKENISE="$MOSES/scripts/tokenizer/tokenizer.perl"
+
+echo "Processing (${SLANG}) ${BATCH}"
+
+< ${BATCH}/sentences.gz gzip -dc | b64filter cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised.$$.gz
+
+rm -f ${BATCH}/tokenised.gz
+mv ${TMPDIR}/tokenised.$$.gz ${BATCH}/tokenised.gz
+
+echo "Copied result (${SLANG}) ${BATCH}"

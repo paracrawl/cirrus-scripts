@@ -4,8 +4,57 @@ SLANG="$1"
 BATCH="$2"
 
 echo "Translating $SLANG $BATCH"
-gzip -dc ${BATCH}/sentences.gz | b64filter cache sh translate.sh ${SLANG} | gzip -9c > ${BATCH}/sentences_en.gz
+echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
+sentences=`gzip -dc $BATCH/sentences.gz | base64 -d | wc -l`
+echo "Sentences: ${sentences}"
+
+. ${SCRIPTS}/translate.sh
+eval model_${SLANG} || (echo No model for ${SLANG} 1>&2 ; exit 255)
+MDIR="`dirname $MODEL`"
+MNAME="`basename $MODEL`"
+export MODEL="${SCRATCH}/${MNAME}"
+
+cleanup () {
+	echo "Cleaning up..."
+	rm -rf ${MODEL}
+	rm -f ${SCRATCH}/translate.${SLANG}
+	echo "Done."
+}
+trap cleanup EXIT
+
+echo "Copying translation model ${MODEL} to scratch space"
+(cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${SCRATCH}" && tar -xvf -)
+
+cat > ${SCRATCH}/translate.${SLANG} <<EOF
+#!/bin/bash
+
+set -e -o pipefail
+
+cd "$MODEL"
+$MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
+    $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
+    $MODELS/phi-system/trim_lines.py 100 | \
+    $MOSES_BIN -v 0 $MOSES_ARGS -f $MOSES_INI | \
+    $MOSES/scripts/recaser/detruecase.perl | \
+    $MOSES/scripts/tokenizer/detokenizer.perl -q
+EOF
+echo "Using this script to translate:"
+cat ${SCRATCH}/translate.${SLANG}
+
+bsize=$(($sentences / 64))
+if test $(($sentences % 64)) -ne 0; then
+	bsize=$(($bsize + 1))
+fi
+echo "Using a sentence batch size of ${bsize}"
+nmosi=16
+echo "Using ${nmosi} Mosi with ${MOSES_ARGS}"
+
+echo "Start:" `date` $BATCH
+gzip -dc ${BATCH}/sentences.gz | b64filter cache parallel -j ${nmosi} --pipe -k -l ${bsize} bash ${SCRATCH}/translate.${SLANG} | gzip -9c > /tmp/sentences_en.$$.gz
+echo "End:" `date` $BATCH
+mv /tmp/sentences_en.$$.gz ${BATCH}/sentences_en.gz
+echo "Output size:" `ls -lh $BATCH/sentences_en.gz | cut -d' ' -f5` $BATCH
 
 before=`gzip -dc ${BATCH}/sentences.gz | wc -l`
 after=`gzip -dc ${BATCH}/sentences_en.gz | wc -l`
-echo "Check $before -> $after $BATCH"
+echo "Check count $before -> $after $BATCH"

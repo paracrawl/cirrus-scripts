@@ -7,9 +7,9 @@ SPLIT=$MOSES/scripts/ems/support/split-sentences.perl
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-rm -f ${BATCH}/sentences.gz
-< ${BATCH}/plain_text.gz gzip -dc | while read doc; do
-    echo $doc | base64 -d | sed 's/$/\n/' | $SPLIT -q -l $SLANG | sed '/^<P>$/d' | base64 -w 0
-    echo
-done | gzip -9c > ${BATCH}/sentences.gz
+< ${BATCH}/plain_text.gz gzip -dc | b64map $SPLIT -q -n -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
 
+rm -f ${BATCH}/sentences.gz
+mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
+
+echo "Copied result (${SLANG}) ${BATCH}"

@@ -1,12 +1,12 @@
 #!/bin/sh
-#SBATCH -J translate
+#SBATCH -J tok
 #SBATCH -A t2-cs119-knl
 #SBATCH -p knl
 #SBATCH -N 1
 #SBATCH --exclusive
-#SBATCH --time 12:00:00
-#SBATCH -e /home/cs-wait1/logs/04.translate-%A_%a.err
-#SBATCH -o /home/cs-wait1/logs/04.translate-%A_%a.out
+#SBATCH --time 36:00:00
+#SBATCH -e /home/cs-wait1/logs/05.tokenise-%A_%a.err
+#SBATCH -o /home/cs-wait1/logs/05.tokenise-%A_%a.out
 
 ## ARGUMENTS: lang batch
 
@@ -17,12 +17,13 @@ module load perl/5.20.0
 
 SLANG="${1}"
 BATCHES="${2}"
-TRANSLATE=${SCRIPTS}/04.translate
+TOKENISE=${SCRIPTS}/05.tokenise
+TMPDIR=${SCRATCH}/tokenise.$$
+mkdir -p ${TMPDIR} || exit 255
+export TMPDIR
 
-BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
-echo "Batch: ${BATCH}"
 
-/bin/time -f "%E %M" ${TRANSLATE} ${SLANG} ${BATCH}
+< ${BATCHES}.${SLURM_ARRAY_TASK_ID} /bin/time -f "%E %M" parallel --tmpdir ${TMPDIR} -j 64 ${TOKENISE} ${SLANG} '{}'
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"

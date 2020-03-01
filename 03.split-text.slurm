@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -J split
-#SBATCH -A t2-cs119-sl4-knl
+#SBATCH -A t2-cs119-knl
 #SBATCH -p knl
 #SBATCH -N 1
 #SBATCH --exclusive
-#SBATCH --time 12:00:00
+#SBATCH --time 36:00:00
 #SBATCH -e /home/cs-wait1/logs/03.split-%A_%a.err
 #SBATCH -o /home/cs-wait1/logs/03.split-%A_%a.out
 
@@ -36,7 +36,10 @@ COLLECTIONS=${BATCHES}.${SLURM_ARRAY_TASK_ID}
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 echo "Collections: ${COLLECTIONS}"
 
-< ${COLLECTIONS} /bin/time -f "%E %M" parallel ${SPLIT} ${SLANG} '{}' 2>&1
+export TMPDIR=${SCRATCH}/split.$$
+mkdir -p ${TMPDIR}
+< ${COLLECTIONS} /bin/time -f "%E %M" parallel --tmpdir ${TMPDIR} ${SPLIT} ${SLANG} '{}' 2>&1
+rm -rf ${TMPDIR}
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 

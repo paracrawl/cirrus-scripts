@@ -1,0 +1,40 @@
+#!/bin/sh
+#SBATCH -J shard
+#SBATCH -p knl
+#SBATCH -N 1
+#SBATCH --exclusive
+#SBATCH --time 36:00:00
+#SBATCH -e /home/cs-wait1/logs/02.shard-%j.err
+#SBATCH -o /home/cs-wait1/logs/02.shard-%j.out
+
+## Arguments: lang collection batchno
+
+COLLECTION="${1}"
+BATCH="${2}"
+shift; shift
+LANGS="$*"
+
+. ./config.csd3
+
+module load parallel
+
+ulimit -n 2048
+
+echo "Processing ${COLLECTION}-batches/texts.${BATCH}"
+
+tasks() {
+	for lang in $*; do
+		items=`< ${COLLECTION}-batches/texts.${BATCH} sed 's@$@'/${lang}@`
+		echo giashard -n 8 -b 1024 -o ${COLLECTION}-shards/${lang} $items
+	done
+}
+
+tasks ${LANGS} | parallel sh -c '{}'
+
+echo "Done rocessing ${COLLECTION}-batches/texts.${BATCH}"
+
+NEXT=$(($BATCH + 1))
+if test -f ${COLLECTION}-batches/texts.${NEXT}; then
+	echo "Proceeding to next batch"
+	sbatch 02.shard.csd3 ${COLLECTION} ${NEXT} ${LANGS}
+fi
