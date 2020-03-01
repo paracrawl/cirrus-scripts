@@ -7,7 +7,7 @@ SPLIT=$MOSES/scripts/ems/support/split-sentences.perl
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/plain_text.gz gzip -dc | b64map $SPLIT -q -n -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
+< ${BATCH}/plain_text.gz gzip -dc | parallel --tmpdir ${TMPDIR} -j 128 --pipe -k -l 256 b64map $SPLIT -q -n -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
 
 rm -f ${BATCH}/sentences.gz
 mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz

@@ -31,14 +31,14 @@ module load perl/5.20.0
 SLANG="${1}"
 BATCHES="${2}"
 SPLIT=${SCRIPTS}/03.split-text
-COLLECTIONS=${BATCHES}.${SLURM_ARRAY_TASK_ID}
+BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
 
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
-echo "Collections: ${COLLECTIONS}"
+echo "Batch: ${BATCH}"
 
 export TMPDIR=${SCRATCH}/split.$$
 mkdir -p ${TMPDIR}
-< ${COLLECTIONS} /bin/time -f "%E %M" parallel --tmpdir ${TMPDIR} ${SPLIT} ${SLANG} '{}' 2>&1
+/bin/time -f "%E %M" ${SPLIT} ${SLANG} ${BATCH}
 rm -rf ${TMPDIR}
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
