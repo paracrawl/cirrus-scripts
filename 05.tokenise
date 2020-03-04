@@ -5,9 +5,12 @@ BATCH="$2"
 
 TOKENISE="$MOSES/scripts/tokenizer/tokenizer.perl"
 
+set -e -o pipefail
+ulimit -n 16384
+
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/sentences_en.gz gzip -dc | b64filter cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
+< ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 128 --pipe -k -l 256 b64filter ${DEBUG} cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
 
 rm -f ${BATCH}/tokenised_en.gz
 mv ${TMPDIR}/tokenised_en.$$.gz ${BATCH}/tokenised_en.gz

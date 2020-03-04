@@ -50,7 +50,7 @@ nmosi=16
 echo "Using ${nmosi} Mosi with ${MOSES_ARGS}"
 
 echo "Start:" `date` $BATCH
-gzip -dc ${BATCH}/sentences.gz | b64filter cache parallel -j ${nmosi} --pipe -k -l ${bsize} bash ${SCRATCH}/translate.${SLANG} | gzip -9c > /tmp/sentences_en.$$.gz
+gzip -dc ${BATCH}/sentences.gz | b64filter cache parallel --halt 2 -j ${nmosi} --pipe -k -l ${bsize} bash ${SCRATCH}/translate.${SLANG} | gzip -9c > /tmp/sentences_en.$$.gz
 echo "End:" `date` $BATCH
 mv /tmp/sentences_en.$$.gz ${BATCH}/sentences_en.gz
 echo "Output size:" `ls -lh $BATCH/sentences_en.gz | cut -d' ' -f5` $BATCH

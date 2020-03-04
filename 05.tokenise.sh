@@ -13,7 +13,6 @@ for lang in $*; do
 	fi
 	rm -f ${DATA}/${collection}-batches/05.${lang}
 	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/05.${lang}
-	python split-cirrus.py 16 ${DATA}/${collection}-batches/05.${lang}
-	n=`ls ${DATA}/${collection}-batches/05.${lang}.* | wc -l`
+	n=`< ${DATA}/${collection}-batches/05.${lang} wc -l`
 	sbatch -a 1-${n} 05.tokenise.slurm ${lang} ${DATA}/${collection}-batches/05.${lang}
 done

@@ -16,13 +16,15 @@ module load parallel
 module load perl/5.20.0
 
 BATCHES="${1}"
-TRANSLATE=${SCRIPTS}/05.tokenise-en
+TOKENISE=${SCRIPTS}/05.tokenise-en
+BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
+
 TMPDIR=${SCRATCH}/tokenise.$$
 mkdir -p ${TMPDIR} || exit 255
 export TMPDIR
 
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 
-< ${BATCHES}.${SLURM_ARRAY_TASK_ID} /bin/time -f "%E %M" parallel --tmpdir ${TMPDIR} -j 64 ${TRANSLATE} '{}'
+/bin/time -f "%E %M" ${TOKENISE} "${BATCH}"
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
