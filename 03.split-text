@@ -7,7 +7,7 @@ BATCH="$2"
 echo "Setting up ephemeral environment"
 RAMDIR=/tmp/split.$$
 mkdir -p ${RAMDIR}
-(cd $MOSES/scripts; tar -cf - ./share ./ems/support) | (cd $RAMDIR; tar -xf -)
+(cd $MOSES/scripts && tar -cf - ./share ./ems/support) | (cd $RAMDIR && tar -xf -)
 SPLIT=$RAMDIR/ems/support/split-sentences.perl
 B64MAP=$RAMDIR/b64map
 sbcast `which b64map` $B64MAP
