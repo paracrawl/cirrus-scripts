@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+SLANG="$1"
+BATCH="$2"
+
+SHARD=$(basename $(dirname ${BATCH}))
+EN_SHARD=$(dirname $(dirname $(dirname ${BATCH})))/en/${SHARD}
+
+DALIGN=/home/cs-vand1/w/bitextor/document-aligner/build/bin/dalign
+CATDOC=/home/cs-vand1/w/bitextor/document-aligner/build/bin/catdoc
+BLEUALIGN=/home/cs-vand1/w/bleualign-cpp/build/bleualign_cpp
+
+
+ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
+	EN_BATCH=${EN_BATCH_DIR%/}
+	echo "Processing (${SLANG}) '${BATCH}' against '${EN_BATCH}'"
+	${DALIGN} --verbose on -j4 \
+		${BATCH}/tokenised_en.gz \
+		${EN_BATCH}/tokenised.gz \
+	| ${CATDOC} \
+		-l ${BATCH}/url.gz\
+		-r ${EN_BATCH}/url.gz\
+		-l ${BATCH}/sentences.gz\
+		-r ${EN_BATCH}/sentences.gz\
+		-l ${BATCH}/sentences_en.gz\
+	| ${BLEUALIGN} \
+	| gzip -c \
+	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
+done
+
+rm -f ${BATCH}/aligned-*.gz
+for FILE in ${TMPDIR}/aligned-*.gz.$$; do
+	mv $FILE ${BATCH}/$(basename $FILE .$$)
+done
+
+echo "Copied result (${SLANG}) ${BATCH}"
