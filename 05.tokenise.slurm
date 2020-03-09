@@ -4,6 +4,7 @@
 #SBATCH -p skylake
 #SBATCH -n 1
 #SBATCH -c 4
+#SBATCH --mail-type=ALL
 #SBATCH --exclusive=user
 #SBATCH --time 36:00:00
 #SBATCH -e /home/cs-wait1/logs/05.tokenise-%A_%a.err
