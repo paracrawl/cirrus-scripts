@@ -8,7 +8,7 @@ collection=$1
 shift
 
 for lang in $*; do
-	if test $ -f ${DATA}/${collection}-batches/${lang}; then
+	if test ! -f ${DATA}/${collection}-batches/${lang}; then
 		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
 	fi
 	ln -sf ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/03.${lang}

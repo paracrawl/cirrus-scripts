@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -J tok-en
-#SBATCH -A t2-cs119-knl
-#SBATCH -p knl
+#SBATCH -A t2-cs119-cpu
+#SBATCH -p skylake
 #SBATCH -N 1
 #SBATCH --exclusive
-#SBATCH --time 36:00:00
+#SBATCH --time 16:00:00
 #SBATCH -e /home/cs-wait1/logs/05.tokenise-en-%A_%a.err
 #SBATCH -o /home/cs-wait1/logs/05.tokenise-en-%A_%a.out
 

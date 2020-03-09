@@ -3,14 +3,31 @@
 SLANG="$1"
 BATCH="$2"
 
-TOKENISE="$MOSES/scripts/tokenizer/tokenizer.perl"
+## preamble: setting up temporary run environment
+echo "Setting up ephemeral environment"
+RAMDIR=/tmp/tokenise.$$
+mkdir -p ${RAMDIR}
+
+cleanup () {
+        echo "Cleaning up ephemeral environment..."
+        rm -rf ${RAMDIR}
+}
+trap cleanup EXIT
+
+(cd $MOSES/scripts && tar -cf - ./share ./tokenizer) | (cd $RAMDIR && tar -xf -)
+TOKENISE="$RAMDIR/tokenizer/tokenizer.perl"
+B64FILTER=$RAMDIR/b64filter
+CACHE=$RAMDIR/cache
+sbcast `which b64filter` $B64FILTER
+sbcast `which cache` $CACHE
+echo "Done."
 
 set -e -o pipefail
 ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 128 --pipe -k -l 256 b64filter ${DEBUG} cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
+< ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 -j 8 --tmpdir ${TMPDIR} --pipe -k -l 256 b64filter ${DEBUG} cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
 
 rm -f ${BATCH}/tokenised_en.gz
 mv ${TMPDIR}/tokenised_en.$$.gz ${BATCH}/tokenised_en.gz

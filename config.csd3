@@ -11,5 +11,6 @@ export MOSES=/home/cs-wait1/src/mosesdecoder
 export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 export MOSES_ARGS="--threads 16"
 export MOSES_INI=moses2.ini
+export KPU=/home/cs-wait1/src/kpu-preprocess
 export DATA=/rds/project/t2_vol4/rds-t2-cs119
 export SCRATCH=/local

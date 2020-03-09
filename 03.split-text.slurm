@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -J split
-#SBATCH -A t2-cs119-knl
+#SBATCH -A t2-cs119-sl4-knl
 #SBATCH -p knl
 #SBATCH -N 1
 #SBATCH --exclusive
-#SBATCH --time 36:00:00
+#SBATCH --time 12:00:00
 #SBATCH -e /home/cs-wait1/logs/03.split-%A_%a.err
 #SBATCH -o /home/cs-wait1/logs/03.split-%A_%a.out
 
