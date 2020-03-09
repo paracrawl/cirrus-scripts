@@ -5,8 +5,8 @@
 #SBATCH -N 1
 #SBATCH --exclusive
 #SBATCH --time 16:00:00
-#SBATCH -e /home/$USER/logs/05.tokenise-en-%A_%a.err
-#SBATCH -o /home/$USER/logs/05.tokenise-en-%A_%a.out
+#SBATCH -e /home/%u/logs/05.tokenise-en-%A_%a.err
+#SBATCH -o /home/%u/logs/05.tokenise-en-%A_%a.out
 
 ## ARGUMENTS: lang batch
 

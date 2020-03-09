@@ -6,8 +6,8 @@
 #SBATCH -c 4
 #SBATCH --exclusive=user
 #SBATCH --time 36:00:00
-#SBATCH -e /home/$USER/logs/05.tokenise-%A_%a.err
-#SBATCH -o /home/$USER/logs/05.tokenise-%A_%a.out
+#SBATCH -e /home/%u/logs/05.tokenise-%A_%a.err
+#SBATCH -o /home/%u/logs/05.tokenise-%A_%a.out
 
 ## ARGUMENTS: lang batch
 
