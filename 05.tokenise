@@ -27,7 +27,7 @@ ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 -j 8 --tmpdir ${TMPDIR} --pipe -k -l 256 b64filter ${DEBUG} cache $TOKENISE -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
+< ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 -j 8 --tmpdir ${TMPDIR} --pipe -k -l 256 ${B64FILTER} ${DEBUG} ${CACHE} ${TOKENISE} -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
 
 rm -f ${BATCH}/tokenised_en.gz
 mv ${TMPDIR}/tokenised_en.$$.gz ${BATCH}/tokenised_en.gz
