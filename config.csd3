@@ -1,4 +1,4 @@
-export LD_LIBRARY_PATH=${HOME}/sw/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
 export PYTHON=/usr/bin/python3
 export BITEXTOR=/home/cs-wait1/sw/bitextor
 export GIAWARC=/home/cs-wait1/go/bin/giawarc
