@@ -15,7 +15,7 @@ BLEUALIGN=/home/cs-vand1/w/bleualign-cpp/build/bleualign_cpp
 ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 	EN_BATCH=${EN_BATCH_DIR%/}
 	echo "Processing (${SLANG}) '${BATCH}' against '${EN_BATCH}'"
-	${DALIGN} --verbose on -j4 \
+	${DALIGN} --verbose on -j 256 \
 		${BATCH}/tokenised_en.gz \
 		${EN_BATCH}/tokenised.gz \
 	| ${CATDOC} \
