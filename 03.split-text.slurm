@@ -5,8 +5,8 @@
 #SBATCH -N 1
 #SBATCH --exclusive
 #SBATCH --time 12:00:00
-#SBATCH -e /home/cs-wait1/logs/03.split-%A_%a.err
-#SBATCH -o /home/cs-wait1/logs/03.split-%A_%a.out
+#SBATCH -e /home/%u/logs/03.split-%A_%a.err
+#SBATCH -o /home/%u/logs/03.split-%A_%a.out
 
 ### To use this:
 ###
@@ -23,7 +23,7 @@
 ###    sbatch -a 1-4 03.split.slurm is batches.is
 ###
 
-. /home/cs-wait1/src/cirrus-scripts/config.csd3
+. /home/$USER/src/cirrus-scripts/config.csd3
 
 module load parallel
 module load perl/5.20.0
