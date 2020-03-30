@@ -10,7 +10,7 @@ EN_SHARD=$(dirname $(dirname $(dirname ${BATCH})))/en/${SHARD}
 ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 	EN_BATCH=${EN_BATCH_DIR%/}
 	echo "Processing (${SLANG}) '${BATCH}' against '${EN_BATCH}'"
-	${DOCALIGN} --verbose -j 256\
+	${DOCALIGN} --verbose -j 64\
 		${BATCH}/tokenised_en.gz \
 		${EN_BATCH}/tokenised.gz \
 	| ${DOCJOIN} \
@@ -19,7 +19,7 @@ ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 		-l ${BATCH}/sentences.gz\
 		-r ${EN_BATCH}/sentences.gz\
 		-l ${BATCH}/sentences_en.gz\
-	| parallel --gnu --pipe -j256 -k ${BLEUALIGN} \
+	| parallel --gnu --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
 	| gzip -c \
 	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 done
