@@ -48,6 +48,7 @@ fi
 echo "Using a sentence batch size of ${bsize}"
 nmosi=16
 echo "Using ${nmosi} Mosi with ${MOSES_ARGS}"
+echo "Using b64filter at $(which b64filter)"
 
 echo "Start:" `date` $BATCH
 gzip -dc ${BATCH}/sentences.gz | b64filter cache parallel --halt 2 -j ${nmosi} --pipe -k -l ${bsize} bash ${SCRATCH}/translate.${SLANG} | gzip -9c > /tmp/sentences_en.$$.gz

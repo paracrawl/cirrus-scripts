@@ -13,5 +13,5 @@ for lang in $*; do
 	fi
 	ln -sf ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/03.${lang}
 	n=`< ${DATA}/${collection}-batches/${lang} wc -l`
-	sbatch -a 1-${n} 03.split-text.slurm ${lang} ${DATA}/${collection}-batches/03.${lang}
+	sbatch -a 1-${n} ${SCRIPTS}/03.split-text.slurm ${lang} ${DATA}/${collection}-batches/03.${lang}
 done
