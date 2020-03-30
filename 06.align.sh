@@ -14,6 +14,5 @@ for lang in $*; do
 	rm -f ${DATA}/${collection}-batches/06.${lang}
 	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/06.${lang}
 	n=`< ${DATA}/${collection}-batches/06.${lang} wc -l`
-	n=1
 	sbatch --nice=600 -J align-${lang} -a 1-${n} 06.align.slurm ${lang} ${DATA}/${collection}-batches/06.${lang}
 done
