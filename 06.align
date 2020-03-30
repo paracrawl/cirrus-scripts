@@ -24,7 +24,6 @@ ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 done
 
-rm -f ${BATCH}/aligned-*.gz
 for FILE in ${TMPDIR}/aligned-*.gz.$$; do
 	mv $FILE ${BATCH}/$(basename $FILE .$$)
 done
