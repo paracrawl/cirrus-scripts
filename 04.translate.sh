@@ -13,7 +13,6 @@ for lang in $*; do
 	fi
 	rm -f ${DATA}/${collection}-batches/04.${lang}
 	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/04.${lang}
-	python split-cirrus.py 16 ${DATA}/${collection}-batches/04.${lang}
 	n=`< ${DATA}/${collection}-batches/04.${lang} wc -l`
-	sbatch -J translate-${lang} -a 1-${n} 04.translate.slurm ${lang} ${DATA}/${collection}-batches/04.${lang}
+	sbatch -J translate-${lang} -a 111,119,124,38,64,68,92,97 04.translate.slurm ${lang} ${DATA}/${collection}-batches/04.${lang}
 done

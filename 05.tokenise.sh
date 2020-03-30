@@ -14,5 +14,5 @@ for lang in $*; do
 	rm -f ${DATA}/${collection}-batches/05.${lang}
 	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/05.${lang}
 	n=`< ${DATA}/${collection}-batches/05.${lang} wc -l`
-	sbatch -J tok_${lang} -a 1-${n} 05.tokenise.slurm ${lang} ${DATA}/${collection}-batches/05.${lang}
+	sbatch --nice=500 -J tok-${lang} -a 1-${n} 05.tokenise.slurm ${lang} ${DATA}/${collection}-batches/05.${lang}
 done

@@ -1,14 +1,17 @@
 #!/bin/sh
 #SBATCH -J stats
-#SBATCH -p knl
+#SBATCH -p skylake
 #SBATCH -N 1
-#SBATCH --exclusive
-#SBATCH --time 36:00:00
-#SBATCH -e /home/cs-wait1/logs/99.stats-%j.err
-#SBATCH -o /home/cs-wait1/logs/99.stats-%j.out
+#SBATCH -n 16
+#SBATCH --time 8:00:00
+#SBATCH -e /home/%u/logs/99.stats-%j.err
+#SBATCH -o /home/%u/logs/99.stats-%j.out
+#SBATCH --mail-type=ALL
 
 ## Calculate statistics for all shards, if they have been changed
 ## Arguments: collection
+
+set -eu
 
 COLLECTION="${1}"
 
@@ -26,4 +29,6 @@ batches () {
 	done	
 }
 
-batches | parallel -j64 giastat -r -w '{}'
+cp $(which giastat) $SCRATCH/giastat
+
+batches | parallel -j64 $SCRATCH/giastat -c -w '{}'

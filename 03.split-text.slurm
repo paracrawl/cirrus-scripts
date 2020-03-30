@@ -1,12 +1,13 @@
 #!/bin/sh
 #SBATCH -J split
-#SBATCH -A t2-cs119-sl4-knl
-#SBATCH -p knl
+#SBATCH -A t2-cs119-cpu
+#SBATCH -p skylake
 #SBATCH -N 1
-#SBATCH --exclusive
-#SBATCH --time 12:00:00
+#SBATCH --time 0:15:00
 #SBATCH -e /home/%u/logs/03.split-%A_%a.err
 #SBATCH -o /home/%u/logs/03.split-%A_%a.out
+
+set -eu
 
 ### To use this:
 ###
@@ -23,7 +24,8 @@
 ###    sbatch -a 1-4 03.split.slurm is batches.is
 ###
 
-. /home/$USER/src/cirrus-scripts/config.csd3
+# Commented out because I assume sbatch will pass them on
+#. /home/$USER/src/cirrus-scripts/config.csd3
 
 module load parallel
 module load perl/5.20.0
