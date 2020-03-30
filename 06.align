@@ -7,24 +7,19 @@ BATCH="$2"
 SHARD=$(basename $(dirname ${BATCH}))
 EN_SHARD=$(dirname $(dirname $(dirname ${BATCH})))/en/${SHARD}
 
-DALIGN=/home/cs-vand1/w/bitextor/document-aligner/build/bin/dalign
-CATDOC=/home/cs-vand1/w/bitextor/document-aligner/build/bin/catdoc
-BLEUALIGN=/home/cs-vand1/w/bleualign-cpp/build/bleualign_cpp
-
-
 ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 	EN_BATCH=${EN_BATCH_DIR%/}
 	echo "Processing (${SLANG}) '${BATCH}' against '${EN_BATCH}'"
-	${DALIGN} --verbose on -j 256 \
+	${DOCALIGN} --verbose -j 256\
 		${BATCH}/tokenised_en.gz \
 		${EN_BATCH}/tokenised.gz \
-	| ${CATDOC} \
-		-l ${BATCH}/url.gz\
-		-r ${EN_BATCH}/url.gz\
+	| ${DOCJOIN} \
+		-li\
+		-ri\
 		-l ${BATCH}/sentences.gz\
 		-r ${EN_BATCH}/sentences.gz\
 		-l ${BATCH}/sentences_en.gz\
-	| parallel --gnu --pipe ${BLEUALIGN} \
+	| parallel --gnu --pipe -j256 -k ${BLEUALIGN} \
 	| gzip -c \
 	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 done
