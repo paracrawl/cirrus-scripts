@@ -8,7 +8,7 @@ echo "Setting up ephemeral environment"
 RAMDIR=/tmp/split.$$
 mkdir -p ${RAMDIR}
 (cd $KPU && tar -cf - ./moses) | (cd $RAMDIR && tar -xf -)
-SPLIT=$RAMDIR/moses/ems/support/split-sentences-base64documents.perl 
+SPLIT=$RAMDIR/moses/ems/support/split-sentences.perl 
 echo "Done."
 
 set -e -o pipefail
@@ -16,7 +16,7 @@ ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/plain_text.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 128 --pipe -k -l 256 $SPLIT -k -q -n -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
+< ${BATCH}/plain_text.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 128 --pipe -k -l 256 $SPLIT -d -k -q -n -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
 
 rm -f ${BATCH}/sentences.gz
 mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
