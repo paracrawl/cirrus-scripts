@@ -19,7 +19,7 @@ ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
 		-l ${BATCH}/sentences.gz\
 		-r ${EN_BATCH}/sentences.gz\
 		-l ${BATCH}/sentences_en.gz\
-	| parallel --gnu --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
+	| parallel --gnu --halt 2 --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
 	| gzip -c \
 	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 done
