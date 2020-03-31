@@ -3,7 +3,7 @@
 #SBATCH -A t2-cs119-sl4-knl
 #SBATCH -p knl
 #SBATCH -N 1
-#SBATCH --time 1:00:00
+#SBATCH --time 2:00:00
 #SBATCH -e /home/%u/logs/06.align-%A_%a.err
 #SBATCH -o /home/%u/logs/06.align-%A_%a.out
 
@@ -23,7 +23,7 @@ task() {
   echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 }
 
-for OFFSET in $(seq 0 3); do
+for OFFSET in $(seq 0 $(($TASKS_PER_BATCH-1))); do
   task $((4*$SLURM_ARRAY_TASK_ID+$OFFSET)) &
 done
 
