@@ -10,7 +10,8 @@
 
 ## ARGUMENTS: lang batch
 
-. /home/$USER/src/cirrus-scripts/config.csd3
+# Inherited from submission
+# . /home/$USER/src/cirrus-scripts/config.csd3
 
 module load parallel
 module load perl/5.20.0
