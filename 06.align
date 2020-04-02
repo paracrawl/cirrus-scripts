@@ -2,30 +2,23 @@
 set -euo pipefail
 
 SLANG="$1"
-BATCH="$2"
+XX_BATCH="$2"
+EN_BATCH="$3"
 
-SHARD=$(basename $(dirname ${BATCH}))
-EN_SHARD=$(dirname $(dirname $(dirname ${BATCH})))/en/${SHARD}
+OUTPUT=${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 
-ls -d ${EN_SHARD}/*/ | while read EN_BATCH_DIR; do
-	EN_BATCH=${EN_BATCH_DIR%/}
-	echo "Processing (${SLANG}) '${BATCH}' against '${EN_BATCH}'"
-	${DOCALIGN} --verbose -j 64\
-		${BATCH}/tokenised_en.gz \
-		${EN_BATCH}/tokenised.gz \
-	| ${DOCJOIN} \
-		-li\
-		-ri\
-		-l ${BATCH}/sentences.gz\
-		-r ${EN_BATCH}/sentences.gz\
-		-l ${BATCH}/sentences_en.gz\
-	| parallel --gnu --halt 2 --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
-	| gzip -c \
-	> ${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
-done
+${DOCALIGN} --verbose -j 64\
+	${XX_BATCH}/tokenised_en.gz \
+	${EN_BATCH}/tokenised.gz \
+| ${DOCJOIN} \
+	-li\
+	-ri\
+	-l ${XX_BATCH}/sentences.gz\
+	-r ${EN_BATCH}/sentences.gz\
+	-l ${XX_BATCH}/sentences_en.gz\
+| parallel --gnu --halt 2 --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
+| gzip -c \
+> $OUTPUT
 
-for FILE in ${TMPDIR}/aligned-*.gz.$$; do
-	mv $FILE ${BATCH}/$(basename $FILE .$$)
-done
-
-echo "Copied result (${SLANG}) ${BATCH}"
+mv $OUTPUT ${XX_BATCH}/$(basename $OUTPUT .$$)
+echo "Copied result (${SLANG}) ${XX_BATCH}"
