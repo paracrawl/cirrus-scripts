@@ -1,18 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 
 ## create and submit the batches on csd3 for translation
 set -euo pipefail
 
 . ./config.csd3
+. ${SCRIPTS}/functions
+
 collection=$1
 shift
 
 for lang in $*; do
-	if ! test -d ${DATA}/${collection}-batches/${lang}; then
-		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
+	batch_list=$(make_batch_list 04 $collection $lang)
+	job_list=$(make_job_list $batch_list sentences_en.gz)
+	if [ ! -z $job_list ]; then
+		echo Scheduling $job_list
+		confirm
+		sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.slurm $lang $batch_list
 	fi
-	rm -f ${DATA}/${collection}-batches/04.${lang}
-	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/04.${lang}
-	n=`< ${DATA}/${collection}-batches/04.${lang} wc -l`
-	sbatch -J translate-${lang} -a 111,119,124,38,64,68,92,97 04.translate.slurm ${lang} ${DATA}/${collection}-batches/04.${lang}
 done

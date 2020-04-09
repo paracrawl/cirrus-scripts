@@ -3,7 +3,6 @@
 #SBATCH -A t2-cs119-knl
 #SBATCH -p knl
 #SBATCH -N 1
-#SBATCH --mail-type=ALL
 #SBATCH --exclusive
 #SBATCH --time 24:00:00
 #SBATCH -e /home/%u/logs/04.translate-%A_%a.err
