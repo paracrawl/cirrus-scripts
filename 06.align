@@ -7,16 +7,24 @@ EN_BATCH="$3"
 
 OUTPUT=${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 
-${DOCALIGN} --verbose -j 64\
+${DOCALIGN} --verbose -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
+| cut -f2-3 \
 | ${DOCJOIN} \
 	-li\
 	-ri\
 	-l ${XX_BATCH}/sentences.gz\
 	-r ${EN_BATCH}/sentences.gz\
 	-l ${XX_BATCH}/sentences_en.gz\
-| parallel --gnu --halt 2 --pipe -j64 -L64 --line-buffer ${BLEUALIGN} \
+| parallel \
+	--gnu \
+	--halt 2 \
+	--pipe \
+	-j${THREADS} \
+	-L64 \
+	--line-buffer \
+	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
 > $OUTPUT
 

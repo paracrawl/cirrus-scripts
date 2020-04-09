@@ -19,6 +19,8 @@ trap "kill 0" EXIT
 SLANG="${1}"
 BATCHES="${2}"
 
+export THREADS=$((256 / ${TASKS_PER_BATCH}))
+
 task() {
   local BATCH_ID=$1
 
@@ -32,10 +34,18 @@ task() {
   echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 }
 
-for OFFSET in $(seq 0 $((${TASKS_PER_BATCH}-1))); do
-  task $((${TASKS_PER_BATCH}*${SLURM_ARRAY_TASK_ID}+${OFFSET})) &
+task_pid=()
+
+for OFFSET in $(seq 0 $(( ${TASKS_PER_BATCH} - 1 ))); do
+  task $(( ${TASKS_PER_BATCH} * ${SLURM_ARRAY_TASK_ID} + ${OFFSET} )) &
+  task_pid+=($!)
 done
 
-wait
+# While this script is running, also write CPU stats
+mpstat 10 > $HOME/logs/06.align-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
+stat_pid=$!
+
+wait ${task_pid[@]}
+kill ${stat_pid}
 
   
