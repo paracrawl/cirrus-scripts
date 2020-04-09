@@ -9,8 +9,8 @@ RAMDIR=/tmp/tokenise.$$
 mkdir -p ${RAMDIR}
 
 cleanup () {
-        echo "Cleaning up ephemeral environment..."
-        rm -rf ${RAMDIR}
+    echo "Cleaning up ephemeral environment..."
+    rm -rf ${RAMDIR}
 }
 trap cleanup EXIT
 
@@ -28,6 +28,11 @@ ulimit -n 16384
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/sentences_en.gz gzip -dc | parallel --halt 2 -j 8 --tmpdir ${TMPDIR} --pipe -k -l 256 ${B64FILTER} ${DEBUG} ${CACHE} ${TOKENISE} -a -q -l en | gzip -9c > ${TMPDIR}/tokenised_en.$$.gz
+
+if test ! $(gzip -cd ${TMPDIR}/tokenised_en.$$.gz | wc -l) -eq $(gzip -cd ${BATCH}/sentences_en.gz | wc -l); then
+	echo "Error: different number of documents in output" 1>&2
+	exit 1
+fi
 
 rm -f ${BATCH}/tokenised_en.gz
 mv ${TMPDIR}/tokenised_en.$$.gz ${BATCH}/tokenised_en.gz

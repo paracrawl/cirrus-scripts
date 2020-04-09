@@ -4,19 +4,58 @@
 set -euo pipefail
 
 . ./config.csd3
-export TASKS_PER_BATCH=4 # Also used by 06.align.slurm, hence export
+. ${SCRIPTS}/functions
 
-collection=$1
-shift
+TASKS_PER_BATCH=4
 
-for lang in $*; do
-	if ! test -d ${DATA}/${collection}-batches/06.${lang}; then
+function make_batch_list {
+	local collection="$1" lang="$2"
+	if ! test -e ${DATA}/${collection}-batches/06.${lang}; then
 		for shard in $(ls -d ${DATA}/${collection}-shards/${lang}/*); do
 			join -j2 \
 				<(ls -d $shard/*) \
 				<(ls -d ${DATA}/${collection}-shards/en/$(basename $shard)/*)
 		done > ${DATA}/${collection}-batches/06.${lang}
 	fi
-	n=$(( $(< ${DATA}/${collection}-batches/06.${lang} wc -l) / ${TASKS_PER_BATCH}))
-	sbatch --nice=600 -J align-${lang} -a 1-${n} ${SCRIPTS}/06.align.slurm ${lang} ${DATA}/${collection}-batches/06.${lang}
+	echo ${DATA}/${collection}-batches/06.${lang}
+}
+
+function make_job_list_all {
+	local n=$(( $(< "$1" wc -l) / ${TASKS_PER_BATCH} ))
+	echo 1-${n}
+}
+
+function make_job_list_retry {
+	TASKS_PER_BATCH=1
+
+	local index=0
+ 	local -a indices=()
+	while read XX_BATCH EN_BATCH; do 
+		index=$(($index + 1))
+		alignments=$XX_BATCH/aligned-$(basename $EN_BATCH).gz
+		if [[ ! -e $alignments ]]; then
+			indices+=($index)
+		fi
+	done < $1
+	if [ ${#indices[@]} -gt 0 ]; then
+		join_by , ${indices[@]}
+	fi
+}
+
+collection=$1
+shift
+
+for lang in $*; do
+	batch_list=`make_batch_list $collection $lang`
+	job_list=`make_job_list $batch_list`
+	if [ ! -z $job_list ]; then
+		echo $job_list
+		confirm
+		export TASKS_PER_BATCH # Used by 06.align.slurm
+		sbatch \
+			--nice=600 \
+			-J align-${lang} \
+			-a $job_list \
+			${SCRIPTS}/06.align.slurm ${lang} $batch_list
+	fi
 done

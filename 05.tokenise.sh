@@ -1,18 +1,20 @@
 #!/bin/sh
 
 ## create and submit the batches on csd3 for translation
+set -euo pipefail
 
 . ./config.csd3
+. ${SCRIPTS}/functions
 
 collection=$1
 shift
 
 for lang in $*; do
-	if ! test -d ${DATA}/${collection}-batches/${lang}; then
-		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
+	batch_list=$(make_batch_list 05 $collection $lang)
+	job_list=$(make_job_list $batch_list tokenised_en.gz)
+	if [ ! -z $job_list ]; then
+		echo Scheduling $job_list
+		confirm
+		sbatch --nice=500 -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
 	fi
-	rm -f ${DATA}/${collection}-batches/05.${lang}
-	ln -s   ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/05.${lang}
-	n=`< ${DATA}/${collection}-batches/05.${lang} wc -l`
-	sbatch --nice=500 -J tok-${lang} -a 1-${n} ${SCRIPTS}/05.tokenise.slurm ${lang} ${DATA}/${collection}-batches/05.${lang}
 done
