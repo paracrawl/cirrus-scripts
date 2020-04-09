@@ -26,14 +26,13 @@ function make_job_list_all {
 }
 
 function make_job_list_retry {
-	TASKS_PER_BATCH=1
-
 	local index=0
  	local -a indices=()
 	while read XX_BATCH EN_BATCH; do 
 		index=$(($index + 1))
 		alignments=$XX_BATCH/aligned-$(basename $EN_BATCH).gz
 		if [[ ! -e $alignments ]]; then
+			echo $alignments 1>&2
 			indices+=($index)
 		fi
 	done < $1
@@ -45,13 +44,18 @@ function make_job_list_retry {
 collection=$1
 shift
 
+if $RETRY; then
+	TASKS_PER_BATCH=1
+fi
+
+export TASKS_PER_BATCH # Used by 06.align.slurm
+
 for lang in $*; do
 	batch_list=`make_batch_list $collection $lang`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
-		echo $job_list
+		echo Scheduling $job_list
 		confirm
-		export TASKS_PER_BATCH # Used by 06.align.slurm
 		sbatch \
 			--nice=600 \
 			-J align-${lang} \
