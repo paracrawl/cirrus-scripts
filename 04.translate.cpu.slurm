@@ -10,19 +10,16 @@
 
 ## ARGUMENTS: lang batch
 
-. /home/$USER/src/cirrus-scripts/config.csd3
-
 module load parallel
 module load perl/5.20.0
 
 SLANG="${1}"
 BATCHES="${2}"
-TRANSLATE=${SCRIPTS}/04.translate
 
 BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
 echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
 echo "Batch: ${BATCH}"
 
-/bin/time -f "%E %M" ${TRANSLATE} ${SLANG} ${BATCH}
+/bin/time -f "%E %M" bash ${SCRIPTS}/04.translate.cpu ${SLANG} ${BATCH}
 
 echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"

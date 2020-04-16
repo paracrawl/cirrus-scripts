@@ -38,6 +38,7 @@ function make_job_list_retry {
 	while read batch; do
 		line=$(($line + 1))
 		if [ ! -e ${batch}/${file} ]; then
+			echo ${batch}/${file} 1>&2
 			indices+=($line)
 		fi
 	done < ${batch_list}
