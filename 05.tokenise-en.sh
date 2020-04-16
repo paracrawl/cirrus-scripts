@@ -4,7 +4,7 @@
 set -euo pipefail
 
 . ./config.csd3
-. ${SCRIPTS}/functions
+. ${SCRIPTS}/functions.sh
 
 collection=$1
 shift
