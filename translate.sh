@@ -1,3 +1,5 @@
+ARCH=cpu
+
 model_is () {
     MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_IS_EN.is-en
     MOSES_BIN=$MOSES/bin/moses
@@ -139,12 +141,20 @@ model_sv () {
     TRUECASE_MODEL=truecase-model.sv
 }
 
-translate () {
-    SLANG="$1"
+model_ps () {
+    MODEL=/home/cs-vand1/rds/rds-t2-cs119/romang/psen
+    TRUECASE_MODEL=tc.ps
+    ARCH=gpu
+}
+
+translate_moses () {
+    local SLANG="$1"
+    shift
+
     pushd . > /dev/null
     cd "$MODEL"
     $MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
-        $LOCAL/truecase --model $TRUECASE_MODEL | \
+        $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
         $MODELS/phi-system/trim_lines.py 100 | \
         $MOSES_BIN -v 0 $MOSES_ARGS -f $MOSES_INI | \
         $MOSES/scripts/recaser/detruecase.perl | \
@@ -152,4 +162,18 @@ translate () {
     popd > /dev/null
 }
 
-
+translate_marian() {
+    local SLANG="$1"
+    shift
+    
+    pushd . > /dev/null
+    cd "$MODEL"
+    perl $MOSES/scripts/tokenizer/tokenizer.perl -l $SLANG -q \
+        | perl $MOSES/scripts/recaser/truecase.perl -model $TRUECASE_MODEL \
+        | python3 $BPE/apply_bpe.py -c $MODEL/bpe.$SLANG \
+        | $MARIAN/marian-decoder -c $MODEL/config.yml "$@" \
+        | perl -pe 's/@@ //g' \
+        | $MOSES/scripts/recaser/detruecase.perl \
+        | perl $MOSES/scripts/tokenizer/detokenizer.perl -l $SLANG -q
+    popd > /dev/null
+}

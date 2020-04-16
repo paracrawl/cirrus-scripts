@@ -15,5 +15,10 @@ export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 export MOSES_ARGS="--threads 16"
 export MOSES_INI=moses2.ini
 export KPU=/home/cs-wait1/src/kpu-preprocess
-export DATA=/rds/project/t2_vol4/rds-t2-cs119
+#export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
+export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
 export SCRATCH=/local
+
+# For Pashto (not paracrawl)
+export MARIAN=/home/cs-vand1/rds/rds-t2-cs119/romang/marian-dev/build-static
+export BPE=/home/cs-vand1/rds/rds-t2-cs119/romang/subword-nmt/subword_nmt

@@ -1,0 +1,35 @@
+#!/bin/bash
+set -euo pipefail
+
+SLANG="$1"
+BATCH="$2"
+
+echo "Translating $SLANG $BATCH"
+echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
+sentences=`gzip -dc $BATCH/sentences.gz | base64 -d | wc -l`
+echo "Sentences: ${sentences}"
+
+echo "Start:" `date` $BATCH
+
+set -a # causes all the variables set in translate.sh to be exported
+. ${SCRIPTS}/translate.sh
+eval model_${SLANG} || (echo No model for ${SLANG} 1>&2 ; exit 255)
+export -f translate_marian
+export MODEL
+gzip -dc ${BATCH}/sentences.gz \
+    | b64filter \
+    	cache \
+    		bash -u -e -o pipefail -c 'translate_marian $@' -- $SLANG -d 0 --max-length 300 --max-length-crop \
+    | gzip -9c > /tmp/sentences_en.$$.gz
+
+echo "End:" `date` $BATCH
+
+before=`gzip -dc ${BATCH}/sentences.gz | wc -l`
+after=`gzip -dc /tmp/sentences_en.$$.gz | wc -l`
+echo "Check count $before -> $after $BATCH"
+if [[ $before != $after ]]; then
+	echo "Error: counts don't match"
+	exit 1
+fi
+
+mv /tmp/sentences_en.$$.gz ${BATCH}/sentences_en.gz

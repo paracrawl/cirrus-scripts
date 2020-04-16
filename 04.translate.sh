@@ -4,17 +4,20 @@
 set -euo pipefail
 
 . ./config.csd3
-. ${SCRIPTS}/functions
+. ${SCRIPTS}/functions.sh
+. ${SCRIPTS}/translate.sh
 
 collection=$1
 shift
 
 for lang in $*; do
+	# Load in translation model config so we know ARCH
+	eval model_${lang} || (echo No model for ${lang} 1>&2 ; exit 255)
 	batch_list=$(make_batch_list 04 $collection $lang)
 	job_list=$(make_job_list $batch_list sentences_en.gz)
 	if [ ! -z $job_list ]; then
-		echo Scheduling $job_list
+		echo Scheduling $job_list on $ARCH
 		confirm
-		sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.slurm $lang $batch_list
+		sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
 	fi
 done
