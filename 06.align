@@ -23,7 +23,6 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	--halt 2 \
 	--pipe \
 	-j${THREADS} \
-	-L64 \
 	--line-buffer \
 	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
