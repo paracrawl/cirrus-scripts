@@ -7,7 +7,7 @@ EN_BATCH="$3"
 
 OUTPUT=${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
 
-${DOCALIGN} --verbose -j ${THREADS} --threshold 0.1 \
+${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
 | cut -f2-3 \
