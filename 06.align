@@ -11,6 +11,7 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
 | cut -f2-3 \
+| tee /dev/fd/2 \
 | ${DOCJOIN} \
 	-li\
 	-ri\
