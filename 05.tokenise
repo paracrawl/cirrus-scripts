@@ -34,6 +34,11 @@ if test ! $(gzip -cd ${TMPDIR}/tokenised_en.$$.gz | wc -l) -eq $(gzip -cd ${BATC
 	exit 1
 fi
 
+if test ! $(docenc -d ${TMPDIR}/tokenised_en.$$.gz) -eq $(docenc -d ${BATCH}/sentences_en.gz); then
+	echo "Error: different number of lines in output" 1>&2
+	exit 1
+fi
+
 rm -f ${BATCH}/tokenised_en.gz
 mv ${TMPDIR}/tokenised_en.$$.gz ${BATCH}/tokenised_en.gz
 

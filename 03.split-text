@@ -3,10 +3,17 @@
 SLANG="$1"
 BATCH="$2"
 
+
 ## preamble: setting up temporary run environment
 echo "Setting up ephemeral environment"
 RAMDIR=/tmp/split.$$
 mkdir -p ${RAMDIR}
+
+cleanup () {
+	rm -rf ${RAMDIR} ${TMPDIR}/sentences.$$.gz
+}
+trap cleanup EXIT
+
 (cd $KPU && tar -cf - ./moses) | (cd $RAMDIR && tar -xf -)
 SPLIT=$RAMDIR/moses/ems/support/split-sentences.perl 
 echo "Done."
@@ -17,6 +24,9 @@ ulimit -n 16384
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/plain_text.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 64 --pipe -k -l 256 $SPLIT -k -q -n -d -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
+
+# Test the output. docenc will fail if output is broken
+docenc -d ${TMPDIR}/sentences.$$.gz > /dev/null
 
 rm -f ${BATCH}/sentences.gz
 mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
