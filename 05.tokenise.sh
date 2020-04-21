@@ -14,7 +14,8 @@ for lang in $*; do
 	job_list=$(make_job_list $batch_list tokenised_en.gz)
 	if [ ! -z $job_list ]; then
 		echo Scheduling $job_list
-		confirm
-		sbatch --nice=500 -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
+		if confirm; then 
+			sbatch --nice=500 -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
+		fi
 	fi
 done

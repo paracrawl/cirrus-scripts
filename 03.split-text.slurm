@@ -3,6 +3,7 @@
 #SBATCH -A t2-cs119-cpu
 #SBATCH -p skylake
 #SBATCH -N 1
+#sbatch -n 4
 #SBATCH --time 1:00:00
 #SBATCH -e /home/%u/logs/03.split-%A_%a.err
 #SBATCH -o /home/%u/logs/03.split-%A_%a.out
@@ -30,6 +31,7 @@ set -eu
 module load parallel
 module load perl/5.20.0
 
+THREADS=8
 SLANG="${1}"
 BATCHES="${2}"
 SPLIT=${SCRIPTS}/03.split-text

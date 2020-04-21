@@ -2,6 +2,7 @@
 
 SLANG="$1"
 BATCH="$2"
+THREADS=${THREADS:-8}
 
 
 ## preamble: setting up temporary run environment
@@ -23,7 +24,18 @@ ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/plain_text.gz gzip -dc | parallel --halt 2 --tmpdir ${TMPDIR} -j 64 --pipe -k -l 256 $SPLIT -k -q -n -d -l $SLANG | gzip -9c > ${TMPDIR}/sentences.$$.gz
+< ${BATCH}/plain_text.gz gzip -dc \
+| parallel --halt 2 --tmpdir ${TMPDIR} -j $THREADS --pipe -k -l 256 \
+	$SPLIT -k -q -n -d -l $SLANG \
+| gzip -9c \
+> ${TMPDIR}/sentences.$$.gz
+
+echo "Testing output"
+
+docs_pt=$(gzip -cd ${BATCH}/plain_text.gz | wc -l)
+docs_st=$(gzip -cd ${TMPDIR}/sentences.$$.gz | wc -l)
+echo "Expecting $docs_pt documents, found $docs_st"
+test $docs_pt -eq $docs_st || exit 1
 
 # Test the output. docenc will fail if output is broken
 docenc -d ${TMPDIR}/sentences.$$.gz > /dev/null
@@ -31,4 +43,5 @@ docenc -d ${TMPDIR}/sentences.$$.gz > /dev/null
 rm -f ${BATCH}/sentences.gz
 mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
 
-echo "Copied result (${SLANG}) ${BATCH}"
+echo "Copied result (${SLANG}) ${BATCH}":w
+
