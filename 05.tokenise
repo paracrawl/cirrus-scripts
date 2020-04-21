@@ -19,7 +19,7 @@ if test -n "$SLURM_JOB_ID"; then
 
 	cleanup () {
 		echo "Cleaning up ephemeral environment..."
-    	rm -rf ${RAMDIR} ${TMPDIR}/tokenised_en.$$.gz
+    	rm -rf ${RAMDIR} ${TMPDIR}/${OUTPUT}.$$.gz
 	}
 	trap cleanup EXIT
 
