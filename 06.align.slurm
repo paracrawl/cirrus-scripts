@@ -1,11 +1,14 @@
 #!/bin/sh
 #SBATCH -J align
-#SBATCH -A t2-cs119-sl4-knl
-#SBATCH -p knl
 #SBATCH -N 1
-#SBATCH --time 4:00:00
+#SBATCH -A t2-cs119-cpu
+#SBATCH -p skylake
+#SBATCH --time 8:00:00
 #SBATCH -e /home/%u/logs/06.align-%A_%a.err
 #SBATCH -o /home/%u/logs/06.align-%A_%a.out
+
+## SBATCH -A t2-cs119-sl4-knl
+## SBATCH -p knl
 
 ## ARGUMENTS: lang batch
 
@@ -19,7 +22,10 @@ trap "kill 0" EXIT
 SLANG="${1}"
 BATCHES="${2}"
 
-export THREADS=$((256 / ${TASKS_PER_BATCH}))
+CPUS=256 # KNL
+CPUS=64 # SKYLAKE
+
+export THREADS=$(($CPUS / ${TASKS_PER_BATCH}))
 
 task() {
   local BATCH_ID=$1
