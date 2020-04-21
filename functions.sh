@@ -57,8 +57,26 @@ function make_job_list {
 
 RETRY=false
 
-if [[ "$1" == "-r" ]]; then
-	RETRY=true
-	shift
-fi
-
+while (( "$#" )); do
+	case "$1" in
+		-r|--retry)
+			RETRY=true
+			shift
+			;;
+		-j|--threads)
+			THREADS=$2
+			shift 2
+			;;
+		--)
+			shift
+			break
+			;;
+		-*|--*)
+			echo "Uknown option $1" 1>&2
+			exit 1
+			;;
+		*)
+			break
+			;;
+	esac
+done
