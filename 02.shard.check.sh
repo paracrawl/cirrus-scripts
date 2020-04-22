@@ -20,6 +20,6 @@ function validate () {
 export -f validate
 
 for lang in $@; do
-	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer validate 
+	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer -j $THREADS validate 
 done
 		

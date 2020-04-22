@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-. ./config.csd3
-. ./functions.sh
+. config.csd3
+. functions.sh
 
 THREADS=${THREADS:-4}
 
@@ -36,6 +36,6 @@ function validate () {
 export -f validate
 
 for lang in $@; do
-	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer validate $lang
+	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer -j $THREADS validate $lang
 done
 		
