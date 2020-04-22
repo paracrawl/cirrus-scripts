@@ -3,9 +3,9 @@
 ## create and submit the batches on csd3 for translation
 set -euo pipefail
 
-. ./config.csd3
-. ${SCRIPTS}/functions.sh
-. ${SCRIPTS}/translate.sh
+. config.csd3
+. functions.sh
+. translate.sh
 
 collection=$1
 shift
@@ -17,7 +17,8 @@ for lang in $*; do
 	job_list=$(make_job_list $batch_list sentences_en.gz)
 	if [ ! -z $job_list ]; then
 		echo Scheduling $job_list on $ARCH
-		confirm
-		sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
+		if confirm; then
+			sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
+		fi
 	fi
 done

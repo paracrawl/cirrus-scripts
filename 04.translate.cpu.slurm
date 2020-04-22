@@ -4,7 +4,7 @@
 #SBATCH -p knl
 #SBATCH -N 1
 #SBATCH --exclusive
-#SBATCH --time 24:00:00
+#SBATCH --time 4:00:00
 #SBATCH -e /home/%u/logs/04.translate-%A_%a.err
 #SBATCH -o /home/%u/logs/04.translate-%A_%a.out
 
