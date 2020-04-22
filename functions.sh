@@ -67,9 +67,20 @@ while (( "$#" )); do
 			THREADS=$2
 			shift 2
 			;;
+		-t|--time)
+			export SBATCH_TIMELIMIT=$2
+			shift 2
+			;;
 		--)
 			shift
 			break
+			;;
+		-h|--help)
+			echo "Available options"
+			echo "  -j | --threads  specify number of threads, mostly for interactive stuff"
+			echo "  -r | --retry    retry batches for which no output was found"
+			echo "  -t | --time	    override walltime limit for individual jobs"
+			exit 0
 			;;
 		-*|--*)
 			echo "Uknown option $1" 1>&2
