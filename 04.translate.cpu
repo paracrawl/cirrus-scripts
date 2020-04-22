@@ -3,6 +3,7 @@ set -euo pipefail
 
 SLANG="$1"
 BATCH="$2"
+TMPDIR=${TMPDIR:-/tmp}
 
 echo "Translating $SLANG $BATCH"
 echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
@@ -45,20 +46,22 @@ echo "Start:" `date` $BATCH
 
 export -f translate_moses
 gzip -dc ${BATCH}/sentences.gz \
-	| b64filter \
-		cache \
+	| $B64FILTER \
+		$CACHE \
 			parallel --halt 2 -j ${nmosi} --pipe -k -l ${bsize} \
 				'bash -u -e -o pipefail -c '"'"'translate_moses $@'"'"' --' $SLANG \
-	| gzip -9c > /tmp/sentences_en.$$.gz
+	| gzip -9c > ${TMPDIR}/sentences_en.$$.gz
 
 echo "End:" `date` $BATCH
 
-before=`gzip -dc ${BATCH}/sentences.gz | wc -l`
-after=`gzip -dc /tmp/sentences_en.$$.gz | wc -l`
-echo "Check count $before -> $after $BATCH"
-if [[ $before != $after ]]; then
-	echo "Error: counts don't match"
-	exit 1
-fi
+docs_fr=$(gzip -dc ${BATCH}/sentences.gz | wc -l)
+docs_en=$(gzip -dc ${TMPDIR}/sentences_en.$$.gz | wc -l)
+echo "Expecting $docs_fr documents found $docs_en"
+test "$docs_fr" -eq "$docs_en" || exit 1
 
-mv /tmp/sentences_en.$$.gz ${BATCH}/sentences_en.gz
+lines_fr=$($DOCENC -d ${BATCH}/sentences.gz | wc -l)
+lines_en=$($DOCENC -d ${TMPDIR}/sentences_en.$$.gz | wc -l)
+echo "Expecting $lines_fr lines, found $lines_en"
+test "$lines_fr" -eq "$lines_en" || exit 1
+
+mv ${TMPDIR}/sentences_en.$$.gz ${BATCH}/sentences_en.gz
