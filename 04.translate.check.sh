@@ -12,14 +12,10 @@ function validate () {
 	local lang=$1
 	shift
 	
-	if [[ "$lang" == "en" ]]; then
-		local input=sentences
-		local output=tokenised
-	else
-		local input=sentences_en
-		local output=tokenised_en
-	fi
-
+	local input=sentences
+	local output=sentences_en
+	
+	# Test equal number of documents
 	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
 	if test ! $docs_st -eq $docs_tk; then
@@ -27,8 +23,9 @@ function validate () {
 		return
 	fi
 
-	local lines_st=$(docenc -d $1/$input.gz | wc -l)
-	local lines_tk=$(docenc -d $1/$output.gz | wc -l)
+	# Test equal number of sentences
+	local lines_st=$($DOCENC -d $1/$input.gz | wc -l)
+	local lines_tk=$($DOCENC -d $1/$output.gz | wc -l)
 	if test ! $lines_st -eq $lines_tk; then
 		echo $1/$output.gz
 		return
@@ -38,6 +35,11 @@ function validate () {
 export -f validate
 
 for lang in $@; do
+	# Skip this for English, nothing to translate there
+	if [[ "$lang" == "en" ]]; then
+		continue
+	fi
+
 	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer -j $THREADS validate $lang
 done
 		
