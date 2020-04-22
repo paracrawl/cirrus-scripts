@@ -7,7 +7,7 @@ set -euo pipefail
 collection=$1
 shift
 
-declare -g LAST_JOB_ID
+declare -g LAST_JOB_ID LAST_JOB_IS_PARTIAL
 
 function batch_count {
 	ls -1d $DATA/$collection-shards/$1/*/*/ | wc -l
@@ -49,18 +49,26 @@ function step {
 
 	# Schedule a new run
 	prompt "[$2] Scheduling generation task\n" 2>&1
+	local dependency_opt=""
+
 	if [ -n "$LAST_JOB_ID" ]; then
-		local dependency="--aftercorr $LAST_JOB_ID"
-	else
-		local dependency=""
+		if [ "$LAST_JOB_IS_PARTIAL" -eq 0 ]; then
+			# If the last job was full array, we can do pipelining on individual jobs
+			dependency_opt="--aftercorr $LAST_JOB_ID"
+		else
+			# Otherwise, just wait for the full job to finish to be sure
+			dependency_opt="--afterok $LAST_JOB_ID"
+		fi
 	fi
 
 	if [ $(wc -l <<< "$broken") -eq $(batch_count $2) ]; then
-		LAST_JOB_ID=$(./$1.sh $dependency $collection $2)
-		return 1
+		LAST_JOB_IS_PARTIAL=0
+		LAST_JOB_ID=$(./$1.sh $dependency_opt $collection $2)
+		return 0
 	else
-		LAST_JOB_ID=$(./$1.sh -r $dependency $collection $2)
-		return 1
+		LAST_JOB_IS_PARTIAL=1
+		LAST_JOB_ID=$(./$1.sh -r $dependency_opt $collection $2)
+		return 0
 	fi
 
 	return 2 #why would we end up here?
@@ -76,11 +84,9 @@ steps=(
 
 function pipeline {
 	for step_name in ${steps[@]}; do
-		# If the step wasn't already done & correct this will schedule it
-		step $step_name $1
-		if [ $? -ne 0 ]; then
+		if step $step_name $1; then
 			echo $LAST_JOB_ID
-			prompt "Continue scheduling next step?"
+			prompt "Continue scheduling next step?\n"
 
 			# Do we want to continue checking & scheduling?
 			if confirm ; then

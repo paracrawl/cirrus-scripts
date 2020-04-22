@@ -57,7 +57,7 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
-			sbatch \
+			schedule \
 				--nice=600 \
 				-J align-${lang} \
 				-a $job_list \

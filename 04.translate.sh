@@ -18,7 +18,7 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list on $ARCH\n"
 		if confirm; then
-			sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
+			schedule --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
 		fi
 	fi
 done
