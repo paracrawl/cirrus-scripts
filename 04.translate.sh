@@ -16,7 +16,7 @@ for lang in $*; do
 	batch_list=$(make_batch_list 04 $collection $lang)
 	job_list=$(make_job_list $batch_list sentences_en.gz)
 	if [ ! -z $job_list ]; then
-		echo Scheduling $job_list on $ARCH
+		prompt "Scheduling $job_list on $ARCH\n"
 		if confirm; then
 			sbatch --nice=400 -J translate-${lang} -a $job_list 04.translate.${ARCH}.slurm $lang $batch_list
 		fi
