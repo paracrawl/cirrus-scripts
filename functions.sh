@@ -4,11 +4,14 @@ function join_by {
 	echo "$*";
 }
 
+function prompt {
+	printf "$@" 1>&2 
+}
+
 function confirm {
 	read -p "Are you sure? " -n 1 -r
-	echo 2>&1
-	if [[ ! $REPLY =~ ^[Yy]$ ]]
-	then
+	echo 1>&2
+	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
     	[[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
 	fi
 }
@@ -55,7 +58,14 @@ function make_job_list {
 	fi
 }
 
+function schedule {
+	local job_id=$(sbatch "${SCHEDULE_OPTIONS[@]}" "$@")
+	echo $(date +%Y%m%d%H%M%S) $job_id "${SCHEDULE_OPTIONS[@]}" "$@" >> ./.schedule-log
+	echo $job_id
+}
+
 RETRY=false
+declare -g SCHEDULE_OPTIONS=(--parsable)
 
 while (( "$#" )); do
 	case "$1" in
@@ -68,7 +78,15 @@ while (( "$#" )); do
 			shift 2
 			;;
 		-t|--time)
-			export SBATCH_TIMELIMIT=$2
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --time "$2")
+			shift 2
+			;;
+		--afterok)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "afterok:$2")
+			shift 2
+			;;
+		--aftercorr)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "aftercorr:$2")
 			shift 2
 			;;
 		--)
@@ -77,9 +95,12 @@ while (( "$#" )); do
 			;;
 		-h|--help)
 			echo "Available options"
-			echo "  -j | --threads  specify number of threads, mostly for interactive stuff"
-			echo "  -r | --retry    retry batches for which no output was found"
-			echo "  -t | --time	    override walltime limit for individual jobs"
+			echo "  -j | --threads n     Specify number of threads, mostly for interactive stuff."
+			echo "  -r | --retry         Retry batches for which no output was found."
+			echo "  -t | --time t	     Override walltime limit for individual jobs."
+			echo "  --afterok job-id     Run this job after prev job has finished."
+			echo "  --aftercorr job-id   Run each of the job array tasks after their counterpart."
+			echo "                       has finished."
 			exit 0
 			;;
 		-*|--*)

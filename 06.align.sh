@@ -55,12 +55,13 @@ for lang in $*; do
 	batch_list=`make_batch_list $collection $lang`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
-		echo Scheduling $job_list
-		confirm
-		sbatch \
-			--nice=600 \
-			-J align-${lang} \
-			-a $job_list \
-			${SCRIPTS}/06.align.slurm ${lang} $batch_list
+		prompt "Scheduling $job_list\n"
+		if confirm; then
+			sbatch \
+				--nice=600 \
+				-J align-${lang} \
+				-a $job_list \
+				${SCRIPTS}/06.align.slurm ${lang} $batch_list
+		fi
 	fi
 done
