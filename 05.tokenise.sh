@@ -21,7 +21,7 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then 
-			sbatch --nice=500 -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
+			schedule --nice=500 -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
 		fi
 	fi
 done
