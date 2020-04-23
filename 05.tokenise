@@ -44,11 +44,11 @@ ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
-< ${BATCH}/${IPUT}.gz gzip -dc \
+< ${BATCH}/${INPUT}.gz gzip -dc \
 | parallel --halt 2 -j $THREADS --tmpdir ${TMPDIR} --pipe -k -l 256 \
 ${B64FILTER} ${CACHE} ${TOKENISE} -a -q -l en \
 | gzip -9c \
-> ${TMPDIR}/tokenised_en.$$.gz
+> ${TMPDIR}/${OUTPUT}.$$.gz
 
 echo "Checking output"
 
@@ -63,6 +63,6 @@ echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
 rm -f ${BATCH}/${OUTPUT}.gz
-mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPT}.gz
+mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
 
 echo "Moved result (${SLANG}) ${BATCH}"
