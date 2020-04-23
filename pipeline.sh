@@ -37,15 +37,17 @@ function step {
 	fi
 
 	# Delete the broken files
-	prompt "[$2] Deleting any existing broken files:\n"
-	xargs ls -l <<< "$broken" 2> /dev/null || true # I don't care if this fails
-	confirm || return 1
+	if $RETRY; then
+		prompt "[$2] Deleting any existing broken files:\n"
+		xargs ls -l <<< "$broken" 2> /dev/null || true # I don't care if this fails
+		confirm || return 1
 
-	while read file; do
-		if [ -e $file ]; then
-			mv $file $file~$(date +%Y%m%d-%H%M%S)~corrupt
-		fi
-	done <<< "$broken"
+		while read file; do
+			if [ -e $file ]; then
+				mv $file $file~$(date +%Y%m%d-%H%M%S)~corrupt
+			fi
+		done <<< "$broken"
+	fi
 
 	# Schedule a new run
 	prompt "[$2] Scheduling generation task\n" 2>&1
