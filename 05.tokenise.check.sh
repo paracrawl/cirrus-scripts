@@ -20,6 +20,10 @@ function validate () {
 		local output=tokenised_en
 	fi
 
+	if is_marked_valid 05 $1 $input.gz $output.gz; then
+		return
+	fi
+
 	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
 	if test ! $docs_st -eq $docs_tk; then
@@ -33,9 +37,11 @@ function validate () {
 		echo $1/$output.gz
 		return
 	fi
+
+	mark_valid 05 $1
 }
 
-export -f validate
+export -f validate is_marked_valid mark_valid
 
 for lang in $@; do
 	ls -d $DATA/$collection-shards/$lang/*/* | parallel --line-buffer -j $THREADS validate $lang
