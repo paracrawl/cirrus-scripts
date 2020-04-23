@@ -4,9 +4,11 @@ function join_by {
 	echo "$*";
 }
 
+
 function prompt {
 	printf "$@" 1>&2 
 }
+
 
 function confirm {
 	read -p "Are you sure? " -n 1 -r
@@ -15,6 +17,7 @@ function confirm {
     	[[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
 	fi
 }
+
 
 function make_batch_list {
 	local step="$1" collection="$2" lang="$3"
@@ -29,10 +32,12 @@ function make_batch_list {
 	echo ${DATA}/${collection}-batches/${step}.${lang}
 }
 
+
 function make_job_list_all {
 	n=`< $1 wc -l`
     echo 1-${n}
 }
+
 
 function make_job_list_retry {
 	local batch_list="$1" file="$2"
@@ -50,6 +55,7 @@ function make_job_list_retry {
 	fi
 }
 
+
 function make_job_list {
 	if $RETRY; then
 		make_job_list_retry "$@"
@@ -58,13 +64,36 @@ function make_job_list {
 	fi
 }
 
+
 function schedule {
 	local job_id=$(sbatch "${SCHEDULE_OPTIONS[@]}" "$@")
 	echo $(date +%Y%m%d%H%M%S) $job_id "${SCHEDULE_OPTIONS[@]}" "$@" >> ./.schedule-log
 	echo $job_id
 }
 
-RETRY=false
+
+function is_marked_valid {
+	local marker=".validated-$1"
+	local batch="$2"
+	shift 2
+
+	local latest_file=$(cd "$batch"; ls -1t "$@" | head -n1)
+	if [ -z "$latest_file" ] || [ $batch/$latest_file -nt $batch/$marker ]; then
+		return 1
+	else
+		return 0
+	fi
+}
+
+
+function mark_valid {
+	local marker=".validated-$1"
+	local batch="$2"
+	touch "$batch/$marker"
+}
+
+
+declare -g RETRY=false
 declare -g SCHEDULE_OPTIONS=(--parsable)
 
 while (( "$#" )); do
