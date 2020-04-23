@@ -61,17 +61,16 @@ function step {
 		fi
 	fi
 
-	if [ $(wc -l <<< "$broken") -eq $(batch_count $2) ]; then
-		LAST_JOB_IS_PARTIAL=0
-		LAST_JOB_ID=$(./$1.sh $dependency_opt $collection $2)
-		return 0
-	else
+	if $RETRY  && [ $(wc -l <<< "$broken") -ne $(batch_count $2) ]; then
 		LAST_JOB_IS_PARTIAL=1
 		LAST_JOB_ID=$(./$1.sh -r $dependency_opt $collection $2)
-		return 0
+	else
+		LAST_JOB_IS_PARTIAL=0
+		LAST_JOB_ID=$(./$1.sh $dependency_opt $collection $2)
 	fi
 
-	return 2 #why would we end up here?
+	echo $LAST_JOB_ID
+	return 0
 }
 
 steps=(
@@ -84,16 +83,15 @@ steps=(
 
 function pipeline {
 	for step_name in ${steps[@]}; do
-		if step $step_name $1; then
-			echo $LAST_JOB_ID
-			prompt "Continue scheduling next step?\n"
-
-			# Do we want to continue checking & scheduling?
-			if confirm ; then
-				continue
-			else
+		if [ -n "$LAST_JOB_ID" ]; then
+			prompt "Continue scheduling next step $step_name?\n"
+			if ! confirm ; then
 				break
 			fi
+		fi
+
+		if ! step $step_name $1; then
+			break
 		fi
 	done
 }
