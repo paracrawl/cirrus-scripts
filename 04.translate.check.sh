@@ -14,6 +14,10 @@ function validate () {
 	
 	local input=sentences
 	local output=sentences_en
+
+	if is_marked_valid 04 $1 $input.gz $output.gz ; then
+		return
+	fi
 	
 	# Test equal number of documents
 	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
@@ -30,9 +34,11 @@ function validate () {
 		echo $1/$output.gz
 		return
 	fi
+
+	mark_valid 04 $1
 }
 
-export -f validate
+export -f validate is_marked_valid mark_valid
 
 for lang in $@; do
 	# Skip this for English, nothing to translate there
