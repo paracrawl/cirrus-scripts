@@ -8,14 +8,14 @@ model_is () {
 }
 
 model_nb () {
-    MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_IS_EN.nb-en
+    MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_NB_EN.nb-en
     MOSES_BIN=$MOSES/bin/moses
     MOSES_INI=moses.ini
     TRUECASE_MODEL=truecaser.nb
 }
 
 model_nn () {
-    MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_IS_EN.nn-en
+    MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_NN_EN.nn-en
     MOSES_BIN=$MOSES/bin/moses
     MOSES_INI=moses.ini
     TRUECASE_MODEL=truecaser.nn
