@@ -11,6 +11,8 @@ shift
 function validate () {
 	local lang=$1
 	shift
+
+	set -euo pipefail
 	
 	if [[ "$lang" == "en" ]]; then
 		local input=sentences
@@ -20,20 +22,26 @@ function validate () {
 		local output=tokenised_en
 	fi
 
-	if is_marked_valid 05 $1 $input.gz $output.gz; then
+	if is_marked_valid 05 $1 $input.gz $output.gz ; then
 		return
 	fi
 
-	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
-	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
-	if test ! $docs_st -eq $docs_tk; then
+	local docs_tk docs_st
+	if docs_tk=$(gzip -cd $1/$output.gz | wc -l) \
+	  && docs_st=$(gzip -cd $1/$input.gz | wc -l) \
+	  && test $docs_st -eq $docs_tk; then
+		: # Good!
+	else
 		echo $1/$output.gz
 		return
 	fi
-
-	local lines_tk=$(docenc -d $1/$output.gz | wc -l)
-	local lines_st=$(docenc -d $1/$input.gz | wc -l)
-	if test ! $lines_st -eq $lines_tk; then
+	
+	local lines_tk lines_st
+	if lines_tk=$(docenc -d $1/$output.gz | wc -l) \
+	  && lines_st=$(docenc -d $1/$input.gz | wc -l) \
+	  && test $lines_st -eq $lines_tk; then
+		: # Good!
+	else
 		echo $1/$output.gz
 		return
 	fi
