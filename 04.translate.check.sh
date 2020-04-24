@@ -20,16 +20,16 @@ function validate () {
 	fi
 	
 	# Test equal number of documents
-	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
+	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	if test ! $docs_st -eq $docs_tk; then
 		echo $1/$output.gz
 		return
 	fi
 
 	# Test equal number of sentences
-	local lines_st=$($DOCENC -d $1/$input.gz | wc -l)
 	local lines_tk=$($DOCENC -d $1/$output.gz | wc -l)
+	local lines_st=$($DOCENC -d $1/$input.gz | wc -l)
 	if test ! $lines_st -eq $lines_tk; then
 		echo $1/$output.gz
 		return

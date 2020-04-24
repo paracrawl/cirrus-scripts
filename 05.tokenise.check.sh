@@ -24,15 +24,15 @@ function validate () {
 		return
 	fi
 
-	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
+	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
 	if test ! $docs_st -eq $docs_tk; then
 		echo $1/$output.gz
 		return
 	fi
 
-	local lines_st=$(docenc -d $1/$input.gz | wc -l)
 	local lines_tk=$(docenc -d $1/$output.gz | wc -l)
+	local lines_st=$(docenc -d $1/$input.gz | wc -l)
 	if test ! $lines_st -eq $lines_tk; then
 		echo $1/$output.gz
 		return
