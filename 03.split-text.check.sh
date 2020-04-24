@@ -13,8 +13,8 @@ function validate () {
 		return 0
 	fi
 
-	local docs_pt=$(gzip -cd $1/plain_text.gz | wc -l)
 	local docs_st=$(gzip -cd $1/sentences.gz | wc -l)
+	local docs_pt=$(gzip -cd $1/plain_text.gz | wc -l)
 	if test ! "$docs_pt" -eq "$docs_st"; then 
 		echo $1/sentences.gz
 	else
