@@ -1,14 +1,13 @@
 #!/bin/sh
 #SBATCH -J align
 #SBATCH -N 1
-#SBATCH -A t2-cs119-cpu
-#SBATCH -p skylake
 #SBATCH --time 8:00:00
 #SBATCH -e /home/%u/logs/06.align-%A_%a.err
 #SBATCH -o /home/%u/logs/06.align-%A_%a.out
-
-## SBATCH -A t2-cs119-sl4-knl
-## SBATCH -p knl
+##SBATCH -A t2-cs119-cpu
+##SBATCH -p skylake
+#SBATCH -A t2-cs119-sl4-knl
+#SBATCH -p knl
 
 ## ARGUMENTS: lang batch
 
@@ -22,10 +21,11 @@ trap "kill 0" EXIT
 SLANG="${1}"
 BATCHES="${2}"
 
-CPUS=256 # KNL
-CPUS=64 # SKYLAKE
+CPUS=${SLURM_CPUS_ON_NODE}
+echo "There are $CPUS on this node"
 
 export THREADS=$(($CPUS / ${TASKS_PER_BATCH}))
+echo "Running $THREADS per task, ${TASKS_PER_BATCH} tasks"
 
 task() {
   local BATCH_ID=$1
