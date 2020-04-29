@@ -5,28 +5,33 @@ SLANG="$1"
 XX_BATCH="$2"
 EN_BATCH="$3"
 
-OUTPUT=${TMPDIR}/aligned-$(basename ${EN_BATCH}).gz.$$
+SHARD_ID=$(basename $(dirname $XX_BATCH))
+XX_BATCH_ID=$(basename $XX_BATCH)
+EN_BATCH_ID=$(basename $EN_BATCH)
+
+OUTPUT=$(mktemp --suffix=.gz)
 
 ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
 | cut -f2-3 \
-| tee /dev/fd/2 \
+| tee >(gzip -c > ${XX_BATCH}/aligned-${EN_BATCH_ID}-docalign-output.gz) \
 | ${DOCJOIN} \
 	-li\
 	-ri\
 	-l ${XX_BATCH}/sentences.gz\
 	-r ${EN_BATCH}/sentences.gz\
 	-l ${XX_BATCH}/sentences_en.gz\
+| tee >(gzip -c > ${XX_BATCH}/aligned-${EN_BATCH_ID}-bleualign-input.gz) \
 | parallel \
-	--gnu \
+	-j${THREADS} \
 	--halt 2 \
 	--pipe \
-	-j${THREADS} \
-	--line-buffer \
+	--group \
+	-l 1 \
 	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
 > $OUTPUT
 
-mv $OUTPUT ${XX_BATCH}/$(basename $OUTPUT .$$)
+mv $OUTPUT ${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
 echo "Copied result (${SLANG}) ${XX_BATCH}"

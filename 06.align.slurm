@@ -6,7 +6,7 @@
 #SBATCH -o /home/%u/logs/06.align-%A_%a.out
 ##SBATCH -A t2-cs119-cpu
 ##SBATCH -p skylake
-#SBATCH -A t2-cs119-sl4-knl
+#SBATCH -A t2-cs119-knl
 #SBATCH -p knl
 
 ## ARGUMENTS: lang batch
@@ -18,16 +18,13 @@ set -euo pipefail
 trap "exit" INT TERM
 trap "kill 0" EXIT
 
-SLANG="${1}"
-BATCHES="${2}"
-
-CPUS=${SLURM_CPUS_ON_NODE}
-echo "There are $CPUS on this node"
-
-export THREADS=$(($CPUS / ${TASKS_PER_BATCH}))
+export SLANG="${1}"
+export BATCHES="${2}"
+export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
 echo "Running $THREADS per task, ${TASKS_PER_BATCH} tasks"
 
 task() {
+  set -euo pipefail
   local BATCH_ID=$1
 
   # Note: BATCH will contain two paths separated by space. These are intended
@@ -40,18 +37,16 @@ task() {
   echo `date` "Done whole node job ${BATCH_ID} on ${HOSTNAME}"
 }
 
-task_pid=()
-
-for OFFSET in $(seq 0 $(( ${TASKS_PER_BATCH} - 1 ))); do
-  task $(( ${TASKS_PER_BATCH} * ${SLURM_ARRAY_TASK_ID} + ${OFFSET} )) &
-  task_pid+=($!)
-done
-
 # While this script is running, also write CPU stats
 mpstat 10 > $HOME/logs/06.align-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
 stat_pid=$!
 
-wait ${task_pid[@]}
+GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
+GROUP_START=$(( 1 + $GROUP_END - $TASKS_PER_BATCH))
+
+export -f task
+parallel task ::: $(seq $GROUP_START $GROUP_END)
+
 kill ${stat_pid}
 
-  
+
