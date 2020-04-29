@@ -31,19 +31,39 @@ function validate {
 		return
 	fi
 
-	# Test if it contains fewer or equal number of lines as the input (as in
-	# our current setup we try to associate each sentence with one English at
-	# most. Note that we still end up with at most N repetitions as each batch
-	# in the English shard can have a match.)
-	local lines_aligned lines_foreign
+	# General note: Testing on url.gz here for speed if possible, as those files
+	# are way smaller but should already have the same number of documents as
+	# the sentences.gz given check 02.shard.check.sh succeeded.
+
+	# There cannot be more sentences in the output than there were in the input.
+	local lines_aligned lines_en
 	if lines_aligned=$(gzip -cd $output | wc -l) \
-		&& lines_foreign=$(docenc -d ${batches[0]}/tokenised_en.gz | wc -l) \
-		&& test $lines_aligned -le $lines_foreign; then
+		&& lines_en=$(docenc -d ${batches[0]}/sentences.gz | wc -l) \
+		&& test $lines_aligned -le $lines_en; then
 		: # Good
 	else
 		echo $output
 		return
 	fi
+
+	local docs_lang=$(gzip -cd ${batches[0]}/url.gz | wc -l)
+	local docs_en=$(gzip -cd ${batches[1]}/url.gz | wc -l)
+
+	# All indices mentioned in the output should be inside the ranges of the 
+	# aligned documents.
+	gzip -cd $output | cut -f1-2 | while read index_aligned index_en; do
+		if test "$index_aligned" -gt "$docs_lang" 2>/dev/null; then
+			echo "Document index $index_aligned is not inside $lang/url.gz ($docs_lang)" >&2
+			echo $output
+			return
+		fi
+	
+		if test "$index_en" -gt "$docs_en" 2>/dev/null; then
+			echo "Document index $index_en is not inside en/url.gz ($docs_en)" >&2
+			echo $output
+			return
+		fi
+	done
 }
 
 export -f validate
