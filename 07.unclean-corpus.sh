@@ -9,7 +9,7 @@ shift
 for lang in $*; do
 	cat ${DATA}/${collection}-batches/${lang} \
 	| while read batch; do
-		for match in ${batch}/aligned-*.gz; do
+		for match in ${batch}/aligned-[0-9].gz; do
 			echo $match 1>&2
 			paste <(gzip -cd ${match} \
 					| cut -f1-2 \
