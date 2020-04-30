@@ -22,7 +22,7 @@ function make_batch_list {
 }
 
 function make_job_list_all {
-	local n=$(( $(< "$1" wc -l) / ${TASKS_PER_BATCH} ))
+	local n=$(( $(< "$1" wc -l) / ${TASKS_PER_BATCH} + 1))
 	echo 1-${n}
 }
 
