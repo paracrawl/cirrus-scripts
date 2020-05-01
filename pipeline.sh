@@ -38,8 +38,8 @@ function step {
 
 	# Delete the broken files
 	if $RETRY; then
-		prompt "[$2] Deleting any existing broken files:\n"
-		xargs ls -l <<< "$broken" 2> /dev/null || true # I don't care if this fails
+		prompt "[$2] These files are broken or not found:\n"
+		echo "$broken"
 		confirm || return 1
 
 		while read file; do
@@ -50,11 +50,11 @@ function step {
 	fi
 
 	# Schedule a new run
-	prompt "[$2] Scheduling generation task\n" 2>&1
+	prompt "[$2] Scheduling task\n"
 	local dependency_opt=""
 
 	if [ -n "$LAST_JOB_ID" ]; then
-		if [ "$LAST_JOB_IS_PARTIAL" -eq 0 ]; then
+		if [ "$LAST_JOB_IS_PARTIAL" -eq 0 ] && [ "$2" != "06" ]; then
 			# If the last job was full array, we can do pipelining on individual jobs
 			dependency_opt="--aftercorr $LAST_JOB_ID"
 		else
@@ -80,7 +80,7 @@ steps=(
 	03.split-text
 	04.translate
 	05.tokenise
-	#06.align
+	06.align
 )
 
 function pipeline {
