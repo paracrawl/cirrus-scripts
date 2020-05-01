@@ -38,8 +38,8 @@ task() {
 }
 
 # While this script is running, also write CPU stats
-mpstat 10 > $HOME/logs/06.align-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
-stat_pid=$!
+#mpstat 10 > $HOME/logs/06.align-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
+#stat_pid=$!
 
 GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( 1 + $GROUP_END - $TASKS_PER_BATCH))
@@ -47,6 +47,6 @@ GROUP_START=$(( 1 + $GROUP_END - $TASKS_PER_BATCH))
 export -f task
 parallel task ::: $(seq $GROUP_START $GROUP_END)
 
-kill ${stat_pid}
+#kill ${stat_pid}
 
 

@@ -15,14 +15,12 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
 | cut -f2-3 \
-| tee >(gzip -c > ${XX_BATCH}/aligned-${EN_BATCH_ID}-docalign-output.gz) \
 | ${DOCJOIN} \
 	-li\
 	-ri\
 	-l ${XX_BATCH}/sentences.gz\
 	-r ${EN_BATCH}/sentences.gz\
 	-l ${XX_BATCH}/sentences_en.gz\
-| tee >(gzip -c > ${XX_BATCH}/aligned-${EN_BATCH_ID}-bleualign-input.gz) \
 | parallel \
 	-j${THREADS} \
 	--halt 2 \
