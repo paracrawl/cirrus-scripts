@@ -9,6 +9,8 @@ collection=$1
 shift
 
 function validate () {
+	set -euo pipefail
+	
 	local lang=$1
 	shift
 
