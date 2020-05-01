@@ -9,20 +9,23 @@ collection=$1
 shift
 
 function validate () {
+	set -euo pipefail
+
 	if is_marked_valid 02 $1 mime.gz source.gz plain_text.gz url.gz ; then
 		return 0
 	fi
 
-	local mime_cnt=$(gzip -cd $1/mime.gz | wc -l)
-	local source_cnt=$(gzip -cd $1/source.gz | wc -l)
-	local doc_cnt=$(gzip -cd $1/plain_text.gz | wc -l)
-	local url_cnt=$(gzip -cd $1/url.gz | wc -l)
-	if test ! "$mime_cnt" -eq "$source_cnt" \
-		|| test ! "$source_cnt" -eq "$doc_cnt" \
-		|| test ! "$doc_cnt" -eq "$url_cnt"; then
-		echo $1/plain_text.gz
-	else
+	local mime_cnt source_cnt doc_cnt url_cnt
+	if mime_cnt=$(gzip -cd $1/mime.gz | wc -l) \
+		&& source_cnt=$(gzip -cd $1/source.gz | wc -l) \
+		&& doc_cnt=$(gzip -cd $1/plain_text.gz | wc -l) \
+		&& url_cnt=$(gzip -cd $1/url.gz | wc -l) \
+		&& test "$mime_cnt" -eq "$source_cnt" \
+		&& test "$source_cnt" -eq "$doc_cnt" \
+		&& test "$doc_cnt" -eq "$url_cnt"; then
 		mark_valid 02 $1
+	else
+		echo $1/plain_text.gz
 	fi
 }
 

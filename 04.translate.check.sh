@@ -9,6 +9,8 @@ collection=$1
 shift
 
 function validate () {
+	set -euo pipefail
+
 	local lang=$1
 	shift
 	
@@ -18,19 +20,25 @@ function validate () {
 	if is_marked_valid 04 $1 $input.gz $output.gz ; then
 		return
 	fi
-	
+
 	# Test equal number of documents
-	local docs_tk=$(gzip -cd $1/$output.gz | wc -l)
-	local docs_st=$(gzip -cd $1/$input.gz | wc -l)
-	if test ! $docs_st -eq $docs_tk; then
+	local docs_tk docs_st
+	if docs_tk=$(gzip -cd $1/$output.gz | wc -l) \
+		&& docs_st=$(gzip -cd $1/$input.gz | wc -l) \
+		&& test $docs_st -eq $docs_tk; then
+		: # Good
+	else
 		echo $1/$output.gz
 		return
 	fi
 
 	# Test equal number of sentences
-	local lines_tk=$($DOCENC -d $1/$output.gz | wc -l)
-	local lines_st=$($DOCENC -d $1/$input.gz | wc -l)
-	if test ! $lines_st -eq $lines_tk; then
+	local lines_tk lines_st
+	if lines_tk=$($DOCENC -d $1/$output.gz | wc -l) \
+		&& lines_st=$($DOCENC -d $1/$input.gz | wc -l) \
+		&& test $lines_st -eq $lines_tk; then
+		: # Good
+	else
 		echo $1/$output.gz
 		return
 	fi

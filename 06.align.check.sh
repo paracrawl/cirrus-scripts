@@ -21,6 +21,8 @@ function make_batch_list {
 }
 
 function validate {
+	set -euo pipefail
+	
 	local lang="$1" batches=($2)
 
 	local output=${batches[0]}/aligned-$(basename ${batches[1]}).gz
