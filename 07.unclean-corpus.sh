@@ -14,11 +14,13 @@ for lang in $*; do
 			paste <(gzip -cd ${match} \
 					| cut -f1-2 \
 					| docjoin \
-						-l $(dirname ${match})/url.gz \
-						-r ${DATA}/${collection}-shards/en/$(basename $(dirname $batch))/$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')/url.gz) \
-				  <(gzip -cd $match | cut -f3-)
+						-r ${DATA}/${collection}-shards/en/$(basename $(dirname $batch))/$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')/url.gz \
+						-l $(dirname ${match})/url.gz) \
+				  <(gzip -cd $match | cut -f4) \
+				  <(gzip -cd $match | cut -f3) \
+				  <(gzip -cd $match | cut -f5-)
 		done
 	done \
-	| gzip -c > ${DATA}/${collection}-corpora/${collection}-unclean.${lang}-en.gz 
+	| gzip -c > ${DATA}/${collection}-corpora/${collection}-unclean.en-${lang}.gz 
 done
 
