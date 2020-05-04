@@ -110,6 +110,10 @@ while (( "$#" )); do
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --time "$2")
 			shift 2
 			;;
+		--after)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "after:$2")
+			shift 2
+			;;
 		--afterok)
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "afterok:$2")
 			shift 2
