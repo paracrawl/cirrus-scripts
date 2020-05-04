@@ -131,6 +131,7 @@ while (( "$#" )); do
 			echo "  -j | --threads n     Specify number of threads, mostly for interactive stuff."
 			echo "  -r | --retry         Retry batches for which no output was found."
 			echo "  -t | --time t	     Override walltime limit for individual jobs."
+            echo "  --after job-id       Run this job after prev job ended (however that happend)."
 			echo "  --afterok job-id     Run this job after prev job has finished."
 			echo "  --aftercorr job-id   Run each of the job array tasks after their counterpart."
 			echo "                       has finished."
