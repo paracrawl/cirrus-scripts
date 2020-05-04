@@ -59,7 +59,7 @@ function step {
 			dependency_opt="--aftercorr $LAST_JOB_ID"
 		else
 			# Otherwise, just wait for the full job to finish to be sure
-			dependency_opt="--afterok $LAST_JOB_ID"
+			dependency_opt="--after $LAST_JOB_ID"
 		fi
 	fi
 
