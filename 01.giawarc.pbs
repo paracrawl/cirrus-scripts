@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -A dc007
+#PBS -l select=1:ncpus=36
+#PBS -l place=exclhost
+#PBS -l walltime=04:00:00
+
+set -euo pipefail
+
+module load gnu-parallel
+
+# GROUP_SIZE=36 group-size specified by submission script
+GROUP_START=$(($GROUP_SIZE * $PBS_ARRAY_INDEX - $GROUP_SIZE)) # Start counting by 1
+GROUP_END=$(($GROUP_START + $GROUP_SIZE))
+
+task () {
+    set -euo pipefail
+    local batch=$1
+    local output=$DATA/$COLLECTION-text/$(basename $batch .warc.gz)
+    local output_partial=$output.$$
+    mkdir -p $output_partial
+    $GIAWARC -o $output_partial $batch
+    mv $output_partial $output
+}
+
+export -f task
+
+head -n$GROUP_END "$BATCH_LIST" \
+| tail -n$GROUP_SIZE \
+| parallel -j36 task '{}'

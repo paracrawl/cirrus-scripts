@@ -127,19 +127,30 @@ hand.
 
 # Steps
 
-## 01 giawarc
+## 01.giawarc
 Splits `*.warc` files into `plain_text.gz`, `url.gz`, and `mime.gz`, split by
 language. The `plain_text.gz` contains base64-encoded documents. Each document
 is already split into lines according to what the HTML dictates as being on a
 new line (i.e. `<li>` elements are separate lines, stuff wrapped in `<em>` wont
 cause a new line, etc.)
 
-## 02 giashard
+The script in this repository is what is currently being run for wide00015 on
+Cirrus, adapted to the common structure of the scripts here.
+
+## 02.shard
 Splits/merges each language's `plain_text.gz`, `url.gz` and `mime.gz` into
 shards. For each document (c.f. line) in these files the domain is looked up and
 hashed, which decides in which shard the document will end up. Inside that shard
 the document is appended to the relative files, which are chopped into about 1GB
 max size until a new batch is opened.
+
+Note that sharding cannot be done in parallel like the other steps, we need a
+merge step at the end that isn't parallel. Jelmer has been able to do most
+sharding he did on Valhalla with just a single process but we can (and will
+need to) use giashard and then giamerge for collections larger than wide00006.
+
+Since this step essentially completely duplicates all data from the batches it
+will have to run on Cirrus until CSD3 has more storage available...
 
 ## 03.split-text
 Reads the lines from `plain_text.gz` and splits them into multiple lines if
