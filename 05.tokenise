@@ -12,32 +12,7 @@ if [[ "$SLANG" == "en" ]]; then
 	OUTPUT=tokenised
 fi
 
-## preamble: setting up temporary run environment
-if test -n "$SLURM_JOB_ID"; then 
-	echo "Setting up ephemeral environment"
-	RAMDIR=/tmp/tokenise.$$
-	mkdir -p ${RAMDIR}
-
-	cleanup () {
-		echo "Cleaning up ephemeral environment..."
-    	rm -rf ${RAMDIR} ${TMPDIR}/${OUTPUT}.$$.gz
-	}
-	trap cleanup EXIT
-
-	(cd $MOSES/scripts && tar -cf - ./share ./tokenizer) | (cd $RAMDIR && tar -xf -)
-	TOKENISE="$RAMDIR/tokenizer/tokenizer.perl"
-	B64FILTER=$RAMDIR/b64filter
-	CACHE=$RAMDIR/cache
-	sbcast `which b64filter` $B64FILTER
-	sbcast `which cache` $CACHE
-	echo "Done."
-else
-	TOKENISE=$KPU/tokenizer/tokenizer.perl
-	B64FILTER=$(which b64filter)
-	CACHE=$(which cache)
-fi
-
-DOCENC=${DOCENC:-docenc}
+TOKENISE=$KPU/moses/tokenizer/tokenizer.perl
 
 set -euo pipefail
 ulimit -n 16384
@@ -62,7 +37,6 @@ lines_tk=$($DOCENC -d ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
 echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
-rm -f ${BATCH}/${OUTPUT}.gz
 mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
 
 echo "Moved result (${SLANG}) ${BATCH}"
