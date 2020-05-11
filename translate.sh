@@ -21,6 +21,11 @@ model_nn () {
     TRUECASE_MODEL=truecaser.nn
 }
 
+model_no () {
+	# Treat the generic no as nb
+	model_nb
+}
+
 model_bg () {
     MODEL=${MODELS}/phi-system/fast-bg-en
     TRUECASE_MODEL=truecase-model.bg
