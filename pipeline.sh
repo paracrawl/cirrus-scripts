@@ -63,16 +63,22 @@ function step {
 		fi
 	fi
 
+	local schedule_ret
 	if $RETRY  && [ $(wc -l <<< "$broken") -ne $(batch_count $2) ]; then
 		LAST_JOB_IS_PARTIAL=1
 		LAST_JOB_ID=$(./$1.sh -r $dependency_opt $collection $2)
+		schedule_ret=$?
 	else
 		LAST_JOB_IS_PARTIAL=0
 		LAST_JOB_ID=$(./$1.sh $dependency_opt $collection $2)
+		schedule_ret=$?
 	fi
 
-	echo $LAST_JOB_ID
-	return 0
+	if [ "$schedule_ret" -eq 0 ]; then 
+		echo $LAST_JOB_ID
+	fi
+
+	return $schedule_ret
 }
 
 steps=(
