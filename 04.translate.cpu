@@ -16,7 +16,7 @@ set -a # I want the variables from translate.sh to be available in my deep deep 
 eval model_${SLANG} || (echo No model for ${SLANG} 1>&2 ; exit 255)
 
 # Copy model to local machine (only if we're running multiple mosis)
-if [ "$NMOSI" -gt 1 ]; then
+if [ "$NMOSI" -gt 2 ]; then
 	MDIR="`dirname $MODEL`"
 	MNAME="`basename $MODEL`"
 	MODEL="${SCRATCH}/${MNAME}"
@@ -59,9 +59,11 @@ docs_en=$(gzip -dc ${TMPDIR}/sentences_en.$$.gz | wc -l)
 echo "Expecting $docs_fr documents found $docs_en"
 test "$docs_fr" -eq "$docs_en" || exit 1
 
-lines_fr=$($DOCENC -d ${BATCH}/sentences.gz | wc -l)
-lines_en=$($DOCENC -d ${TMPDIR}/sentences_en.$$.gz | wc -l)
+lines_fr=$(gzip -cd ${BATCH}/sentences.gz | base64 -d | wc -l)
+lines_en=$(gzip -cd ${TMPDIR}/sentences_en.$$.gz | base64 -d | wc -l)
 echo "Expecting $lines_fr lines, found $lines_en"
 test "$lines_fr" -eq "$lines_en" || exit 1
 
-mv ${TMPDIR}/sentences_en.$$.gz ${BATCH}/sentences_en.gz
+# Copy instead of move to get ownership right
+cp ${TMPDIR}/sentences_en.$$.gz ${BATCH}/sentences_en.gz
+rm ${TMPDIR}/sentences_en.$$.gz
