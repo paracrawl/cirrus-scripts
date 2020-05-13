@@ -25,11 +25,17 @@ function validate {
 	
 	local lang="$1" batches=($2)
 
-	local output=${batches[0]}/aligned-$(basename ${batches[1]}).gz
+	local en_batch_id=$(basename ${batches[1]})
+
+	local output=${batches[0]}/aligned-${en_batch_id}.gz
 
 	# Test if the file was created
 	if [ ! -f $output ]; then
 		echo $output
+		return
+	fi
+
+	if is_marked_valid 06-$en_batch_id ${batches[0]} $output tokenised_en.gz $(realpath ${batches[1]}/tokenised.gz); then
 		return
 	fi
 
@@ -66,9 +72,11 @@ function validate {
 			return
 		fi
 	done
+
+	mark_valid 06-$en_batch_id ${batches[0]}
 }
 
-export -f validate
+export -f validate is_marked_valid mark_valid
 
 for lang in $*; do
 	make_batch_list $collection $lang | parallel --line-buffer -j $THREADS validate $lang
