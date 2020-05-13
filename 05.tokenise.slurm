@@ -4,7 +4,7 @@
 #SBATCH -p skylake
 #SBATCH -n 1
 #SBATCH -c 4
-#SBATCH --time 0:30:00
+#SBATCH --time 4:00:00
 #SBATCH -e /home/%u/logs/05.tokenise-%A_%a.err
 #SBATCH -o /home/%u/logs/05.tokenise-%A_%a.out
 
