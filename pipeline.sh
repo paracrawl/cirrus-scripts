@@ -7,6 +7,7 @@ set -euo pipefail
 collection=$1
 shift
 
+export THREADS=${THREADS:-4}
 declare -g LAST_JOB_ID LAST_JOB_IS_PARTIAL
 
 function batch_count {
@@ -28,6 +29,12 @@ function step {
 		return 0
 	else
 		prompt "NOT OK\n"
+	fi
+
+	# If we're only running tests, stop here. But don't say we failed because
+	# we want the other tests to continue as well.
+	if $TEST; then
+		return 0
 	fi
 
 	# Test whether we can resolve this

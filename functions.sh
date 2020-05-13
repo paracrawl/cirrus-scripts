@@ -92,7 +92,7 @@ function mark_valid {
 	touch "$batch/$marker"
 }
 
-
+declare -g TEST=false
 declare -g RETRY=false
 declare -g SCHEDULE_OPTIONS=(--parsable)
 
@@ -100,6 +100,10 @@ while (( "$#" )); do
 	case "$1" in
 		-r|--retry)
 			RETRY=true
+			shift
+			;;
+		-t|--test)
+			TEST=true
 			shift
 			;;
 		-j|--threads)
@@ -129,6 +133,7 @@ while (( "$#" )); do
 		-h|--help)
 			echo "Available options"
 			echo "  -j | --threads n     Specify number of threads, mostly for interactive stuff."
+			echo "  -t | --test          Just run all checks, don't schedule."
 			echo "  -r | --retry         Retry batches for which no output was found."
 			echo "  -t | --time t	     Override walltime limit for individual jobs."
             echo "  --after job-id       Run this job after prev job ended (however that happend)."
