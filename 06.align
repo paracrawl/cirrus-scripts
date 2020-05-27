@@ -9,8 +9,12 @@ SHARD_ID=$(basename $(dirname $XX_BATCH))
 XX_BATCH_ID=$(basename $XX_BATCH)
 EN_BATCH_ID=$(basename $EN_BATCH)
 
+PAIR_FORMAT='{"shard": "'$SHARD_ID'", "xx":'$XX_BATCH_ID', "en":'$EN_BATCH_ID'}'
+TIME_FORMAT='{"user":"%U", "system":"%S", "elapsed":"%E", "cpu":"%P", "text":%X, "data":%D, "max":%M, "inputs":%I, "output":%O, "major":%F, "minor":%R, "swaps":%W}'
+
 OUTPUT=$(mktemp --suffix=.gz)
 
+/usr/bin/time -f '{"task":"docalign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
@@ -21,7 +25,8 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	-l ${XX_BATCH}/sentences.gz\
 	-r ${EN_BATCH}/sentences.gz\
 	-l ${XX_BATCH}/sentences_en.gz\
-| parallel \
+| /usr/bin/time -f '{"task":"bleualign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
+parallel \
 	-j${THREADS} \
 	--halt 2 \
 	--pipe \
@@ -31,5 +36,6 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 | gzip -c \
 > $OUTPUT
 
-mv $OUTPUT ${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
+cp $OUTPUT ${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
 echo "Copied result (${SLANG}) ${XX_BATCH}"
+rm $OUTPUT
