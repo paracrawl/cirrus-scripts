@@ -34,6 +34,7 @@ function step {
 	# If we're only running tests, stop here. But don't say we failed because
 	# we want the other tests to continue as well.
 	if $TEST; then
+		echo "$broken"
 		return 0
 	fi
 
