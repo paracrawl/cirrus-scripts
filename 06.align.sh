@@ -7,7 +7,7 @@ set -euo pipefail
 . ${SCRIPTS}/functions.sh
 
 TASKS_PER_BATCH=8 # KNL
-#TASKS_PER_BATCH=2 # Skylake
+#TASKS_PER_BATCH=1 # Skylake
 
 function make_batch_list {
 	local collection="$1" lang="$2"
