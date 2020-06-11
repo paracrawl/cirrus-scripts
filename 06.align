@@ -18,6 +18,7 @@ OUTPUT=$(mktemp --suffix=.gz)
 ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${XX_BATCH}/tokenised_en.gz \
 	${EN_BATCH}/tokenised.gz \
+| tee ${XX_BATCH}/pairs-${EN_BATCH_ID}.txt \
 | cut -f2-3 \
 | ${DOCJOIN} \
 	-li\
