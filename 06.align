@@ -37,6 +37,8 @@ parallel \
 | gzip -c \
 > $OUTPUT
 
-cp $OUTPUT ${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
+DEST=${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
+cp $OUTPUT $DEST.$$
+mv $DEST.$$ $DEST
 echo "Copied result (${SLANG}) ${XX_BATCH}"
 rm $OUTPUT
