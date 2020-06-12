@@ -14,7 +14,7 @@ function confirm {
 	read -p "Are you sure? " -n 1 -r
 	echo 1>&2
 	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
-    	[[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
+		[[ "$0" = "$BASH_SOURCE" ]] && exit 1 || return 1 # handle exits from shell or function but don't exit interactive shell
 	fi
 }
 
@@ -35,7 +35,7 @@ function make_batch_list {
 
 function make_job_list_all {
 	n=`< $1 wc -l`
-    echo 1-${n}
+	echo 1-${n}
 }
 
 
@@ -78,7 +78,11 @@ function is_marked_valid {
 	shift 2
 
 	local latest_file=$(cd "$batch"; ls -1t "$@" | head -n1)
-	if [ -z "$latest_file" ] || [ $batch/$latest_file -nt $batch/$marker ]; then
+	if [ -z "$latest_file" ]; then
+		return 1
+	elif [ ! -f $batch/$marker ]; then
+		return 1
+	elif [ $batch/$latest_file -nt $batch/$marker ]; then
 		return 1
 	else
 		return 0
@@ -114,8 +118,8 @@ while (( "$#" )); do
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --time "$2")
 			shift 2
 			;;
-		--after)
-			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "after:$2")
+		--afterany)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "afterany:$2")
 			shift 2
 			;;
 		--afterok)
@@ -136,7 +140,7 @@ while (( "$#" )); do
 			echo "  -t | --test          Just run all checks, don't schedule."
 			echo "  -r | --retry         Retry batches for which no output was found."
 			echo "  -t | --time t	     Override walltime limit for individual jobs."
-            echo "  --after job-id       Run this job after prev job ended (however that happend)."
+			echo "  --after job-id       Run this job after prev job ended (however that happend)."
 			echo "  --afterok job-id     Run this job after prev job has finished."
 			echo "  --aftercorr job-id   Run each of the job array tasks after their counterpart."
 			echo "                       has finished."

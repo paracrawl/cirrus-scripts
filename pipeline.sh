@@ -23,7 +23,7 @@ function step {
 	fi
 
 	# Test if all the files are okay for this step
-	local broken=$(./$1.check.sh $collection $2 2>/dev/null)
+	local broken=$(./$1.check.sh $collection $2)
 	if [ -z "$broken" ]; then
 		prompt "OK\n"
 		return 0
@@ -67,7 +67,7 @@ function step {
 			dependency_opt="--aftercorr $LAST_JOB_ID"
 		else
 			# Otherwise, just wait for the full job to finish to be sure
-			dependency_opt="--after $LAST_JOB_ID"
+			dependency_opt="--afterany $LAST_JOB_ID"
 		fi
 	fi
 
