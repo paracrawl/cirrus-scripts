@@ -1,21 +1,20 @@
 #!/bin/bash
+set -euo pipefail
+ulimit -n 16384
 
 SLANG="$1"
 BATCH="$2"
 THREADS=${THREADS:-8}
 
-INPUT=sentences_en
-OUTPUT=tokenised_en
+INPUT="sentences_${TARGET_LANG}"
+OUTPUT="tokenised_${TARGET_LANG}"
 
-if [[ "$SLANG" == "en" ]]; then
+if [[ "$SLANG" == "$TARGET_LANG" ]]; then
 	INPUT=sentences
 	OUTPUT=tokenised
 fi
 
 TOKENISE=$KPU/moses/tokenizer/tokenizer.perl
-
-set -euo pipefail
-ulimit -n 16384
 
 echo "Processing (${SLANG}) ${BATCH}"
 
@@ -32,11 +31,11 @@ docs_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
 echo "Expecting $docs_st documents, found $docs_tk"
 test $docs_st -eq $docs_tk || exit 1
 
-lines_st=$($DOCENC -d ${BATCH}/${INPUT}.gz | wc -l)
-lines_tk=$($DOCENC -d ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
+lines_st=$(gzip -cd ${BATCH}/${INPUT}.gz | base64 -d | wc -l)
+lines_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | base64 -d | wc -l)
 echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
 mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
 
-echo "Moved result (${SLANG}) ${BATCH}"
+echo "Moved result (${SLANG}) ${BATCH}/${OUTPUT}.gz"

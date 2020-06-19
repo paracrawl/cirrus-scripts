@@ -14,10 +14,10 @@ function validate () {
 	local lang=$1
 	shift
 	
-	local input=sentences
-	local output=sentences_en
+	local input="sentences"
+	local output="sentences_${TARGET_LANG}"
 
-	if is_marked_valid 04 $1 $input.gz $output.gz ; then
+	if is_marked_valid 04-$TARGET_LANG $1 $input.gz $output.gz ; then
 		return
 	fi
 
@@ -43,14 +43,14 @@ function validate () {
 		return
 	fi
 
-	mark_valid 04 $1
+	mark_valid 04-$TARGET_LANG $1
 }
 
 export -f validate is_marked_valid mark_valid
 
 for lang in $@; do
 	# Skip this for English, nothing to translate there
-	if [[ "$lang" == "en" ]]; then
+	if [[ "$lang" == "$TARGET_LANG" ]]; then
 		continue
 	fi
 
