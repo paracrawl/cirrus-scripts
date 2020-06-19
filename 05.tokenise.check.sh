@@ -16,15 +16,15 @@ function validate () {
 
 	set -euo pipefail
 	
-	if [[ "$lang" == "en" ]]; then
+	if [[ "$lang" == "$TARGET_LANG" ]]; then
 		local input=sentences
 		local output=tokenised
 	else
-		local input=sentences_en
-		local output=tokenised_en
+		local input="sentences_${TARGET_LANG}"
+		local output="tokenised_${TARGET_LANG}"
 	fi
 
-	if is_marked_valid 05 $1 $input.gz $output.gz ; then
+	if is_marked_valid 05-$TARGET_LANG $1 $input.gz $output.gz ; then
 		return
 	fi
 
@@ -39,8 +39,8 @@ function validate () {
 	fi
 	
 	local lines_tk lines_st
-	if lines_tk=$(docenc -d $1/$output.gz | wc -l) \
-	  && lines_st=$(docenc -d $1/$input.gz | wc -l) \
+	if lines_tk=$(gzip -cd $1/$output.gz | base64 -d | wc -l) \
+	  && lines_st=$(gzip -cd $1/$input.gz | base64 -d | wc -l) \
 	  && test $lines_st -eq $lines_tk; then
 		: # Good!
 	else
@@ -48,7 +48,7 @@ function validate () {
 		return
 	fi
 
-	mark_valid 05 $1
+	mark_valid 05-$TARGET_LANG $1
 }
 
 export -f validate is_marked_valid mark_valid

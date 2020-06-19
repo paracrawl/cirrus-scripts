@@ -2,30 +2,30 @@
 set -euo pipefail
 
 SLANG="$1"
-XX_BATCH="$2"
-EN_BATCH="$3"
+SRC_BATCH="$2"
+REF_BATCH="$3"
 
-SHARD_ID=$(basename $(dirname $XX_BATCH))
-XX_BATCH_ID=$(basename $XX_BATCH)
-EN_BATCH_ID=$(basename $EN_BATCH)
+SHARD_ID=$(basename $(dirname $SRC_BATCH))
+SRC_BATCH_ID=$(basename $SRC_BATCH)
+REF_BATCH_ID=$(basename $REF_BATCH)
 
-PAIR_FORMAT='{"shard": "'$SHARD_ID'", "xx":'$XX_BATCH_ID', "en":'$EN_BATCH_ID'}'
+PAIR_FORMAT='{"shard": "'$SHARD_ID'", "'$SLANG'":'$SRC_BATCH_ID', "'$TARGET_LANG'":'$REF_BATCH_ID'}'
 TIME_FORMAT='{"user":"%U", "system":"%S", "elapsed":"%E", "cpu":"%P", "text":%X, "data":%D, "max":%M, "inputs":%I, "output":%O, "major":%F, "minor":%R, "swaps":%W}'
 
-OUTPUT=$(mktemp --suffix=.gz)
+OUTPUT=$(mktemp --suffix=.gz --tmpdir=$SCRATCH)
 
 /usr/bin/time -f '{"task":"docalign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
-	${XX_BATCH}/tokenised_en.gz \
-	${EN_BATCH}/tokenised.gz \
-| tee ${XX_BATCH}/pairs-${EN_BATCH_ID}.txt \
+	${SRC_BATCH}/tokenised_${TARGET_LANG}.gz \
+	${REF_BATCH}/tokenised.gz \
+| tee ${SRC_BATCH}/pairs-${REF_BATCH_ID}.txt \
 | cut -f2-3 \
 | ${DOCJOIN} \
 	-li\
 	-ri\
-	-l ${XX_BATCH}/sentences.gz\
-	-r ${EN_BATCH}/sentences.gz\
-	-l ${XX_BATCH}/sentences_en.gz\
+	-l ${SRC_BATCH}/sentences.gz\
+	-r ${REF_BATCH}/sentences.gz\
+	-l ${SRC_BATCH}/sentences_${TARGET_LANG}.gz\
 | /usr/bin/time -f '{"task":"bleualign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 parallel \
 	-j${THREADS} \
@@ -37,8 +37,8 @@ parallel \
 | gzip -c \
 > $OUTPUT
 
-DEST=${XX_BATCH}/aligned-${EN_BATCH_ID}.gz
+DEST=${SRC_BATCH}/aligned-${REF_BATCH_ID}.gz
 cp $OUTPUT $DEST.$$
 mv $DEST.$$ $DEST
-echo "Copied result (${SLANG}) ${XX_BATCH}"
+echo "Copied result (${SLANG}) ${SRC_BATCH}"
 rm $OUTPUT

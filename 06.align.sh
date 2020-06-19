@@ -11,14 +11,14 @@ TASKS_PER_BATCH=8 # KNL
 
 function make_batch_list {
 	local collection="$1" lang="$2"
-	if ! test -e ${DATA}/${collection}-batches/06.${lang}; then
+	if ! test -e ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}; then
 		for shard in $(ls -d ${DATA}/${collection}-shards/${lang}/*); do
 			join -j2 \
 				<(ls -d $shard/*) \
-				<(ls -d ${DATA}/${collection}-shards/en/$(basename $shard)/*)
-		done > ${DATA}/${collection}-batches/06.${lang}
+				<(ls -d ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $shard)/*)
+		done > ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
 	fi
-	echo ${DATA}/${collection}-batches/06.${lang}
+	echo ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
 }
 
 function make_job_list_all {
@@ -29,9 +29,9 @@ function make_job_list_all {
 function make_job_list_retry {
 	local index=0
  	local -a indices=()
-	while read XX_BATCH EN_BATCH; do 
+	while read SRC_BATCH REF_BATCH; do 
 		index=$(($index + 1))
-		alignments=$XX_BATCH/aligned-$(basename $EN_BATCH).gz
+		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
 		if [[ ! -e $alignments ]]; then
 			echo $alignments 1>&2
 			indices+=($index)

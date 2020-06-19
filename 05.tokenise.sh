@@ -10,10 +10,10 @@ collection=$1
 shift
 
 for lang in $*; do
-	if [ "$lang" = en ]; then
-		output=tokenised.gz
+	if [ "$lang" = "$TARGET_LANG" ]; then
+		output="tokenised.gz"
 	else
-		output=tokenised_en.gz
+		output="tokenised_${TARGET_LANG}.gz"
 	fi
 
 	batch_list=$(make_batch_list 05 $collection $lang)
