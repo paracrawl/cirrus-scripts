@@ -194,7 +194,9 @@ translate_apertium() {
     local SLANG="$1"
     shift
 
-    $APERTIUM/bin/apertium-destxt -i \
+    # Apertium messes up lines when encountering nbsp
+    sed "s/\xc2\xad/X/g" \
+        | $APERTIUM/bin/apertium-destxt -i \
         | $APERTIUM/bin/apertium -f none -u ${SLANG}-${TARGET_LANG} \
         | $APERTIUM/bin/apertium-retxt
 }
