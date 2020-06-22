@@ -155,6 +155,13 @@ model_ps_en () {
 }
 
 model_gl_es() {
+    MODEL=gl-es
+    MODEL_IMPL=translate_apertium
+    MODEL_ARCH=cpu
+}
+
+model_ca_es() {
+    MODEL=cat-spa
     MODEL_IMPL=translate_apertium
     MODEL_ARCH=cpu
 }
@@ -177,7 +184,7 @@ translate_moses () {
 translate_marian() {
     local SLANG="$1"
     shift
-    
+
     pushd . > /dev/null
     cd "$MODEL"
     perl $MOSES/scripts/tokenizer/tokenizer.perl -l $SLANG -q \
@@ -191,12 +198,12 @@ translate_marian() {
 }
 
 translate_apertium() {
-    local SLANG="$1"
-    shift
-
-    # Apertium messes up lines when encountering nbsp
-    sed "s/\xc2\xad/X/g" \
+    # Apertium messes up lines when encountering utf-8 nbsp. It
+    # also has trouble with "^$", introducing a full stop and
+    # skipping the line break altogether.
+    sed "s/\xc2\xad/ /g" \
+        | sed 's/\\^\\$//g' \
         | $APERTIUM/bin/apertium-destxt -i \
-        | $APERTIUM/bin/apertium -f none -u ${SLANG}-${TARGET_LANG} \
+        | $APERTIUM/bin/apertium -f none -u $MODEL \
         | $APERTIUM/bin/apertium-retxt
 }
