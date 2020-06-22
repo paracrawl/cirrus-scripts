@@ -1,24 +1,27 @@
 #!/bin/sh
 #SBATCH -J shard
-#SBATCH -c 2
-#SBATCH -n 1
-#SBATCH -w dagr
-#SBATCH -e /home/shared/wwaites/logs/02.shard-%j.err
-#SBATCH -o /home/shared/wwaites/logs/02.shard-%j.out
+#SBATCH -A t2-cs119-cpu
+#SBATCH -p skylake
+#SBATCH -N 1
+#sbatch -n 2
+#SBATCH --time 16:00:00
+#SBATCH -e /home/%u/logs/02.shard-%j.err
+#SBATCH -o /home/%u/logs/02.shard-%j.out
 
-## this job purposely runs on dagr to avoid unnecessary I/O
+# Single-threaded version of giashard. Only useful for
+# pretty small languages. Use the more complicated
+# set + merge for larger languages.
 
-## Arguments: lang collection batches
-
-SLANG="${1}"
-COLLECTION="${2}"
+COLLECTION="${1}"
+SLANG="${2}"
 shift; shift
 
-. /home/shared/wwaites/cirrus-scripts/config.valhalla
+ulimit -n 16384
 
-ulimit -n 2048
+OUTPUT=${DATA}/${COLLECTION}-shards/${SLANG}
 
-for batch in $*; do
-	items=`< $batch sed -e 's@^@'${DATA}/${COLLECTION}-text/@ -e 's@$@'/${SLANG}@`
-	giashard -n 8 -b 1024 -o ${DATA}/${COLLECTION}-shards/${SLANG} $items
-done
+$GIASHARD -n 8 -b 1024 \
+	-o ${OUTPUT}.$$ \
+	${DATA}/${COLLECTION}-text/*/${SLANG}
+
+mv $OUTPUT.$$ $OUTPUT
