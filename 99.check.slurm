@@ -16,6 +16,7 @@ LANG="${2}"
 module load parallel
 
 ulimit -n 2048
+export LC_ALL=C # For perl and the likes
 
 ./pipeline.sh -j 64 -t $COLLECTION $LANG
 
