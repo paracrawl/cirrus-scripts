@@ -166,6 +166,18 @@ model_ca_es() {
     MODEL_ARCH=cpu
 }
 
+model_eu_es() {
+    MODEL=eu-es
+    MODEL_IMPL=translate_apertium
+    MODEL_ARCH=cpu
+}
+
+model_oc_es() {
+    MODEL=oc-es
+    MODEL_IMPL=translate_apertium
+    MODEL_ARCH=cpu
+}
+
 translate_moses () {
     local SLANG="$1"
     shift
@@ -203,6 +215,7 @@ translate_apertium() {
     # skipping the line break altogether.
     sed "s/\xc2\xad/ /g" \
         | sed 's/\\^\\$//g' \
+        | cut -b1-6000 \
         | $APERTIUM/bin/apertium-destxt -i \
         | $APERTIUM/bin/apertium -f none -u $MODEL \
         | $APERTIUM/bin/apertium-retxt
