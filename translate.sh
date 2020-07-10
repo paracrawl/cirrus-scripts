@@ -215,7 +215,6 @@ translate_apertium() {
     # skipping the line break altogether.
     sed "s/\xc2\xad/ /g" \
         | sed 's/\\^\\$//g' \
-        | cut -b1-6000 \
         | $APERTIUM/bin/apertium-destxt -i \
         | $APERTIUM/bin/apertium -f none -u $MODEL \
         | $APERTIUM/bin/apertium-retxt
