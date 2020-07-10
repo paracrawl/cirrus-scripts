@@ -1,10 +1,17 @@
-export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
+# For translating to Spanish
+export APERTIUM=/rds/project/t2_vol4/rds-t2-cs119/jelmervdl/apertium
+
+# For Pashto (not paracrawl)
+export MARIAN=/home/cs-vand1/rds/rds-t2-cs119/romang/marian-dev/build-static
+export BPE=/home/cs-vand1/rds/rds-t2-cs119/romang/subword-nmt/subword_nmt
+
+export LD_LIBRARY_PATH=$APERTIUM/lib:/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
 export PYTHON=/usr/bin/python3
 export BITEXTOR=/home/cs-wait1/sw/bitextor
 export GIAWARC=/home/cs-wait1/go/bin/giawarc
-export GIASHARD=/home/cs-wait1/go/bin/giashard
+export GIASHARD=$HOME/go/bin/giashard
 export GIASHARDID=/home/cs-wait1/go/bin/giashardid
-export DOCALIGN=docalign
+export DOCALIGN=docalign-ris
 export DOCJOIN=docjoin
 export DOCENC=docenc
 export CACHE=cache
@@ -21,12 +28,6 @@ export KPU=/home/cs-vand1/src/preprocess
 export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
 #export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
 export SCRATCH=/local
-#export TARGET_LANG=en
-export TARGET_LANG=es
+export TARGET_LANG=en
+#export TARGET_LANG=es
 
-# For translating to Spanish
-export APERTIUM=/rds/project/t2_vol4/rds-t2-cs119/jelmervdl/apertium
-
-# For Pashto (not paracrawl)
-export MARIAN=/home/cs-vand1/rds/rds-t2-cs119/romang/marian-dev/build-static
-export BPE=/home/cs-vand1/rds/rds-t2-cs119/romang/subword-nmt/subword_nmt
