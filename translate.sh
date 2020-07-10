@@ -52,14 +52,26 @@ model_el_en () {
     TRUECASE_MODEL=truecase-model.el
 }
 
+#model_es_en () {
+#    MODEL=${MODELS}/phi-system/fast-es-en
+#    TRUECASE_MODEL=truecase-model.es
+#}
+
+# Experiment: Bergamot marian
 model_es_en () {
-    MODEL=${MODELS}/phi-system/fast-es-en
-    TRUECASE_MODEL=truecase-model.es
+    MODEL_IMPL=translate_marian_cpu
+    MODEL=${MODELS}/bergamot/esen.student.tiny11
 }
 
+#model_et_en () {
+#    MODEL=${MODELS}/phi-system/fast-et-en
+#    TRUECASE_MODEL=truecase-model.et
+#}
+
+# Experiment: Bergamot marian
 model_et_en () {
-    MODEL=${MODELS}/phi-system/fast-et-en
-    TRUECASE_MODEL=truecase-model.et
+    MODEL_IMPL=translate_marian_cpu
+    MODEL=${MODELS}/bergamot/eten.student.tiny11
 }
 
 model_fi_en () {
@@ -206,6 +218,19 @@ translate_marian() {
         | perl -pe 's/@@ //g' \
         | $MOSES/scripts/recaser/detruecase.perl \
         | perl $MOSES/scripts/tokenizer/detokenizer.perl -l $SLANG -q
+    popd > /dev/null
+}
+
+translate_marian_cpu() {
+    local SLANG="$1"
+    shift
+
+    pushd . > /dev/null
+    cd "$MODEL"
+    ../marian-dev-intgemm/marian-decoder -c $MODEL/config.yml \
+        --quiet --quiet-translation \
+        --cpu-threads 16 \
+        --max-length-crop
     popd > /dev/null
 }
 
