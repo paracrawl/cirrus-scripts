@@ -50,8 +50,9 @@ export -f $MODEL_IMPL
 gzip -dc ${BATCH}/${INPUT}.gz \
 	| $B64FILTER \
 		$CACHE \
-			parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
-				'bash -u -e -o pipefail -c '"'"$MODEL_IMPL' $@'"'"' --' $SLANG \
+			foldfilter -w 1000 \
+				parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
+					'bash -u -e -o pipefail -c '"'"$MODEL_IMPL' $@'"'"' --' $SLANG \
 	| gzip -9c > ${TMPDIR}/sentences_${TARGET_LANG}.$$.gz
 
 echo "End:" `date` $BATCH
