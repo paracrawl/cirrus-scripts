@@ -115,6 +115,7 @@ function mark_valid {
 declare -g TEST=false
 declare -g RETRY=false
 declare -g SCHEDULE_OPTIONS=(--parsable)
+declare -g STEPS=""
 
 while (( "$#" )); do
 	case "$1" in
@@ -144,6 +145,11 @@ while (( "$#" )); do
 			;;
 		--aftercorr)
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "aftercorr:$2")
+			shift 2
+			;;
+		--steps)
+			IFS='-' read -a seq_args <<< "$2"
+			STEPS=$(seq ${seq_args[@]})
 			shift 2
 			;;
 		--)
