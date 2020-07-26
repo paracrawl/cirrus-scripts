@@ -3,7 +3,7 @@ set -euo pipefail
 
 timings() {
 	grep -E '(Starting|Done) whole node job' \
-	| sed -r 's/^(\w+) ([0-9]+) (\w+) ([0-9]+:[0-9]+:[0-9]+) (\w+) ([0-9]+) (Starting|Done) whole node job ([0-9]+) on (\w+)/\7\t\2 \3 \6 \4 \5\t\8\t\9/' \
+	| sed -r 's/^(\w+) ([0-9]+) (\w+) ([0-9]+:[0-9]+:[0-9]+) (\w+) ([0-9]+) (Starting|Done) whole node job ([0-9]+)( \([0-9]+\))? on (\w+)/\7\t\2 \3 \6 \4 \5\t\8\t\10/' \
 	| while IFS=$'\t' read WHAT DATE JOB NODE; do
 		SEC=$(date --date "$DATE" '+%s')
 		case $WHAT in
