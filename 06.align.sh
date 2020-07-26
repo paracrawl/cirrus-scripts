@@ -29,17 +29,17 @@ function make_job_list_all {
 function make_job_list_retry {
 	local index=0
  	local -a indices=()
-	while read SRC_BATCH REF_BATCH; do 
+	cat $1 \
+	| while read SRC_BATCH REF_BATCH; do
 		index=$(($index + 1))
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
 		if [[ ! -e $alignments ]]; then
 			echo $alignments 1>&2
-			indices+=($index)
+			echo $index
 		fi
-	done < $1
-	if [ ${#indices[@]} -gt 0 ]; then
-		join_by , ${indices[@]}
-	fi
+	done \
+	| group_ranges \
+	| join_by ,
 }
 
 collection=$1

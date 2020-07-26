@@ -1,12 +1,29 @@
 function join_by {
-	local IFS="$1";
-	shift;
-	echo "$*";
+	paste -sd "$1" -
 }
 
+function group_ranges {
+	local start=
+	local prev=
+	while read el; do
+		if [ ! -z "$prev" ] && [ "$el" -eq $(( $prev + 1 )) ]; then
+			prev=$el
+		else
+			if [ -z "$prev" ]; then
+				true
+			elif [ "$start" -eq "$prev" ]; then
+				echo $start
+			else
+				echo $start-$prev
+			fi
+			prev=$el
+			start=$el
+		fi
+	done
+}
 
 function prompt {
-	printf "$@" 1>&2 
+	printf "$@" 1>&2
 }
 
 
@@ -41,19 +58,18 @@ function make_job_list_all {
 
 function make_job_list_retry {
 	local batch_list="$1" file="$2"
-	local -a indices=()
 	local line=0
-	while read batch; do
+	cat $batch_list \
+	| while read batch; do
 		line=$(($line + 1))
 		if [ ! -e ${batch}/${file} ]; then
 			echo ${batch}/${file} 1>&2
-			indices+=($line)
+			echo $line
 		fi
-	done < ${batch_list}
-	if [ ${#indices[@]} -gt 0 ]; then
-		join_by , ${indices[@]}
-	fi
-}
+	done \
+	| group_ranges \
+	| join_by ","
+}	
 
 
 function make_job_list {
