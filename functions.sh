@@ -20,6 +20,13 @@ function group_ranges {
 			start=$el
 		fi
 	done
+	if [ ! -z "$start" ]; then
+		if [ "$start" -eq "$prev" ]; then
+			echo $start
+		else
+			echo $start-$prev
+		fi
+	fi
 }
 
 function prompt {
