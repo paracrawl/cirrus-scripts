@@ -6,7 +6,7 @@ set -euo pipefail
 . ./config.csd3
 . ${SCRIPTS}/functions.sh
 
-TASKS_PER_BATCH=8 # KNL
+TASKS_PER_BATCH=16 # KNL
 #TASKS_PER_BATCH=1 # Skylake
 
 function make_batch_list {
