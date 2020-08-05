@@ -35,6 +35,10 @@ function prompt {
 
 
 function confirm {
+	if $ALWAYS_YES; then
+		return
+	fi
+
 	read -p "Are you sure? " -n 1 -r
 	echo 1>&2
 	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
@@ -121,6 +125,7 @@ function mark_valid {
 
 declare -g TEST=false
 declare -g RETRY=false
+declare -g ALWAYS_YES=${ALWAYS_YES:-false}
 declare -g SCHEDULE_OPTIONS=(--parsable)
 declare -g STEPS=""
 
@@ -132,6 +137,10 @@ while (( "$#" )); do
 			;;
 		-t|--test)
 			TEST=true
+			shift
+			;;
+		-y|--yes)
+			ALWAYS_YES=true
 			shift
 			;;
 		-j|--threads)
