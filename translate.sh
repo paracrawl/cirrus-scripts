@@ -52,14 +52,26 @@ model_el_en () {
     TRUECASE_MODEL=truecase-model.el
 }
 
+#model_es_en () {
+#    MODEL=${MODELS}/phi-system/fast-es-en
+#    TRUECASE_MODEL=truecase-model.es
+#}
+
+# Experiment: Bergamot marian
 model_es_en () {
-    MODEL=${MODELS}/phi-system/fast-es-en
-    TRUECASE_MODEL=truecase-model.es
+    MODEL_IMPL=translate_marian_cpu
+    MODEL=${MODELS}/bergamot/esen.student.tiny11
 }
 
+#model_et_en () {
+#    MODEL=${MODELS}/phi-system/fast-et-en
+#    TRUECASE_MODEL=truecase-model.et
+#}
+
+# Experiment: Bergamot marian
 model_et_en () {
-    MODEL=${MODELS}/phi-system/fast-et-en
-    TRUECASE_MODEL=truecase-model.et
+    MODEL_IMPL=translate_marian_cpu
+    MODEL=${MODELS}/bergamot/eten.student.tiny11
 }
 
 model_fi_en () {
@@ -209,13 +221,25 @@ translate_marian() {
     popd > /dev/null
 }
 
+translate_marian_cpu() {
+    local SLANG="$1"
+    shift
+
+    pushd . > /dev/null
+    cd "$MODEL"
+    ../marian-dev-intgemm/marian-decoder -c $MODEL/config.yml \
+        --quiet --quiet-translation \
+        --cpu-threads 16 \
+        --max-length-crop
+    popd > /dev/null
+}
+
 translate_apertium() {
     # Apertium messes up lines when encountering utf-8 nbsp. It
     # also has trouble with "^$", introducing a full stop and
     # skipping the line break altogether.
     sed "s/\xc2\xad/ /g" \
         | sed 's/\\^\\$//g' \
-        | cut -b1-6000 \
         | $APERTIUM/bin/apertium-destxt -i \
         | $APERTIUM/bin/apertium -f none -u $MODEL \
         | $APERTIUM/bin/apertium-retxt

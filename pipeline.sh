@@ -8,6 +8,7 @@ collection=$1
 shift
 
 export THREADS=${THREADS:-4}
+export ALWAYS_YES
 declare -g LAST_JOB_ID LAST_JOB_IS_PARTIAL
 
 function batch_count {
@@ -17,13 +18,18 @@ function batch_count {
 function step {
 	prompt "[$2] $1\t"
 
+	if [ "$1" = "01.noop" ]; then
+		prompt "SKIP\n"
+		return 0
+	fi
+
 	if [ ! -x ./$1.check.sh ]; then
 		prompt "No $1.check.sh file\n"
 		return 1
 	fi
 
 	# Test if all the files are okay for this step
-	local broken=$(./$1.check.sh $collection $2)
+	local broken=$(./$1.check.sh $collection $2 2>/dev/null)
 	if [ -z "$broken" ]; then
 		prompt "OK\n"
 		return 0
@@ -90,6 +96,7 @@ function step {
 }
 
 steps=(
+	01.noop
 	02.shard
 	03.split-text
 	04.translate
@@ -98,7 +105,18 @@ steps=(
 )
 
 function pipeline {
-	for step_name in ${steps[@]}; do
+	if [ -z "$STEPS" ]; then
+		STEPS=$(seq $((${#steps} - 1)))
+	fi
+
+	for STEP in $STEPS; do
+		step_name=${steps[$(($STEP - 1))]}
+
+		if [ -z "$step_name" ]; then
+			prompt "No step $STEP\n"
+			break
+		fi
+
 		if [ -n "$LAST_JOB_ID" ]; then
 			prompt "Continue scheduling next step $step_name?\n"
 			if ! confirm ; then
