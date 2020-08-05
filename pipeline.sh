@@ -8,6 +8,7 @@ collection=$1
 shift
 
 export THREADS=${THREADS:-4}
+export ALWAYS_YES
 declare -g LAST_JOB_ID LAST_JOB_IS_PARTIAL
 
 function batch_count {
