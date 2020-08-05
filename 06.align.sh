@@ -9,7 +9,7 @@ set -euo pipefail
 TASKS_PER_BATCH=16 # KNL
 #TASKS_PER_BATCH=1 # Skylake
 
-function make_batch_list {
+function make_batch_list_all {
 	local collection="$1" lang="$2"
 	if ! test -e ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}; then
 		for shard in $(ls -d ${DATA}/${collection}-shards/${lang}/*); do
@@ -21,33 +21,41 @@ function make_batch_list {
 	echo ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
 }
 
+function make_batch_list_retry {
+	batch_list=${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}.$(date '+%Y%m%d%H%M%S')
+
+	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
+		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
+		if [[ ! -e $alignments ]]; then
+			echo $SRC_BATCH $REF_BATCH
+		fi
+	done > $batch_list
+
+	echo $batch_list
+}
+
+function make_batch_list {
+	if $RETRY; then
+		make_batch_list_retry $@
+	else
+		make_batch_list_all $@
+	fi
+}
+
 function make_job_list_all {
 	local n=$(( $(< "$1" wc -l) / ${TASKS_PER_BATCH} + 1))
 	echo 1-${n}
 }
 
 function make_job_list_retry {
-	local index=0
- 	local -a indices=()
-	cat $1 \
-	| while read SRC_BATCH REF_BATCH; do
-		index=$(($index + 1))
-		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
-		if [[ ! -e $alignments ]]; then
-			echo $alignments 1>&2
-			echo $index
-		fi
-	done \
-	| group_ranges \
-	| join_by ,
+	# The batch list will already be filtered to just do the retry ones so
+	# no need to also make an array selection. Just do all of the lines.
+	cat $1 1>&2
+	make_job_list_all $@
 }
 
 collection=$1
 shift
-
-if $RETRY; then
-	TASKS_PER_BATCH=1
-fi
 
 export TASKS_PER_BATCH # Used by 06.align.slurm
 
