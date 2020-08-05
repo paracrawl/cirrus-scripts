@@ -31,8 +31,8 @@ parallel \
 	-j${THREADS} \
 	--halt 2 \
 	--pipe \
-	--group \
-	-l 1 \
+	--roundrobin \
+	-N 1 \
 	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
 > $OUTPUT

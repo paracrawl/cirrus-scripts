@@ -1,10 +1,10 @@
 #!/bin/sh
 #SBATCH -J align
 #SBATCH -N 1
-#SBATCH --time 8:00:00
+#SBATCH --time 12:00:00
 #SBATCH -e /home/%u/logs/06.align-%A_%a.err
 #SBATCH -o /home/%u/logs/06.align-%A_%a.out
-##SBATCH -A t2-cs119-cpu
+##SBATCH -A t2-cs119-sl4-cpu
 ##SBATCH -p skylake
 ##SBATCH --ntasks 1
 ##SBATCH --cpus-per-task 8

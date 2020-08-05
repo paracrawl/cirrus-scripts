@@ -1,16 +1,44 @@
 function join_by {
-	local IFS="$1";
-	shift;
-	echo "$*";
+	paste -sd "$1" -
 }
 
+function group_ranges {
+	local start=
+	local prev=
+	while read el; do
+		if [ ! -z "$prev" ] && [ "$el" -eq $(( $prev + 1 )) ]; then
+			prev=$el
+		else
+			if [ -z "$prev" ]; then
+				true
+			elif [ "$start" -eq "$prev" ]; then
+				echo $start
+			else
+				echo $start-$prev
+			fi
+			prev=$el
+			start=$el
+		fi
+	done
+	if [ ! -z "$start" ]; then
+		if [ "$start" -eq "$prev" ]; then
+			echo $start
+		else
+			echo $start-$prev
+		fi
+	fi
+}
 
 function prompt {
-	printf "$@" 1>&2 
+	printf "$@" 1>&2
 }
 
 
 function confirm {
+	if $ALWAYS_YES; then
+		return
+	fi
+
 	read -p "Are you sure? " -n 1 -r
 	echo 1>&2
 	if [[ ! $REPLY =~ ^[Yy]$ ]] ; then
@@ -41,19 +69,18 @@ function make_job_list_all {
 
 function make_job_list_retry {
 	local batch_list="$1" file="$2"
-	local -a indices=()
 	local line=0
-	while read batch; do
+	cat $batch_list \
+	| while read batch; do
 		line=$(($line + 1))
 		if [ ! -e ${batch}/${file} ]; then
 			echo ${batch}/${file} 1>&2
-			indices+=($line)
+			echo $line
 		fi
-	done < ${batch_list}
-	if [ ${#indices[@]} -gt 0 ]; then
-		join_by , ${indices[@]}
-	fi
-}
+	done \
+	| group_ranges \
+	| join_by ","
+}	
 
 
 function make_job_list {
@@ -98,7 +125,9 @@ function mark_valid {
 
 declare -g TEST=false
 declare -g RETRY=false
+declare -g ALWAYS_YES=${ALWAYS_YES:-false}
 declare -g SCHEDULE_OPTIONS=(--parsable)
+declare -g STEPS=""
 
 while (( "$#" )); do
 	case "$1" in
@@ -108,6 +137,10 @@ while (( "$#" )); do
 			;;
 		-t|--test)
 			TEST=true
+			shift
+			;;
+		-y|--yes)
+			ALWAYS_YES=true
 			shift
 			;;
 		-j|--threads)
@@ -128,6 +161,11 @@ while (( "$#" )); do
 			;;
 		--aftercorr)
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "aftercorr:$2")
+			shift 2
+			;;
+		--steps)
+			IFS='-' read -a seq_args <<< "$2"
+			STEPS=$(seq ${seq_args[@]})
 			shift 2
 			;;
 		--)

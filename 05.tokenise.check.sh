@@ -28,8 +28,10 @@ function validate () {
 		return
 	fi
 
+
 	local docs_tk docs_st
-	if docs_tk=$(gzip -cd $1/$output.gz | wc -l) \
+	if test -e $1/$output.gz \
+	  && docs_tk=$(gzip -cd $1/$output.gz | wc -l) \
 	  && docs_st=$(gzip -cd $1/$input.gz | wc -l) \
 	  && test $docs_st -eq $docs_tk; then
 		: # Good!
