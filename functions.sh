@@ -62,7 +62,8 @@ function make_batch_list {
 
 
 function make_job_list_all {
-	n=`< $1 wc -l`
+	local n_batches=$(< "$1" wc -l)
+	local n=$(( ${n_batches}%${TASKS_PER_BATCH} ? ${n_batches}/${TASKS_PER_BATCH} + 1 : ${n_batches}/${TASKS_PER_BATCH} ))
 	echo 1-${n}
 }
 
@@ -122,6 +123,33 @@ function mark_valid {
 	local batch="$2"
 	touch "$batch/$marker"
 }
+
+
+function get_group_boundaries {
+	local n_batches=`< "${1}" wc -l`
+	local task_id=${2}
+	GROUP_END=$(( ${TASKS_PER_BATCH} * ${task_id} ))
+	GROUP_START=$(( 1 + $GROUP_END - ${TASKS_PER_BATCH}))
+	if [ "${GROUP_END}" -gt "${n_batches}" ]; then
+		GROUP_END=${n_batches}
+	fi
+
+	echo "${GROUP_START},${GROUP_END}"
+}
+
+
+function task() {
+	set -euo pipefail
+	local BATCH_ID=$1
+
+	BATCH=`head -${BATCH_ID} ${BATCHES} | tail -1`
+
+	echo `date` "Starting whole node job ${BATCH_ID} on ${HOSTNAME}"
+	echo "Batch: ${BATCH}"
+	/bin/time -f "%E %M" ${CMD} ${SLANG} ${BATCH}
+	echo `date` "Done whole node job ${BATCH_ID} on ${HOSTNAME}"
+}
+
 
 declare -g TEST=false
 declare -g RETRY=false

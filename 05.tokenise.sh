@@ -5,6 +5,7 @@ set -euo pipefail
 
 . config.csd3
 . functions.sh
+export -f get_group_boundaries task
 
 collection=$1
 shift
