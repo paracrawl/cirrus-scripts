@@ -23,7 +23,7 @@ trap "kill 0" EXIT
 export SLANG="${1}"
 export BATCHES="${2}"
 export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
-echo "Running $THREADS per task, ${TASKS_PER_BATCH} tasks"
+echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks"
 
 task() {
   set -euo pipefail
@@ -43,8 +43,12 @@ task() {
 mpstat 30 > $HOME/logs/06.align-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
 stat_pid=$!
 
+N_BATCHES=`< "${BATCHES}" wc -l`
 GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( 1 + $GROUP_END - $TASKS_PER_BATCH))
+if [ "${GROUP_END}" -gt "${N_BATCHES}" ]; then
+  GROUP_END=${N_BATCHES}
+fi
 
 export -f task
 parallel task ::: $(seq $GROUP_START $GROUP_END)
