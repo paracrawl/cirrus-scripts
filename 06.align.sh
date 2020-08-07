@@ -5,9 +5,7 @@ set -euo pipefail
 
 . ./config.csd3
 . ${SCRIPTS}/functions.sh
-
-TASKS_PER_BATCH=16 # KNL
-#TASKS_PER_BATCH=1 # Skylake
+export -f get_group_boundaries task
 
 function make_batch_list_all {
 	local collection="$1" lang="$2"
@@ -57,8 +55,6 @@ function make_job_list_retry {
 
 collection=$1
 shift
-
-export TASKS_PER_BATCH # Used by 06.align.slurm
 
 for lang in $*; do
 	batch_list=`make_batch_list $collection $lang`
