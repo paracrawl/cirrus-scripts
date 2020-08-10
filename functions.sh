@@ -97,8 +97,14 @@ function make_job_list {
 
 
 function schedule {
-	local job_id=$(sbatch "${SCHEDULE_OPTIONS[@]}" "$@")
-	echo $(date +%Y%m%d%H%M%S) $job_id "${SCHEDULE_OPTIONS[@]}" "$@" >> ./.schedule-log
+	local options=(
+		${SCHEDULE_OPTIONS[@]}
+		--account $SLURM_ACCOUNT
+		--partition $SLURM_PARTITION
+		--ntasks $SLURM_TASKS_PER_NODE
+	)
+	local job_id=$(sbatch "${options[@]}" "$@")
+	echo $(date +%Y%m%d%H%M%S) $job_id "${options[@]}" "$@" >> ./.schedule-log
 	echo $job_id
 }
 

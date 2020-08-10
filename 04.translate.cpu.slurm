@@ -1,15 +1,7 @@
 #!/bin/sh
 #SBATCH -J translate
-#SBATCH -N 1
-##SBATCH -A t2-cs119-cpu
-##SBATCH -p skylake
 #SBATCH --time 16:00:00
-#SBATCH --ntasks 2
 #SBATCH --cpus-per-task=16
-#SBATCH -A t2-cs119-knl
-#SBATCH -p knl
-##SBATCH --time 4:00:00
-##SBATCH --exclusive
 #SBATCH -e /home/%u/logs/04.translate-%A_%a.err
 #SBATCH -o /home/%u/logs/04.translate-%A_%a.out
 

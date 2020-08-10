@@ -1,9 +1,6 @@
 #!/bin/sh
 #SBATCH -J split
-#SBATCH -A t2-cs119-knl
-#SBATCH -p knl
-#SBATCH -N 1
-#SBATCH -n 1
+#SBATCH -c 1
 #SBATCH --time 8:00:00
 #SBATCH -e /home/%u/logs/03.split-%A_%a.err
 #SBATCH -o /home/%u/logs/03.split-%A_%a.out
