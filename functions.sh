@@ -69,6 +69,7 @@ function make_batch_list_retry {
 	cat `make_batch_list_all "$@"` | while read BATCH; do
 		output=${BATCH}/${output_file}
 		if [[ ! -e ${output} ]]; then
+			echo ${output} 1>&2
 			echo ${BATCH}
 		fi
 	done > $batch_list_retry
