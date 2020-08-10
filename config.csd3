@@ -31,3 +31,5 @@ export SCRATCH=/local
 export TARGET_LANG=en
 #export TARGET_LANG=es
 
+# Set to >1 to process multiple batches per task in steps 3-6 (currently breaks --retry)
+TASKS_PER_BATCH=1
