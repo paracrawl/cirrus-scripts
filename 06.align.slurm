@@ -8,7 +8,7 @@
 ##SBATCH -p skylake
 ##SBATCH --ntasks 1
 ##SBATCH --cpus-per-task 8
-#SBATCH -A t2-cs119-knl
+#SBATCH -A t2-cs119-sl4-knl
 #SBATCH -p knl
 
 ## ARGUMENTS: lang batch
