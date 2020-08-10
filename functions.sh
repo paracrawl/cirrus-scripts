@@ -47,49 +47,49 @@ function confirm {
 }
 
 
-function make_batch_list {
+function make_batch_list_all {
 	local step="$1" collection="$2" lang="$3"
+	local batch_list=${DATA}/${collection}-batches/${step}.${lang}
 
 	if ! test -d ${DATA}/${collection}-batches/${lang}; then
 		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
 	fi
 
-	rm -f ${DATA}/${collection}-batches/${step}.${lang}
-	ln -s ${DATA}/${collection}-batches/${lang} ${DATA}/${collection}-batches/${step}.${lang}
+	rm -f ${batch_list}
+	ln -s ${DATA}/${collection}-batches/${lang} ${batch_list}
 
-	echo ${DATA}/${collection}-batches/${step}.${lang}
+	echo ${batch_list}
 }
 
 
-function make_job_list_all {
-	local n_batches=$(< "$1" wc -l)
-	local n=$(( ${n_batches}%${TASKS_PER_BATCH} ? ${n_batches}/${TASKS_PER_BATCH} + 1 : ${n_batches}/${TASKS_PER_BATCH} ))
-	echo 1-${n}
-}
+function make_batch_list_retry {
+	local step="$1" collection="$2" lang="$3" output_file="$4"
+	local batch_list_retry=${DATA}/${collection}-batches/${step}.${lang}.$(date '+%Y%m%d%H%M%S')
 
-
-function make_job_list_retry {
-	local batch_list="$1" file="$2"
-	local line=0
-	cat $batch_list \
-	| while read batch; do
-		line=$(($line + 1))
-		if [ ! -e ${batch}/${file} ]; then
-			echo ${batch}/${file} 1>&2
-			echo $line
+	cat `make_batch_list_all "$@"` | while read BATCH; do
+		output=${BATCH}/${output_file}
+		if [[ ! -e ${output} ]]; then
+			echo ${BATCH}
 		fi
-	done \
-	| group_ranges \
-	| join_by ","
-}	
+	done > $batch_list_retry
+
+	echo ${batch_list_retry}
+}
+
+
+function make_batch_list {
+	if $RETRY; then
+		make_batch_list_retry $@
+	else
+		make_batch_list_all $@
+	fi
+}
 
 
 function make_job_list {
-	if $RETRY; then
-		make_job_list_retry "$@"
-	else
-		make_job_list_all "$@"
-	fi
+	local n_batches=$(< "$1" wc -l)
+	local n=$(( ${n_batches}%${TASKS_PER_BATCH} ? ${n_batches}/${TASKS_PER_BATCH} + 1 : ${n_batches}/${TASKS_PER_BATCH} ))
+	echo 1-${n}
 }
 
 

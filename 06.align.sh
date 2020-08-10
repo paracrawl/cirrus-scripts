@@ -32,27 +32,6 @@ function make_batch_list_retry {
 	echo $batch_list
 }
 
-function make_batch_list {
-	if $RETRY; then
-		make_batch_list_retry $@
-	else
-		make_batch_list_all $@
-	fi
-}
-
-function make_job_list_all {
-	local n_batches=$(< "$1" wc -l)
-	local n=$(( ${n_batches}%${TASKS_PER_BATCH} ? ${n_batches}/${TASKS_PER_BATCH} + 1 : ${n_batches}/${TASKS_PER_BATCH} ))
-	echo 1-${n}
-}
-
-function make_job_list_retry {
-	# The batch list will already be filtered to just do the retry ones so
-	# no need to also make an array selection. Just do all of the lines.
-	cat $1 1>&2
-	make_job_list_all $@
-}
-
 collection=$1
 shift
 
