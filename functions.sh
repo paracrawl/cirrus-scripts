@@ -101,6 +101,7 @@ function schedule {
 		${SCHEDULE_OPTIONS[@]}
 		--account $SLURM_ACCOUNT
 		--partition $SLURM_PARTITION
+		--nodes 1
 		--ntasks ${SLURM_TASKS_PER_NODE:-$TASKS_PER_BATCH}
 	)
 	local job_id=$(sbatch "${options[@]}" "$@")
