@@ -13,7 +13,7 @@ timings() {
 				;;
 			Done)
 				if [ "$JOB" = "$SJOB" ]; then
-					echo $(($SEC - $START))
+					echo $(($SEC - $START)) $JOB
 				fi
 				;;
 		esac
@@ -24,13 +24,30 @@ format_time() {
 	date -d@$(cat) -u '+%H:%M:%S'
 }
 
-TIMINGS=$(cat $@ | timings | sort -n)
-COUNT=$(wc -l <<< "$TIMINGS")
+MODE=summary
 
-echo "Count:  " $COUNT tasks
-echo "Sum:    " $(paste -sd+ <<< "$TIMINGS" | bc | format_time)
+while true; do
+	case "$1" in
+		-l)
+			MODE=list
+			shift
+			;;
+		*)
+			break
+	esac
+done
 
-echo "Min:    " $(sed -n 1p <<< "$TIMINGS" | format_time)
-echo "Max:    " $(sed -n ${COUNT}p <<< "$TIMINGS" | format_time)
-echo "Median: " $(sed -n $(( $COUNT / 2 ))p <<< "$TIMINGS" | format_time)
+JOBS=$(cat $@ | timings | sort -n)
 
+if [ $MODE = "list" ]; then
+	echo "$JOBS"
+elif [ $MODE = "summary" ]; then
+	TIMINGS=$(cut -d' ' -f1 <<< "$JOBS")
+	COUNT=$(wc -l <<< "$TIMINGS")
+	echo "Count:  " $COUNT tasks
+	echo "Sum:    " $(paste -sd+ <<< "$TIMINGS" | bc | format_time)
+
+	echo "Min:    " $(sed -n 1p <<< "$TIMINGS" | format_time)
+	echo "Max:    " $(sed -n ${COUNT}p <<< "$TIMINGS" | format_time)
+	echo "Median: " $(sed -n $(( $COUNT / 2 ))p <<< "$TIMINGS" | format_time)
+fi
