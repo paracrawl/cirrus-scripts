@@ -27,13 +27,10 @@ module load \
     gperf-3.0.4-gcc-5.4.0-noi4rwb \
     protobuf-3.4.0-gcc-5.4.0-zkpendv
 
-SLANG="${1}"
-BATCHES="${2}"
+export SLANG="${1}"
+export BATCHES="${2}"
+export CMD=${SCRIPTS}/04.translate.gpu
 
-BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
-echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
-echo "Batch: ${BATCH}"
+IFS=, read GROUP_START GROUP_END <<< $(get_group_boundaries ${BATCHES} ${SLURM_ARRAY_TASK_ID})
 
-/bin/time -f "%E %M" bash ${SCRIPTS}/04.translate.gpu ${SLANG} ${BATCH}
-
-echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
+parallel task ::: $(seq $GROUP_START $GROUP_END)
