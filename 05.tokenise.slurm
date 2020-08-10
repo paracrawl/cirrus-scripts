@@ -1,8 +1,5 @@
 #!/bin/sh
 #SBATCH -J tok
-#SBATCH -A t2-cs119-knl
-#SBATCH -p knl
-#SBATCH -n 1
 #SBATCH -c 4
 #SBATCH --time 4:00:00
 #SBATCH -e /home/%u/logs/05.tokenise-%A_%a.err
