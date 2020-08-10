@@ -17,8 +17,8 @@ for lang in $*; do
 		output="tokenised_${TARGET_LANG}.gz"
 	fi
 
-	batch_list=$(make_batch_list 05 $collection $lang)
-	job_list=$(make_job_list $batch_list $output)
+	batch_list=$(make_batch_list 05 $collection $lang $output)
+	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then 

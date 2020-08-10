@@ -14,8 +14,8 @@ shift
 for lang in $*; do
 	# Load in translation model config so we know MODEL_ARCH
 	eval model_${lang}_${TARGET_LANG} || (echo "No model for ${lang} -> ${TARGET_LANG}" 1>&2 ; exit 255)
-	batch_list=$(make_batch_list 04 $collection $lang)
-	job_list=$(make_job_list $batch_list sentences_${TARGET_LANG}.gz)
+	batch_list=$(make_batch_list 04 $collection $lang sentences_${TARGET_LANG}.gz)
+	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list on $MODEL_ARCH\n"
 		if confirm; then
