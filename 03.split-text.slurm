@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -J split
-#SBATCH -A t2-cs119-cpu
-#SBATCH -p skylake
+#SBATCH -A t2-cs119-knl
+#SBATCH -p knl
 #SBATCH -N 1
 #SBATCH -n 1
 #SBATCH --time 8:00:00
@@ -13,17 +13,14 @@ set -eu
 module load parallel
 module load perl/5.20.0
 
-SLANG="${1}"
-BATCHES="${2}"
-SPLIT=${SCRIPTS}/03.split-text
-BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
-
-echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
-echo "Batch: ${BATCH}"
+export SLANG="${1}"
+export BATCHES="${2}"
+export CMD=${SCRIPTS}/03.split-text
+export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
+echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks"
 
 export TMPDIR=$(mktemp -d --tmpdir=$SCRATCH)
-/bin/time -f "%E %M" ${SPLIT} ${SLANG} ${BATCH}
-rm -r $TMPDIR
 
-echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
+IFS=, read GROUP_START GROUP_END <<< $(get_group_boundaries ${BATCHES} ${SLURM_ARRAY_TASK_ID})
 
+parallel task ::: $(seq $GROUP_START $GROUP_END)

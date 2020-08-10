@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH -J tok
-#SBATCH -A t2-cs119-cpu
-#SBATCH -p skylake
+#SBATCH -A t2-cs119-knl
+#SBATCH -p knl
 #SBATCH -n 1
 #SBATCH -c 4
 #SBATCH --time 4:00:00
@@ -16,10 +16,11 @@
 module load parallel
 module load perl/5.20.0
 
-SLANG="${1}"
-BATCHES="${2}"
-TOKENISE=${SCRIPTS}/05.tokenise
-BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
+export SLANG="${1}"
+export BATCHES="${2}"
+export CMD=${SCRIPTS}/05.tokenise
+export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
+echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks"
 
 TMPDIR=${SCRATCH}/tokenise.$$
 mkdir -p ${TMPDIR} || exit 255
@@ -31,8 +32,6 @@ cleanup () {
 }
 trap cleanup EXIT
 
-echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
+IFS=, read GROUP_START GROUP_END <<< $(get_group_boundaries ${BATCHES} ${SLURM_ARRAY_TASK_ID})
 
-/bin/time -f "%E %M" ${TOKENISE} ${SLANG} "${BATCH}"
-
-echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
+parallel task ::: $(seq $GROUP_START $GROUP_END)

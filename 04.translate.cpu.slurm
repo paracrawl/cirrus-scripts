@@ -1,13 +1,13 @@
 #!/bin/sh
 #SBATCH -J translate
 #SBATCH -N 1
-#SBATCH -A t2-cs119-cpu
-#SBATCH -p skylake
+##SBATCH -A t2-cs119-cpu
+##SBATCH -p skylake
 #SBATCH --time 16:00:00
 #SBATCH --ntasks 2
 #SBATCH --cpus-per-task=16
-##SBATCH -A t2-cs119-sl4-knl
-##SBATCH -p knl
+#SBATCH -A t2-cs119-knl
+#SBATCH -p knl
 ##SBATCH --time 4:00:00
 ##SBATCH --exclusive
 #SBATCH -e /home/%u/logs/04.translate-%A_%a.err
@@ -23,13 +23,11 @@ export MOSES_ARGS="--threads ${SLURM_CPUS_PER_TASK:-16}"
 module load parallel
 module load perl/5.20.0
 
-SLANG="${1}"
-BATCHES="${2}"
+export SLANG="${1}"
+export BATCHES="${2}"
+export CMD=${SCRIPTS}/04.translate.cpu
+echo "Running $NMOSI threads per task, ${TASKS_PER_BATCH} tasks"
 
-BATCH=`head -${SLURM_ARRAY_TASK_ID} ${BATCHES} | tail -1`
-echo `date` "Starting whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
-echo "Batch: ${BATCH}"
+IFS=, read GROUP_START GROUP_END <<< $(get_group_boundaries ${BATCHES} ${SLURM_ARRAY_TASK_ID})
 
-/bin/time -f "%E %M" bash ${SCRIPTS}/04.translate.cpu ${SLANG} ${BATCH}
-
-echo `date` "Done whole node job ${SLURM_ARRAY_TASK_ID} on ${HOSTNAME}"
+parallel task ::: $(seq $GROUP_START $GROUP_END)
