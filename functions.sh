@@ -90,7 +90,9 @@ function make_batch_list {
 function make_job_list {
 	local n_batches=$(< "$1" wc -l)
 	local n=$(( ${n_batches}%${TASKS_PER_BATCH} ? ${n_batches}/${TASKS_PER_BATCH} + 1 : ${n_batches}/${TASKS_PER_BATCH} ))
-	echo 1-${n}
+	if [ "$n" -gt 0 ]; then
+		echo 1-${n}
+	fi
 }
 
 
