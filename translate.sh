@@ -233,13 +233,48 @@ translate_marian_cpu() {
     popd > /dev/null
 }
 
+readlines () {
+    local N="$1"
+    local line
+    local rc="1"
+
+    # Read at most N lines
+    for i in $(seq 1 $N)
+    do
+        # Try reading a single line
+        read line
+        if [ $? -eq 0 ]
+        then
+            # Output line
+            echo $line
+            rc="0"
+        else
+            break
+        fi
+    done
+
+    # Return 1 if no lines where read
+    return $rc
+}
+
+export -f readlines
+
 translate_apertium() {
     # Apertium messes up lines when encountering utf-8 nbsp. It
     # also has trouble with "^$", introducing a full stop and
     # skipping the line break altogether.
+    # Note: eu has some oddity where it break on @ sometimes.
+    # Adding `| tr '@' '.'` helps with that.
     sed "s/\xc2\xad/ /g" \
+        | sed "s/\x00//g" \
         | sed 's/\\^\\$//g' \
         | $APERTIUM/bin/apertium-destxt -i \
         | $APERTIUM/bin/apertium -f none -u $MODEL \
         | $APERTIUM/bin/apertium-retxt
+}
+
+chunk_translate_apertium() {
+    while chunk=$(readlines 1000); do
+        translate_apertium "$@" <<< "$chunk"
+    done
 }
