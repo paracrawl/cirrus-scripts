@@ -198,8 +198,7 @@ translate_moses () {
     cd "$MODEL"
     $MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
         $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
-        $MODELS/phi-system/trim_lines.py 100 | \
-        $MOSES_BIN -v 0 $MOSES_ARGS -f $MOSES_INI | \
+        $MOSES_BIN -v 1 $MOSES_ARGS -f $MOSES_INI | \
         $MOSES/scripts/recaser/detruecase.perl | \
         $MOSES/scripts/tokenizer/detokenizer.perl -q
     popd > /dev/null
