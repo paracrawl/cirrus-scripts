@@ -31,14 +31,16 @@ parallel \
 	-j${THREADS} \
 	--halt 2 \
 	--pipe \
-	--roundrobin \
-	-N 1 \
+	--group \
+	-l 1 \
 	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
 > $OUTPUT
 
+echo "Copying result"
+
 DEST=${SRC_BATCH}/aligned-${REF_BATCH_ID}.gz
 cp $OUTPUT $DEST.$$
 mv $DEST.$$ $DEST
-echo "Copied result (${SLANG}) ${SRC_BATCH}"
+echo "Copied result (${SLANG}) ${SRC_BATCH} to ${DEST}"
 rm $OUTPUT
