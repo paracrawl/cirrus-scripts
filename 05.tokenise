@@ -4,7 +4,7 @@ ulimit -n 16384
 
 SLANG="$1"
 BATCH="$2"
-THREADS=${THREADS:-8}
+THREADS=${THREADS:-4}
 
 INPUT="sentences_${TARGET_LANG}"
 OUTPUT="tokenised_${TARGET_LANG}"
@@ -20,7 +20,7 @@ echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/${INPUT}.gz gzip -dc \
 | parallel --halt 2 -j $THREADS --tmpdir ${TMPDIR} --pipe -k -l 256 \
-${B64FILTER} ${CACHE} ${TOKENISE} -a -q -l en \
+${B64FILTER} ${CACHE} ${TOKENISE} -a -q -l ${TARGET_LANG} \
 | gzip -9c \
 > ${TMPDIR}/${OUTPUT}.$$.gz
 
