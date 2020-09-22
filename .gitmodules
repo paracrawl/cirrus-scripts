@@ -1,0 +1,4 @@
+[submodule "bitextor"]
+	path = bitextor
+	url = https://github.com/bitextor/bitextor
+	branch = merge_pipelines

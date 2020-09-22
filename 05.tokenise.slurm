@@ -15,7 +15,7 @@ module load perl/5.20.0
 
 export SLANG="${1}"
 export BATCHES="${2}"
-export CMD=${SCRIPTS}/05.tokenise
+export CMD=${SCRIPTS}/bitextor/scripts/05.tokenise
 export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
 echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks"
 

@@ -7,6 +7,7 @@ export BPE=/home/cs-vand1/rds/rds-t2-cs119/romang/subword-nmt/subword_nmt
 
 export LD_LIBRARY_PATH=$APERTIUM/lib:/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
 export PYTHON=/usr/bin/python3
+export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 export BITEXTOR=/home/cs-wait1/sw/bitextor
 export GIAWARC=/home/cs-wait1/go/bin/giawarc
 export GIASHARD=$HOME/go/bin/giashard
@@ -25,6 +26,8 @@ export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 export MOSES_ARGS="--threads 16"
 export MOSES_INI=moses2.ini
 export KPU=/home/cs-vand1/src/preprocess
+export SPLIT=$KPU/moses/ems/support/split-sentences.perl
+export TOKENISE=$KPU/moses/tokenizer/tokenizer.perl
 export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
 #export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
 export SCRATCH=/local
