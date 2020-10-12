@@ -6,7 +6,9 @@ files=(
 	sentences.gz
 	tokenised.gz
 	sentences_en.gz
+	sentences_es.gz
 	tokenised_en.gz
+	tokenised_es.gz
 )
 
 exists() {
