@@ -14,13 +14,19 @@ if [[ "$SLANG" == "$TARGET_LANG" ]]; then
 	OUTPUT=tokenised
 fi
 
-TOKENISE=$KPU/moses/tokenizer/tokenizer.perl
+tokenise() {
+	# Tokenizer gets really unhappy with all-dot lines
+	sed 's/^\.\.\.\.*$/.../' | $PERL $TOKENISE -a -q -l $TARGET_LANG
+}
+
+export TOKENISE=$KPU/moses/tokenizer/tokenizer.perl
+export TARGET_LANG
+export -f tokenise
 
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/${INPUT}.gz gzip -dc \
-| parallel --halt 2 -j $THREADS --tmpdir ${TMPDIR} --pipe -k -l 256 \
-${B64FILTER} ${CACHE} ${TOKENISE} -a -q -l ${TARGET_LANG} \
+| ${B64FILTER} ${CACHE} bash -c tokenise \
 | gzip -9c \
 > ${TMPDIR}/${OUTPUT}.$$.gz
 
@@ -36,6 +42,9 @@ lines_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | base64 -d | wc -l)
 echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
-mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
+# Two-step move because the first one might fail and leave an
+# incomplete file behind, which is tricky to detect.
+mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.$$.gz
+mv ${BATCH}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
 
 echo "Moved result (${SLANG}) ${BATCH}/${OUTPUT}.gz"
