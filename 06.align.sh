@@ -26,9 +26,10 @@ function make_batch_list_retry {
 	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
 		if [[ ! -e $alignments ]]; then
+			echo $alignments 1>&2
 			echo $SRC_BATCH $REF_BATCH
 		fi
-	done > $batch_list
+	done | shuf > $batch_list
 
 	echo $batch_list
 }
