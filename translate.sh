@@ -89,7 +89,7 @@ model_ga_en () {
     TRUECASE_MODEL=truecase-model.ga
 }
 
-model_hr () {
+model_hr_en () {
     MODEL=${MODELS}/phi-system/fast-hr-en
     TRUECASE_MODEL=truecase-model.hr
 }
@@ -190,6 +190,56 @@ model_oc_es() {
     MODEL_ARCH=cpu
 }
 
+model_fa_en() {
+    MODEL_IMPL=translate_fa_en
+    MODEL_ARCH=gpu
+
+    # Hard override full-on I dont care mode
+    export SLURM_ACCOUNT=t2-cs119-gpu
+    export SLURM_PARTITION=pascal
+    export TASKS_PER_BATCH=1
+}
+
+model_ha_en() {
+	MODEL_IMPL=translate_ha_en
+	MODEL_ARCH=cpu
+}
+
+model_ig_en() {
+	MODEL_IMPL=translate_ig_en
+	MODEL_ARCH=cpu
+}
+
+model_zh_en() {
+	MODEL_IMPL=translate_zh_en
+	MODEL_ARCH=cpu
+}
+
+translate_fa_en() {
+    /home/cs-vand1/src/cirrus-scripts/translate_fa_en.sh "$@"
+}
+
+translate_ha_en() {
+	shift # Consume language
+	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ha-en/scripts/translate.sh \
+		--quiet-translation \
+		--cpu-threads 8 \
+		"$@"
+}
+
+translate_ig_en() {
+	shift # Consume language
+	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ig-en/scripts/translate.sh \
+		--quiet-translation \
+		--cpu-threads 8 \
+		"$@"
+}
+
+translate_zh_en() {
+	shift # Consume zh
+	$SCRIPTS/translate_zh_en.sh --quiet-translation --cpu-threads $THREADS
+}
+
 translate_moses () {
     local SLANG="$1"
     shift
@@ -198,7 +248,7 @@ translate_moses () {
     cd "$MODEL"
     $MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
         $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
-        $MOSES_BIN -v 1 $MOSES_ARGS -f $MOSES_INI | \
+        $MOSES_BIN -v 0 $MOSES_ARGS -f $MOSES_INI | \
         $MOSES/scripts/recaser/detruecase.perl | \
         $MOSES/scripts/tokenizer/detokenizer.perl -q
     popd > /dev/null

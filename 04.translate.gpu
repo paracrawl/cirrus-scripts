@@ -20,10 +20,11 @@ eval model_${SLANG}_${TARGET_LANG} || (echo "No model for ${SLANG} -> ${TARGET_L
 export -f $MODEL_IMPL
 export MODEL
 gzip -dc ${BATCH}/${INPUT}.gz \
-    | b64filter \
-    	cache \
-    		bash -u -e -o pipefail -c ${MODEL_IMPL}' $@' -- $SLANG -d 0 --max-length 300 --max-length-crop \
-    | gzip -9c > ${TMPDIR}/${OUTPUT}.$$.gz
+	| b64filter \
+		cache \
+			foldfilter -s -w 400 \
+				bash -u -e -o pipefail -c ${MODEL_IMPL}' $@' -- $SLANG -d 0 --quiet-translation \
+	| gzip -9c > ${TMPDIR}/${OUTPUT}.$$.gz
 
 echo "End:" `date` $BATCH
 
@@ -35,4 +36,5 @@ if [[ $before != $after ]]; then
 	exit 1
 fi
 
-mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
+mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.$$.gz
+mv ${BATCH}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
