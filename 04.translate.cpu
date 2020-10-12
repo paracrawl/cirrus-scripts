@@ -1,72 +1,81 @@
 #!/bin/bash
-set -euo pipefail
 
-SLANG="$1"
-BATCH="$2"
-INPUT="sentences"
-OUTPUT="sentences_${TARGET_LANG}"
-TMPDIR=${TMPDIR:-/tmp}
-NMOSI=${NMOSI:-16} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
+translate_setup () {
+	SLANG=$1
 
-echo "Translating $SLANG $BATCH to $TARGET_LANG"
-echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
-sentences=`gzip -dc $BATCH/sentences.gz | base64 -d | wc -l`
-echo "Sentences: ${sentences}"
+	set -a # I want the variables from translate.sh to be available in my deep deep down bash
+	. ${SCRIPTS}/translate.sh
+	eval model_${SLANG}_${TARGET_LANG} || (echo "No model for ${SLANG} -> ${TARGET_LANG}" 1>&2 ; exit 255)
 
-set -a # I want the variables from translate.sh to be available in my deep deep down bash
-. ${SCRIPTS}/translate.sh
-eval model_${SLANG}_${TARGET_LANG} || (echo "No model for ${SLANG} -> ${TARGET_LANG}" 1>&2 ; exit 255)
+	# Copy model to local machine (only if we're running multiple mosis)
+	if [ "$MODEL_IMPL" = "translate_moses" ]; then
+		MDIR="`dirname $MODEL`"
+		MNAME="`basename $MODEL`"
+		LOCAL_SCRATCH=$(mktemp -d --tmpdir=$SCRATCH)
+		MODEL="${LOCAL_SCRATCH}/${MNAME}"
+		export MODEL
 
-# Copy model to local machine (only if we're running multiple mosis)
-if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 2 ]; then
-	MDIR="`dirname $MODEL`"
-	MNAME="`basename $MODEL`"
-	MODEL="${SCRATCH}/${MNAME}"
+		cleanup () {
+			echo "Cleaning up..."
+			rm -rf "${LOCAL_SCRATCH}/${MNAME}"
+			echo "Clean up done."
+		}
+		trap cleanup EXIT
 
-	cleanup () {
-		echo "Cleaning up..."
-  		rm -rf "${SCRATCH}/${MNAME}"
-		echo "Clean up done."
-	}
-	trap cleanup EXIT
+		echo "Copying translation model ${MODEL} to scratch space"
+		(cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${LOCAL_SCRATCH}" && tar -xvf -)
+	fi
+}
 
-	echo "Copying translation model ${MODEL} to scratch space"
-	(cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${SCRATCH}" && tar -xvf -)
-fi
+translate_task() {
+	set -euo pipefail
+	SLANG="$1"
+	BATCH="$2"
+	INPUT="sentences"
+	OUTPUT="sentences_${TARGET_LANG}"
+	TMPDIR=${TMPDIR:-/tmp}
 
-# Determine a good initial batch size for parallel
-bsize=$(($sentences / 64))
-if test $(($sentences % 64)) -ne 0; then
-	bsize=$(($bsize + 1))
-fi
-echo "Using a sentence batch size of ${bsize}"
-echo "Using ${NMOSI} processes with ${MOSES_ARGS}"
+	echo "Translating $SLANG $BATCH to $TARGET_LANG"
+	echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
+	sentences=`gzip -dc $BATCH/sentences.gz | base64 -d | wc -l`
+	echo "Sentences: ${sentences}"
 
-# Go!
 
-echo "Start:" `date` $BATCH
+	# Determine a good initial batch size for parallel
+	bsize=$(($sentences / 64))
+	if test $(($sentences % 64)) -ne 0; then
+		bsize=$(($bsize + 1))
+	fi
+	echo "Using a sentence batch size of ${bsize}"
+	echo "Using ${NMOSI} processes with ${MOSES_ARGS}"
 
-export -f $MODEL_IMPL
-gzip -dc ${BATCH}/${INPUT}.gz \
-	| $B64FILTER \
-		$CACHE \
-			foldfilter -w 1000 \
-				parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
-					'bash -u -e -o pipefail -c '"'"$MODEL_IMPL' $@'"'"' --' $SLANG \
-	| gzip -9c > ${TMPDIR}/sentences_${TARGET_LANG}.$$.gz
+	# Go!
 
-echo "End:" `date` $BATCH
+	echo "Start:" `date` $BATCH
 
-docs_src=$(gzip -dc ${BATCH}/${INPUT}.gz | wc -l)
-docs_dst=$(gzip -dc ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
-echo "Expecting $docs_src documents found $docs_dst"
-test "$docs_src" -eq "$docs_dst" || exit 1
+	export -f $MODEL_IMPL
+	gzip -dc ${BATCH}/${INPUT}.gz \
+		| $B64FILTER \
+			$CACHE \
+				foldfilter -s -w 500 \
+					parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
+						"bash -u -e -o pipefail -c '$MODEL_IMPL $SLANG'" \
+		| gzip -9c > ${TMPDIR}/sentences_${TARGET_LANG}.$$.gz
 
-lines_src=$(gzip -cd ${BATCH}/${INPUT}.gz | base64 -d | wc -l)
-lines_dst=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | base64 -d | wc -l)
-echo "Expecting $lines_src lines, found $lines_dst"
-test "$lines_src" -eq "$lines_dst" || exit 1
+	echo "End:" `date` $BATCH
 
-# Copy instead of move to get ownership right
-cp ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
-rm ${TMPDIR}/${OUTPUT}.$$.gz
+	docs_src=$(gzip -dc ${BATCH}/${INPUT}.gz | wc -l)
+	docs_dst=$(gzip -dc ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
+	echo "Expecting $docs_src documents found $docs_dst"
+	test "$docs_src" -eq "$docs_dst" || exit 1
+
+	lines_src=$(gzip -cd ${BATCH}/${INPUT}.gz | base64 -d | wc -l)
+	lines_dst=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | base64 -d | wc -l)
+	echo "Expecting $lines_src lines, found $lines_dst"
+	test "$lines_src" -eq "$lines_dst" || exit 1
+
+	cp ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.$$.gz
+	mv ${BATCH}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
+	rm ${TMPDIR}/${OUTPUT}.$$.gz
+}
+
