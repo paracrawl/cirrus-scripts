@@ -22,6 +22,10 @@ docs_st=$(gzip -cd ${TMPDIR}/sentences.$$.gz | wc -l)
 echo "Expecting $docs_pt documents, found $docs_st"
 test $docs_pt -eq $docs_st || exit 1
 
-mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
+# Move in two steps. First copies it to the shared fs which
+# might fail because it hits a quota. Second marks it as
+# the real thing.
+mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.$$.gz
+mv ${BATCH}/sentences.$$.gz ${BATCH}/sentences.gz
 echo "Copied result (${SLANG}) ${BATCH}"
 
