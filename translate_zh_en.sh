@@ -19,5 +19,6 @@ $JIEBA -d ' ' \
 	--maxi-batch-sort src \
 	"$@" \
 | perl -pe 's/@@ //g' \
-| python2 prepare01/deseg.py
+|  $MOSES/scripts/recaser/detruecase.perl \
+|  $MOSES/scripts/tokenizer/detokenizer.perl -q -l en
 
