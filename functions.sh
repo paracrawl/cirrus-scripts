@@ -51,7 +51,7 @@ function make_batch_list_all {
 	local step="$1" collection="$2" lang="$3"
 	local batch_list=${DATA}/${collection}-batches/${step}.${lang}
 
-	if ! test -d ${DATA}/${collection}-batches/${lang}; then
+	if ! test -f ${DATA}/${collection}-batches/${lang}; then
 		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
 	fi
 
@@ -103,6 +103,7 @@ function schedule {
 		--partition $SLURM_PARTITION
 		--nodes 1
 		--ntasks ${SLURM_TASKS_PER_NODE:-$TASKS_PER_BATCH}
+		--verbose
 	)
 	local job_id=$(sbatch "${options[@]}" "$@")
 	echo $(date +%Y%m%d%H%M%S) $job_id "${options[@]}" "$@" >> ./.schedule-log
@@ -156,7 +157,7 @@ function task() {
 
 	echo `date` "Starting whole node job ${BATCH_ID} on ${HOSTNAME}"
 	echo "Batch: ${BATCH}"
-	/bin/time -f "%E %M" ${CMD} ${SLANG} ${BATCH}
+	${CMD} ${SLANG} ${BATCH}
 	echo `date` "Done whole node job ${BATCH_ID} on ${HOSTNAME}"
 }
 
