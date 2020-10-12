@@ -18,7 +18,7 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list \n"
 		if confirm; then 
-			schedule --nice=300 -J split-${lang} -a $job_list 03.split-text.slurm $lang $batch_list
+			schedule -J split-${lang} -a $job_list 03.split-text.slurm $lang $batch_list
 		fi
 	fi
 done

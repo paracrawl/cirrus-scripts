@@ -43,7 +43,6 @@ for lang in $*; do
 		prompt "Scheduling $job_list\n"
 		if confirm; then
 			schedule \
-				--nice=600 \
 				-J align-${lang} \
 				-a $job_list \
 				${SCRIPTS}/06.align.slurm ${lang} $batch_list
