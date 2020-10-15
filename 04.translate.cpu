@@ -52,14 +52,18 @@ translate_task() {
 	# Go!
 
 	echo "Start:" `date` $BATCH
+	
+	# Removed for non-moses, should probably move this to the moses relatd
+	# functions and let it determine how many threads & processes it wants
+	# to split up in, given $THREADS (which is roughly SLURM_CPUS_PER_TASK)
+	# parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
 
 	export -f $MODEL_IMPL
 	gzip -dc ${BATCH}/${INPUT}.gz \
 		| $B64FILTER \
 			$CACHE \
 				foldfilter -s -w 500 \
-					parallel --halt 2 -j ${NMOSI} --pipe -k -l ${bsize} \
-						"bash -u -e -o pipefail -c '$MODEL_IMPL $SLANG'" \
+					bash -u -e -o pipefail -c '$MODEL_IMPL $SLANG' \
 		| gzip -9c > ${TMPDIR}/sentences_${TARGET_LANG}.$$.gz
 
 	echo "End:" `date` $BATCH
