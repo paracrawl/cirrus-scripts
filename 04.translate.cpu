@@ -62,7 +62,7 @@ translate_task() {
 	gzip -dc ${BATCH}/${INPUT}.gz \
 		| $B64FILTER \
 			$CACHE \
-				foldfilter -s -w 500 \
+				${FOLDFILTER:-foldfilter} -s -w 500 \
 					bash -u -e -o pipefail -c '$MODEL_IMPL $SLANG' \
 		| gzip -9c > ${TMPDIR}/sentences_${TARGET_LANG}.$$.gz
 
