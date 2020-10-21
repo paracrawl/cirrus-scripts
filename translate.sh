@@ -223,7 +223,7 @@ translate_ha_en() {
 	shift # Consume language
 	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ha-en/scripts/translate.sh \
 		--quiet-translation \
-		--cpu-threads 8 \
+		--cpu-threads $THREADS \
 		"$@"
 }
 
@@ -231,7 +231,7 @@ translate_ig_en() {
 	shift # Consume language
 	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ig-en/scripts/translate.sh \
 		--quiet-translation \
-		--cpu-threads 8 \
+		--cpu-threads $THREADS \
 		"$@"
 }
 
