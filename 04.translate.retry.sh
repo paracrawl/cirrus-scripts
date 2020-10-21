@@ -4,6 +4,7 @@ set -eou pipefail
 . config.csd3
 . functions.sh
 . translate.sh
+export -f get_group_boundaries task
 
 job_id=$1
 
