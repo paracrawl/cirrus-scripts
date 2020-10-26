@@ -52,7 +52,12 @@ function make_batch_list_all {
 	local batch_list=${DATA}/${collection}-batches/${step}.${lang}
 
 	if ! test -f ${DATA}/${collection}-batches/${lang}; then
-		ls -d ${DATA}/${collection}-shards/${lang}/*/* > ${DATA}/${collection}-batches/${lang}
+		find ${DATA}/${collection}-shards/${lang} \
+			-mindepth 2 \
+			-maxdepth 2 \
+			-type d \
+			-regex '.*/[0-9]+/[0-9]+' \
+			> ${DATA}/${collection}-batches/${lang}
 	fi
 
 	rm -f ${batch_list}
