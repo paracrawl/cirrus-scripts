@@ -8,13 +8,17 @@ set -euo pipefail
 
 export -f get_group_boundaries task
 
+function list_numeric_dirs {
+	find "$@" -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]*'
+}
+
 function make_batch_list_all {
 	local collection="$1" lang="$2"
 	if ! test -e ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}; then
-		for shard in $(ls -d ${DATA}/${collection}-shards/${lang}/*); do
+		for shard in $(list_numeric_dirs ${DATA}/${collection}-shards/${lang}/); do
 			join -j2 \
-				<(ls -d $shard/*) \
-				<(ls -d ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $shard)/*)
+				<(list_numeric_dirs $shard) \
+				<(list_numeric_dirs ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $shard))
 		done > ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
 	fi
 	echo ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
