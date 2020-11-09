@@ -18,6 +18,8 @@ BUILD_BOOST="test ! -d $PREFIX/include/boost"
 BUILD_BLEUALIGN="test ! -x $PREFIX/bin/bleualign_cpp"
 BUILD_DOCALIGN="test ! -x $PREFIX/bin/docalign"
 BUILD_PREPROCESS="test ! -x $PREFIX/bin/b64filter"
+BUILD_XMLRPC="test ! -d $PREFIX/lib/xmlrpc-c"
+BUILD_MOSES="test ! -x $PREFIX/bin/moses2"
 
 command_not_exists() {
 	if command -v "$@" &>/dev/null; then
@@ -27,7 +29,7 @@ command_not_exists() {
 	fi
 }
 
-for name in python subword jieba marian_cpu protobuf perftools boost bleualign docalign preprocess; do
+for name in python subword jieba marian_cpu protobuf perftools boost bleualign docalign preprocess moses; do
 	printf "Building $name: "
 	varname="BUILD_${name^^}"
 	if ${!varname}; then
@@ -169,6 +171,27 @@ if $BUILD_PREPROCESS; then
 		-DCMAKE_INSTALL_PREFIX=$PREFIX
 	make -j8
 	cp bin/* $PREFIX/bin/
+	
+	popd
+fi
+
+# xmlrpc-c is a depencendy for moses2
+if $BUILD_XMLRPC; then
+	curl -L "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download" | tar -zx
+
+	pushd xmlrpc-c-1.51.06/
+
+	./configure --prefix=$PREFIX
+	make
+	make install
+
+	popd
+fi
+
+if $BUILD_MOSES; then
+	pushd mosesdecoder
+	
+	./bjam -a -j8 --prefix=$PREFIX --link=shared
 	
 	popd
 fi

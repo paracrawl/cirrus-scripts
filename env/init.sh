@@ -13,6 +13,7 @@ module load \
 	cmake \
 	intel/mkl/2020.2 \
 	protobuf-3.4.0-gcc-5.4.0-zkpendv \
+	openssl-1.0.2k-gcc-5.4.0-lonhprt \
 	binutils-2.31.1-gcc-5.4.0-uyyspmn
 
 export PATH="$PREFIX/bin:$PATH"
