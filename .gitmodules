@@ -1,0 +1,13 @@
+[submodule "src/marian-fbgemm"]
+	path = env/src/marian-fbgemm
+	url = https://github.com/XapaJIaMnu/marian-dev.git
+	branch = 8bitgpu
+[submodule "env/bitextor"]
+	path = env/src/bitextor
+	url = https://github.com/bitextor/bitextor.git
+[submodule "env/src/preprocess"]
+	path = env/src/preprocess
+	url = https://github.com/kpu/preprocess.git
+[submodule "env/src/mosesdecoder"]
+	path = env/src/mosesdecoder
+	url = https://github.com/moses-smt/mosesdecoder.git
