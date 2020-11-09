@@ -1,3 +1,8 @@
+if test -z "${PREFIX:-}"; then
+	SELF=$(realpath "${BASH_SOURCE[0]}")
+	PREFIX=$(dirname "$SELF")/env
+fi
+
 # For translating to Spanish
 export APERTIUM=/rds/project/t2_vol4/rds-t2-cs119/jelmervdl/apertium
 
