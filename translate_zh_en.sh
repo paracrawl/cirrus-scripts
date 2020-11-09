@@ -15,15 +15,14 @@ TMPDIR=$JIEBA_TMP python -m jieba -d ' ' \
 | marian-decoder-cpu \
 	-m /home/cs-vand1/src/cirrus-scripts/model.zhen.fbgemm.bin \
 	-v run02/vocab.{zh,en}.yml \
-	-w 1024 \
-	--optimize \
+	-w 3200 \
 	--normalize 1 \
 	--word-penalty 0 \
 	--beam-size 4 \
 	--mini-batch-words 300 \
 	--maxi-batch 2000 \
 	--maxi-batch-sort src \
-	--shortlist /home/cs-vand1/src/cirrus-scripts/lex.zhen \
+	--shortlist /home/cs-vand1/src/cirrus-scripts/lex.zhen.gz \
 	"$@" \
 | perl -pe 's/@@ //g' \
 |  $MOSES/scripts/recaser/detruecase.perl \
