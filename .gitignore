@@ -1,1 +1,9 @@
 /.schedule-log
+/env/bin/
+/env/go/
+/env/include/
+/env/lib/
+/env/lib64/
+/env/share/
+/env/pyvenv.cfg
+/env/src/
