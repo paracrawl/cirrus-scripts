@@ -114,19 +114,16 @@ if $BUILD_MARIAN_CPU; then
 		-DUSE_FBGEMM=ON \
 		-DUSE_SENTENCEPIECE=ON \
 		-DCOMPILE_CUDA=OFF \
-		-DUSE_STATIC_LIBS=ON
+		-DUSE_STATIC_LIBS=ON \
+		-DCMAKE_CXX_STANDARD_LIBRARIES="-liconv"
 
-	make -j8
-	make install
+	make -j8 marian_decoder marian_conv
+	# make install # bad idea, installs all kinds of libraries
 	
 	# Note that make install did not install marian's executables in bin. That's
 	# okay, since we'll be needing different versions of marian anyway.
 	cp marian-decoder $PREFIX/bin/marian-decoder-cpu
 	cp marian-conv $PREFIX/bin/marian-conv
-
-	# spm_train is broken due to USE_STATIC_LIBS so let's move it to prevent
-	# shooting ourselves in the foot.
-	rm -f $PREFIX/bin/spm_train
 
 	popd # leave marian
 fi
@@ -191,7 +188,7 @@ fi
 if $BUILD_MOSES; then
 	pushd mosesdecoder
 	
-	./bjam -a -j8 --prefix=$PREFIX --link=shared
+	./bjam -j8 --prefix=$PREFIX moses2
 	
 	popd
 fi
