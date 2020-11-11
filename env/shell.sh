@@ -1,2 +1,2 @@
 #!/bin/bash
-bash --init-file init.sh "$@"
+bash --init-file $(dirname ${BASH_SOURCE[0]})/init.sh "$@"
