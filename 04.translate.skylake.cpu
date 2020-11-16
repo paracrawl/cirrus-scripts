@@ -6,7 +6,7 @@ BATCH="$2"
 INPUT="sentences"
 OUTPUT="sentences_${TARGET_LANG}"
 TMPDIR=${TMPDIR:-/tmp}
-NMOSI=${NMOSI:-8} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
+NMOSI=${NMOSI:-16} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
 
 echo "Translating $SLANG $BATCH to $TARGET_LANG"
 echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
@@ -18,7 +18,7 @@ set -a # I want the variables from translate.sh to be available in my deep deep 
 eval model_${SLANG}_${TARGET_LANG} || (echo "No model for ${SLANG} -> ${TARGET_LANG}" 1>&2 ; exit 255)
 
 # Copy model to scratch (only if we're running multiple mosis)
-if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 0 ]; then
+if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 2 ]; then
        	MDIR="`dirname $MODEL`"
         MNAME="`basename $MODEL`"
        	MODEL_PATH="${MODEL}"

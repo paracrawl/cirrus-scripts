@@ -19,7 +19,7 @@ cat ${DATA}/${collection}-batches/${lang} \
 		echo $match 1>&2
 		paste <(gzip -cd ${match} \
 				| cut -f1-2 \
-				| docjoin \
+				| $DOCJOIN \
 					-r ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $(dirname $batch))/$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')/url.gz \
 					-l $(dirname ${match})/url.gz) \
 			  <(gzip -cd $match | cut -f4) \

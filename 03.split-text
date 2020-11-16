@@ -8,20 +8,22 @@ BATCH="$2"
 PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 SPLIT=$KPU/moses/ems/support/split-sentences.perl
 
-echo "Processing (${SLANG}) ${BATCH}"
+LOGS=$/home/cs-sifa1/split_logs.log
+
+echo "Processing (${SLANG}) ${BATCH}" # >> $LOGS
 
 < ${BATCH}/plain_text.gz gzip -dc \
 | $PERL $SPLIT -k -q -n -d -l $SLANG \
 | gzip -9c \
 > ${TMPDIR}/sentences.$$.gz
 
-echo "Testing output"
+echo "Testing output" # >> $LOGS
 
 docs_pt=$(gzip -cd ${BATCH}/plain_text.gz | wc -l)
 docs_st=$(gzip -cd ${TMPDIR}/sentences.$$.gz | wc -l)
-echo "Expecting $docs_pt documents, found $docs_st"
+echo "Expecting $docs_pt documents, found $docs_st" #>> $LOGS
 test $docs_pt -eq $docs_st || exit 1
 
 mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
-echo "Copied result (${SLANG}) ${BATCH}"
+echo "Copied result (${SLANG}) ${BATCH}" # >> $LOGS
 

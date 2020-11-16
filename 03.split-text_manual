@@ -1,0 +1,25 @@
+#!/bin/bash
+set -o pipefail
+ulimit -n 16384
+
+SLANG=${1:-en}
+InputFile=${2:-plain_text_sample.gz}
+KPU=/home/cs-sifa1/sw/preprocess
+PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
+SPLIT=$KPU/moses/ems/support/split-sentences.perl
+
+LOGS=$/home/cs-sifa1/europat_evaluate_logs.log
+
+# echo "Processing (${SLANG}) ${BATCH}" # >> $LOGS
+
+< $InputFile gzip -dc \
+| $PERL $SPLIT -k -q -n -d -l $SLANG \
+| gzip -9c \
+> sentences.$(basename $InputFile)
+echo "Testing output" # >> $LOGS
+
+# mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.gz
+# echo "Copied result (${SLANG}) ${BATCH}" # >> $LOGS
+
+# tail ES-combined.tab | sed "s/<br>/'\\n'/g"
+# gzip -dc plain_text_sample.gz | $PERL $SPLIT -k -q -n -d -l en

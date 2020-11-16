@@ -163,7 +163,7 @@ function task() {
 
 declare -g TEST=false
 declare -g RETRY=false
-declare -g ALWAYS_YES=${ALWAYS_YES:-false}
+declare -g ALWAYS_YES=${ALWAYS_YES:-true}
 declare -g SCHEDULE_OPTIONS=(--parsable)
 declare -g STEPS=""
 
@@ -231,3 +231,10 @@ while (( "$#" )); do
 			;;
 	esac
 done
+
+function inspect_file () {
+	local FILE="$1"
+	local N2INSPECT="$2"
+	LINES=$(cat $FILE | wc -l)
+	echo zcat $FILE | head -nLINES | tail -nN2INSPECT | $DOCENC -d 
+}

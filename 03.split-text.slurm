@@ -10,11 +10,14 @@ set -eu
 module load parallel
 module load perl/5.20.0
 
+LOGS=/home/cs-sifa1/split_logs.log
+
 export SLANG="${1}"
 export BATCHES="${2}"
 export CMD=${SCRIPTS}/03.split-text
 export THREADS=$((${SLURM_CPUS_ON_NODE} / ${TASKS_PER_BATCH}))
 echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks"
+echo "Running $THREADS threads per task, ${TASKS_PER_BATCH} tasks" >> $LOGS
 
 export TMPDIR=$(mktemp -d --tmpdir=$SCRATCH)
 

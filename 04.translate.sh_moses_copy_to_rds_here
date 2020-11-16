@@ -11,21 +11,21 @@ export -f get_group_boundaries task
 collection=$1
 shift
 
-#export NMOSI=${NMOSI:-4} #16} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
+export NMOSI=${NMOSI:-4} #16} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
 
 for lang in $*; do
 	# Load in translation model config so we know MODEL_ARCH
 	eval model_${lang}_${TARGET_LANG} || (echo "No model for ${lang} -> ${TARGET_LANG}" 1>&2 ; exit 255)
 	# set -a # I want the variables from translate.sh to be available in my deep deep down bash
 	# Copy model to scratch (only if we're running multiple mosis)
-#	if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 2 ]; then
-#        	MDIR="`dirname $MODEL`"
-#	        MNAME="`basename $MODEL`"
-#        	MODEL_PATH="${MODEL}"
-#       		MODEL="${SCRATCH}/${MNAME}"
-#        echo "Copying translation model ${MODEL_PATH} to scratch space"
-#        (cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${SCRATCH}" && tar -xvf -)
-#	fi
+	if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 2 ]; then
+        	MDIR="`dirname $MODEL`"
+	        MNAME="`basename $MODEL`"
+        	MODEL_PATH="${MODEL}"
+       		MODEL="${SCRATCH}/${MNAME}"
+        echo "Copying translation model ${MODEL_PATH} to scratch space"
+        (cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${SCRATCH}" && tar -xvf -)
+	fi
 	batch_list=$(make_batch_list 04 $collection $lang sentences_${TARGET_LANG}.gz)
 	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then

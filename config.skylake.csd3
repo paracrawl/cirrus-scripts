@@ -23,7 +23,7 @@ export SCRIPTS=/home/cs-sifa1/cirrus-scripts
 export MODELS=/rds/project/t2_vol4/rds-t2-cs119/models
 export MOSES=/home/cs-wait1/src/mosesdecoder
 export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
-export MOSES_ARGS="--threads 8"
+export MOSES_ARGS="--threads 16"  # 16
 export MOSES_INI=moses2.ini
 export KPU=/home/cs-sifa1/sw/preprocess
 #export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
@@ -36,11 +36,11 @@ export TARGET_LANG=en
 export COLLECTION=GWB-20191109192916
 # Number of batches processed per slurm job - knl has 256 cores = 16 x 16 
 # the name should actually be BATCHES_PER_TASKS
-export TASKS_PER_BATCH=32
+export TASKS_PER_BATCH=2
 
 # Where jobs should be executed. Values used in functions.sh/schedule.
-export SLURM_ACCOUNT=t2-cs119-knl #cpu
-export SLURM_PARTITION=knl #skylake
+export SLURM_ACCOUNT=t2-cs119-cpu
+export SLURM_PARTITION=skylake
 
 # How many resources should be allocated per slurm job. Defaults
 # to as many as necessary to process all tasks in parallel. Individual

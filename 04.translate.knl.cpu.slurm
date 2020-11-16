@@ -2,7 +2,7 @@
 #SBATCH -J translate
 #SBATCH --time 24:00:00
 #SBATCH --exclusive
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=16
 #SBATCH -e /home/%u/logs/04.translate-%A_%a.err
 #SBATCH -o /home/%u/logs/04.translate-%A_%a.out
 
@@ -18,7 +18,7 @@ module load perl/5.20.0
 
 export SLANG="${1}"
 export BATCHES="${2}"
-export CMD=${SCRIPTS}/04.translate.cpu
+export CMD=${SCRIPTS}/04.translate.knl.cpu
 echo "Running $NMOSI threads per task, ${TASKS_PER_BATCH} tasks"
 
 IFS=, read GROUP_START GROUP_END <<< $(get_group_boundaries ${BATCHES} ${SLURM_ARRAY_TASK_ID})

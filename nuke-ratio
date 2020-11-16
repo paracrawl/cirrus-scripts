@@ -1,0 +1,33 @@
+#!/bin/bash
+
+bad_documents () {
+	gzip -cd sentences.gz \
+	| ~/cirrus-scripts/ascii-ratio.py \
+	| while read index ratio length lines; do
+		if (( $(echo "$ratio < 0.4" |bc -l) )); then
+			echo $index
+		fi
+	done
+}
+
+if [ "$1" = "--nuke" ]; then
+	shift
+	nuke () {
+		rm -rf aligned-*.gz pairs-*.gz
+		xargs --no-run-if-empty ~/cirrus-scripts/nuke.sh
+	}
+else
+	nuke () {
+		: # Do nothing :P
+	}
+fi
+
+for f in $@; do
+	pushd $f > /dev/null
+	bad=$(bad_documents)
+	if [ ! -z "$bad" ]; then
+		echo $(pwd) $bad
+		nuke <<< "$bad"
+	fi
+	popd > /dev/null
+done

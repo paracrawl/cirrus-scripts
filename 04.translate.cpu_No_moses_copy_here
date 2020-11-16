@@ -6,7 +6,7 @@ BATCH="$2"
 INPUT="sentences"
 OUTPUT="sentences_${TARGET_LANG}"
 TMPDIR=${TMPDIR:-/tmp}
-NMOSI=${NMOSI:-8} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
+NMOSI=${NMOSI:-16} # 16 * 16 threads (see $MOSES_ARGS in config.csd3)
 
 echo "Translating $SLANG $BATCH to $TARGET_LANG"
 echo "Input size:" `ls -lh $BATCH/sentences.gz | cut -d' ' -f5` $BATCH
@@ -17,20 +17,12 @@ set -a # I want the variables from translate.sh to be available in my deep deep 
 . ${SCRIPTS}/translate.sh
 eval model_${SLANG}_${TARGET_LANG} || (echo "No model for ${SLANG} -> ${TARGET_LANG}" 1>&2 ; exit 255)
 
-# Copy model to scratch (only if we're running multiple mosis)
-if [ "$MODEL_IMPL" = "translate_moses" ] && [ "$NMOSI" -gt 0 ]; then
-       	MDIR="`dirname $MODEL`"
-        MNAME="`basename $MODEL`"
-       	MODEL_PATH="${MODEL}"
-	MODEL="${SCRATCH}/${MNAME}"
-        echo "Copying translation model ${MODEL_PATH} to scratch space"
-        (cd "${MDIR}" && tar -cf - "${MNAME}") | (cd "${SCRATCH}" && tar -xvf -)
-fi
-bsize=$(($sentences / 128))
-if test $(($sentences % 128)) -ne 0; then
+bsize=$(($sentences / 64))
+if test $(($sentences % 64)) -ne 0; then
 	bsize=$(($bsize + 1))
 fi
 echo "Using a sentence batch size of ${bsize}"
+echo "Using ${NMOSI} processes with ${MOSES_ARGS}"
 
 # Go!
 

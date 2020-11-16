@@ -3,6 +3,7 @@ set -euo pipefail
 . ./config.csd3
 . ./functions.sh
 
+module load parallel
 THREADS=${THREADS:-4}
 
 collection=$1

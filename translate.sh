@@ -89,7 +89,7 @@ model_ga_en () {
     TRUECASE_MODEL=truecase-model.ga
 }
 
-model_hr () {
+model_hr_en () {
     MODEL=${MODELS}/phi-system/fast-hr-en
     TRUECASE_MODEL=truecase-model.hr
 }
@@ -196,6 +196,11 @@ translate_moses () {
 
     pushd . > /dev/null
     cd "$MODEL"
+#    $MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
+#        $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
+#        $MOSES_BIN -v 0 $MOSES_ARGS -f $MOSES_INI | \
+#        $MOSES/scripts/recaser/detruecase.perl | \
+#        $MOSES/scripts/tokenizer/detokenizer.perl -q
     $MOSES/scripts/tokenizer/tokenizer.perl -a -q -l $SLANG | \
         $MOSES/scripts/recaser/truecase.perl --model $TRUECASE_MODEL | \
         $MODELS/phi-system/trim_lines.py 100 | \
