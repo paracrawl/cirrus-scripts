@@ -18,8 +18,16 @@ BUILD_BOOST="test ! -d $PREFIX/include/boost"
 BUILD_BLEUALIGN="test ! -x $PREFIX/bin/bleualign_cpp"
 BUILD_DOCALIGN="test ! -x $PREFIX/bin/docalign"
 BUILD_PREPROCESS="test ! -x $PREFIX/bin/b64filter"
-BUILD_XMLRPC="test ! -d $PREFIX/lib/xmlrpc-c"
+BUILD_XMLRPC="test ! -f $PREFIX/lib/libxmlrpc.so"
 BUILD_MOSES="test ! -x $PREFIX/bin/moses2"
+
+BUILD_KENLM="test ! -f $PREFIX/lib/libkenlm.a"
+BUILD_BIFIXER="test ! -x $PREFIX/bin/bifixer"
+BUILD_BICLEANER="test ! -x $PREFIX/bin/bicleaner-classify-lite"
+BUILD_TMXT="test ! -x $PREFIX/bin/tmxt"
+
+BUILD_MOSES=false
+BUILD_MARIAN_CPU=false
 
 command_not_exists() {
 	if command -v "$@" &>/dev/null; then
@@ -29,7 +37,7 @@ command_not_exists() {
 	fi
 }
 
-for name in python subword jieba marian_cpu protobuf perftools boost bleualign docalign preprocess moses; do
+for name in python subword jieba marian_cpu protobuf perftools boost bleualign docalign preprocess moses kenlm bifixer tmxt xmlrpc; do
 	printf "Building $name: "
 	varname="BUILD_${name^^}"
 	if ${!varname}; then
@@ -191,6 +199,38 @@ if $BUILD_MOSES; then
 	./bjam -j8 --prefix=$PREFIX moses2
 	
 	popd
+fi
+
+if $BUILD_KENLM; then
+	pushd kenlm
+	
+	pip install . --install-option="--max_order 7"
+
+	mkdir -p build && cd build
+	
+	(\
+		module load eigen/latest \
+		&& cmake .. -DKENLM_MAX_ORDER=7 -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX \
+		&& make -j8 install \
+	)
+
+	popd
+fi
+
+if $BUILD_BICLEANER; then
+	pip install bicleaner
+fi
+
+if $BUILD_BIFIXER; then
+	pip install -r bifixer/requirements.txt
+	echo "python $PREFIX/src/bifixer/bifixer/bifixer.py \"$@\"" > $PREFIX/bin/bifixer
+	chmod +x $PREFIX/bin/bifixer
+fi
+
+if $BUILD_TMXT; then
+	pip install -r tmxt/requirements.txt
+	echo "python $PREFIX/src/tmxt/tmxt.py \"$@\"" > $PREFIX/bin/tmxt
+	chmod +x $PREFIX/bin/tmxt
 fi
 
 popd # move out of src
