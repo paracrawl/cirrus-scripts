@@ -191,8 +191,9 @@ model_oc_es() {
 }
 
 model_fa_en() {
-    MODEL_IMPL=translate_fa_en
+    MODEL_IMPL=translate_extern_gpu
     MODEL_ARCH=gpu
+	export TRANSLATE_SCRIPT="/home/cs-vand1/src/cirrus-scripts/translate_fa_en.sh fa"
 
     # Hard override full-on I dont care mode
     export SLURM_ACCOUNT=t2-cs119-gpu
@@ -201,43 +202,42 @@ model_fa_en() {
 }
 
 model_ha_en() {
-	MODEL_IMPL=translate_ha_en
+	MODEL_IMPL=translate_extern_cpu
 	MODEL_ARCH=cpu
+	export TRANSLATE_SCRIPT=/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ha-en/scripts/translate.sh
 }
 
 model_ig_en() {
-	MODEL_IMPL=translate_ig_en
+	MODEL_IMPL=translate_extern_cpu
 	MODEL_ARCH=cpu
+	export TRANSLATE_SCRIPT=/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ig-en/scripts/translate.sh
 }
 
 model_zh_en() {
-	MODEL_IMPL=translate_zh_en
+	MODEL_IMPL=translate_extern_cpu
 	MODEL_ARCH=cpu
+	export TRANSLATE_FOLD_COLUMN=100
+	export TRANSLATE_SCRIPT=$SCRIPTS/translate_zh_en.sh
 }
 
-translate_fa_en() {
-    /home/cs-vand1/src/cirrus-scripts/translate_fa_en.sh "$@"
+model_ko_en() {
+	MODEL_IMPL=translate_extern_cpu
+	MODEL_ARCH=cpu
+	export TRANSLATE_FOLD_COLUMN=100
+	export TRANSLATE_SCRIPT=$SCRIPTS/translate_ko_en.sh
 }
 
-translate_ha_en() {
+translate_extern_gpu() {
+	shift # consume language
+	$TRANSLATE_SCRIPT "$@"
+}
+
+translate_extern_cpu() {
 	shift # Consume language
-	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ha-en/scripts/translate.sh \
+	$TRANSLATE_SCRIPT \
 		--quiet-translation \
 		--cpu-threads $THREADS \
 		"$@"
-}
-
-translate_ig_en() {
-	shift # Consume language
-	/rds/project/t2_vol4/rds-t2-cs119/jhelcl/gourmet/baselines/ig-en/scripts/translate.sh \
-		--quiet-translation \
-		--cpu-threads $THREADS \
-		"$@"
-}
-
-translate_zh_en() {
-	shift # Consume zh
-	$SCRIPTS/translate_zh_en.sh --quiet-translation --cpu-threads $THREADS
 }
 
 translate_moses () {
