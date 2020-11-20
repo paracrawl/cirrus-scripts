@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+collection=$1
+lang=$2
+
+DEST=$DATA/cleaning/${TARGET_LANG}-$lang
+TMP_DEST=$DEST.$$
+
+mkdir -p $DEST $TMP_DEST
+
+pigz -cd $3 \
+| cut -f 1-4 \
+| split \
+	--numeric-suffixes \
+	--suffix-length=1 \
+	--bytes=1024M \
+	- \
+	$TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.
+
+mv $TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.* \
+	$DATA/${collection}-cleaning/${TARGET_LANG}-$lang
+
+rmdir $TMP_DEST
+
