@@ -1,0 +1,45 @@
+#!/bin/bash
+set -euo pipefail
+
+source $SCRIPTS/env/init.sh
+
+collection=$1
+lang=$2
+batch=$3
+
+# Extract the last numbery part from the batch name
+batch_num=$(echo $batch | sed -n 's/.*\([0-9]\{1,\}\)$/\1/p')
+
+output_prefix="${TARGET_LANG}-${lang}.${collection}.${batch_num}"
+
+pushd $(dirname $batch)
+
+FIXED=$TMPDIR/fixed.$$
+CLASSIFIED=$TMPDIR/classified.$$.gz
+FILTERED=$TMPDIR/filtered${BICLEANER_THRESHOLD/./}.$$.gz
+
+cat $batch \
+| bifixer - $FIXED $TARGET_LANG $lang $BIFIXER_PARAMS
+
+cat $FIXED \
+| cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
+| paste $FIXED - \
+| gzip -9c \
+> $CLASSIFIED
+
+gzip -cd $CLASSIFIED \
+| wc -wl \
+| sed 's/^ \+//' \
+| tr -s ' ' '\t' \
+> ${output_prefix}.stats.raw
+
+gzip -cd $CLASSIFIED \
+| python $BITEXTOR/bitextor-filterbicleaner.py --threshold $BICLEANER_THRESHOLD \
+| python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner" -s \
+| LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
+| gzip -9c \
+> $FILTERED
+
+mv $CLASSIFIED ${output_prefix}.classified.gz
+mv $FILTERED ${output_prefix}.filtered${BICLEANER_THRESHOLD/./}.gz
+rm $FIXED
