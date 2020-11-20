@@ -29,7 +29,7 @@ function make_batch_list_retry {
 
 	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
-		if [[ ! -e $alignments ]]; then
+		if [[ -e $SRC_BATCH/tokenised_en.gz ]] && [[ ! -e $alignments ]]; then
 			echo $alignments 1>&2
 			echo $SRC_BATCH $REF_BATCH
 		fi
@@ -50,7 +50,13 @@ for lang in $*; do
 			schedule \
 				-J align-${lang} \
 				-a $job_list \
-				${SCRIPTS}/06.align.slurm ${lang} $batch_list
+				--time 12:00:00 \
+				--cpus-per-task=4 \
+				--mem-per-cpu=8192 \
+				-e ${SLURM_LOGS}/06.align-%A_%a.err \
+				-o ${SLURM_LOGS}/06.align-%A_%a.out \
+				${SCRIPTS}/generic.slurm $batch_list \
+				${SCRIPTS}/06.align $lang
 		fi
 	fi
 done

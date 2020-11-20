@@ -22,7 +22,14 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then 
-			schedule -J tok-${lang} -a $job_list ${SCRIPTS}/05.tokenise.slurm $lang $batch_list
+			schedule \
+				-J tok-${lang} \
+				-a $job_list \
+				--time 4:00:00 \
+				-e ${SLURM_LOGS}/05.tokenise-%A_%a.err \
+				-o ${SLURM_LOGS}/05.tokenise-%A_%a.out \
+				${SCRIPTS}/generic.slurm $batch_list \
+				${SCRIPTS}/05.tokenise $lang
 		fi
 	fi
 done

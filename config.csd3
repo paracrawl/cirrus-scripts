@@ -13,7 +13,7 @@ export JIEBA="/rds/project/t2_vol4/rds-t2-cs119/jelmervdl/jieba/bin/python -m ji
 
 export LD_LIBRARY_PATH=$APERTIUM/lib:/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
 export PYTHON=/usr/bin/python3
-export BITEXTOR=/home/cs-wait1/sw/bitextor
+export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 export KPU=/home/cs-vand1/src/preprocess
 export GIAWARC=/home/cs-wait1/go/bin/giawarc
 export GIASHARD=/home/cs-vand1/go/bin/giashard
@@ -23,6 +23,7 @@ export DOCJOIN=docjoin
 export CACHE=$KPU/build/bin/cache
 export B64FILTER=$KPU/build/bin/b64filter
 export FOLDFILTER=$KPU/build/bin/foldfilter
+export TOKENISER="$PERL $KPU/moses/tokenizer/tokenizer.perl" # We're doing British English in this repo apparently.
 export BLEUALIGN=/home/cs-vand1/src/bleualign-cpp/build/bleualign_cpp
 export SCRIPTS=/home/cs-vand1/src/cirrus-scripts
 export LOCAL=/home/cs-wait1/sw/bin
@@ -31,12 +32,20 @@ export MOSES=$PREFIX/src/mosesdecoder
 export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 export MOSES_ARGS="--threads 16"
 export MOSES_INI=moses2.ini
-#export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
-export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
+export DATA=/rds/project/t2_vol4/rds-t2-cs119/hieu
+#export DATA=/rds/project/t2_vol4/rds-t2-cs119/internet_archive
 #export DATA=/rds/project/t2_vol4/rds-t2-cs119/paracrawl
+#export DATA=/rds/project/t2_vol4/rds-t2-cs119/jelmervdl/voice-of-america
 export SCRATCH=/local
 export TARGET_LANG=${TARGET_LANG:-en}
 #export TARGET_LANG=es
+
+export BIFIXER_PARAMS="--aggressive_dedup -q"
+export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
+export BICLEANER_THRESHOLD="0.7"
+export BICLEANER_PARAMS="--score_only -q"
+export BICLEANER_MODELS="/rds/project/t2_vol4/rds-t2-cs119/cleaning/bicleaner-models"
+export BITEXTOR="$PREFIX/src/bitextor"
 
 # $DATA is used to construct the path to were batch listings are stored
 #export DATA=/rds/project/t2_vol4/rds-t2-cs119
@@ -46,8 +55,10 @@ export TARGET_LANG=${TARGET_LANG:-en}
 #	["hieu"]="$DATA/hieu/hieu"
 #)
 
+export SLURM_LOGS="/home/%u/logs"
+
 # Number of files processed per slurm job
-export TASKS_PER_BATCH=${TPB:-30}
+export TASKS_PER_BATCH=${TPB:-64}
 
 # Where jobs should be executed. Values used in functions.sh/schedule.
 export SLURM_ACCOUNT=t2-cs119-knl
