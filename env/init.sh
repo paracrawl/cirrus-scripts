@@ -9,7 +9,7 @@ unset INCLUDE LIB CPATH LIBRARY_PATH LD_LIBRARY_PATH
 module load \
 	python/3.8 \
 	perl-5.26.2-gcc-7.2.0-2ys4uai \
-	gcc/8 \
+	gcc/9 \
 	cmake \
 	intel/mkl/2020.2 \
 	protobuf-3.4.0-gcc-5.4.0-zkpendv \
