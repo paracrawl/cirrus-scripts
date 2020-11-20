@@ -8,7 +8,7 @@ python3 $BPE/apply_bpe.py \
 | $MARIAN/marian-decoder \
     -m run12/model.npz.best-translation.npz \
     -v run12/vocab.{ko,en}.yml \
-    -w 3200 \
+    -w 3000 \
     --optimize \
     --normalize 1 \
     --word-penalty 0 \
