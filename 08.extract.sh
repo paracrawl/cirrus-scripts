@@ -14,5 +14,6 @@ for lang in $*; do
 		--time 4:00:00 \
 		-e ${SLURM_LOGS}/08.extract-%A.err \
 		-o ${SLURM_LOGS}/08.extract-%A.out \
-		$SCRIPTS/08.extract $collection $lang
+		$SCRIPTS/08.extract $collection $lang \
+		$DATA/${collection}-corpora/${collection}-unclean.${TARGET_LANG}-${lang}.gz
 done

@@ -9,17 +9,27 @@ TMP_DEST=$DEST.$$
 
 mkdir -p $DEST $TMP_DEST
 
+corpus_pairs=$(pigz -cd $3 | wc -l)
+echo "Number of pairs in unclean corpus: $corpus_pairs"
+
 pigz -cd $3 \
 | cut -f 1-4 \
 | split \
 	--numeric-suffixes \
-	--suffix-length=1 \
+	--suffix-length=4 \
 	--bytes=1024M \
 	- \
 	$TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.
 
-mv $TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.* \
-	$DATA/${collection}-cleaning/${TARGET_LANG}-$lang
+chunk_pairs=$(wc -l $TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.* | tail -n1 | awk '{ print $1 }')
+echo "Number of pairs split accorss chunks: $chunk_pairs"
+
+if [[ $corpus_pairs != $chunk_pairs ]]; then
+	echo "Error: number of pairs does not match!"
+	exit 1
+fi
+
+mv $TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.* $DEST/
 
 rmdir $TMP_DEST
 
