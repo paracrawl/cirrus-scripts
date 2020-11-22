@@ -223,13 +223,13 @@ fi
 
 if $BUILD_BIFIXER; then
 	pip install -r bifixer/requirements.txt
-	echo "python $PREFIX/src/bifixer/bifixer/bifixer.py \"$@\"" > $PREFIX/bin/bifixer
+	echo "python $PREFIX/src/bifixer/bifixer/bifixer.py \"\$@\"" > $PREFIX/bin/bifixer
 	chmod +x $PREFIX/bin/bifixer
 fi
 
 if $BUILD_TMXT; then
 	pip install -r tmxt/requirements.txt
-	echo "python $PREFIX/src/tmxt/tmxt.py \"$@\"" > $PREFIX/bin/tmxt
+	echo "python $PREFIX/src/tmxt/tmxt.py \"\$@\"" > $PREFIX/bin/tmxt
 	chmod +x $PREFIX/bin/tmxt
 fi
 
