@@ -11,8 +11,8 @@ function make_batch_list_all {
 	local batch_list="${DATA}/${collection}-batches/09.${lang}-${TARGET_LANG}"
 	
 	if ! test -e $batch_list; then
-		find ${DATA}/${collection}-cleaning/${TARGET_LANG}-${lang}/raw-${collection}.${TARGET_LANG}-${lang} \
-			-mindepth 1 -maxdepth 1 -type f -regex '.*\.[0-9]{1,}$' \
+		find ${DATA}/cleaning/${TARGET_LANG}-${lang}/ \
+			-mindepth 1 -maxdepth 1 -type f -regex ".*/raw-${collection}\.${TARGET_LANG}-${lang}\.[0-9]+$" \
 			> $batch_list
 	fi
 
@@ -71,6 +71,7 @@ for lang in $*; do
 				-J clean-${lang} \
 				-a $job_list \
 				--time 24:00:00 \
+				--cpus-per-task 2 \
 				-e ${SLURM_LOGS}/09.clean-%A_%a.err \
 				-o ${SLURM_LOGS}/09.clean-%A_%a.out \
 				generic.slurm $batch_list 09.clean ${collection} ${lang}
