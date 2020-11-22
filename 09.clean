@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -euxo pipefail
 
 source $SCRIPTS/env/init.sh
 
@@ -18,22 +18,16 @@ FIXED=$TMPDIR/fixed.$$
 CLASSIFIED=$TMPDIR/classified.$$.gz
 FILTERED=$TMPDIR/filtered${BICLEANER_THRESHOLD/./}.$$.gz
 
+# Note: separate from the second pipeline because of the `paste $FIXED` in there.
 cat $batch \
 | bifixer - $FIXED $TARGET_LANG $lang $BIFIXER_PARAMS
 
 cat $FIXED \
 | cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
 | paste $FIXED - \
-| gzip -9c \
-> $CLASSIFIED
-
-gzip -cd $CLASSIFIED \
-| wc -wl \
-| sed 's/^ \+//' \
-| tr -s ' ' '\t' \
-> ${output_prefix}.stats.raw
-
-gzip -cd $CLASSIFIED \
+| tee \
+	>(gzip -9c > $CLASSIFIED) \
+	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > ${output_prefix}.stats.raw) \
 | python $BITEXTOR/bitextor-filterbicleaner.py --threshold $BICLEANER_THRESHOLD \
 | python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner" -s \
 | LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
