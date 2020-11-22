@@ -29,6 +29,10 @@ BUILD_TMXT="test ! -x $PREFIX/bin/tmxt"
 BUILD_MOSES=false
 BUILD_MARIAN_CPU=false
 
+# Used for zh/ko by Chaojun
+BUILD_JIEBA=false
+BUILD_MECAB=false
+
 command_not_exists() {
 	if command -v "$@" &>/dev/null; then
 		return 1
@@ -231,6 +235,20 @@ if $BUILD_TMXT; then
 	pip install -r tmxt/requirements.txt
 	echo "python $PREFIX/src/tmxt/tmxt.py \"\$@\"" > $PREFIX/bin/tmxt
 	chmod +x $PREFIX/bin/tmxt
+fi
+
+if $BUILD_JIEBA; then
+	pip install jieba
+fi
+
+if $BUILD_MECAB; then
+	curl -L "https://github.com/taku910/mecab/archive/master.tar.gz" | tar -zx
+
+	pushd mecab-master/mecab
+	./configure.sh --prefix=$PREFIX
+	make -j8 install
+	pip install mecab
+	popd
 fi
 
 popd # move out of src
