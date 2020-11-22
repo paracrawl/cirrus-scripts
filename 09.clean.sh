@@ -49,6 +49,10 @@ for lang in $*; do
 			--ignore_orthography \
 			--ignore_segmentation"
 		export BICLEANER="python ${HOME}/rds/rds-t2-cs119/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
+		export BICLEANER_PARAMS="\
+			$BICLEANER_PARAMS \
+			--processes 2 \
+		" \
 		export BICLEANER_THRESHOLD=0.4
 	fi
 
