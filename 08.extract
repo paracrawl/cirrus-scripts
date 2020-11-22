@@ -17,7 +17,7 @@ pigz -cd $3 \
 | split \
 	--numeric-suffixes \
 	--suffix-length=4 \
-	--bytes=1024M \
+	--line-bytes=1024M \
 	- \
 	$TMP_DEST/raw-$collection.${TARGET_LANG}-$lang.
 
