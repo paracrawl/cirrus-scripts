@@ -242,13 +242,8 @@ if $BUILD_JIEBA; then
 fi
 
 if $BUILD_MECAB; then
-	curl -L "https://github.com/taku910/mecab/archive/master.tar.gz" | tar -zx
-
-	pushd mecab-master/mecab
-	./configure.sh --prefix=$PREFIX
-	make -j8 install
-	pip install mecab
-	popd
+	pip install mecab-python3
+	pip install python-mecab-ko
 fi
 
 popd # move out of src
