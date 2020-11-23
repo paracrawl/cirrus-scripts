@@ -40,7 +40,7 @@ TMPDIR=${SCRATCH}/$(basename "$1").$$
 mkdir -p ${TMPDIR} || exit 255
 export TMPDIR
 
-chown :t2-cs119 $TMPDIR
+chown :rds-48gU72OtDNY-users $TMPDIR
 chmod g+s $TMPDIR
 
 cleanup () {
