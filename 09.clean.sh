@@ -8,12 +8,16 @@ set -euo pipefail
 
 function make_batch_list_all {
 	local collection="$1" lang="$2"
-	local batch_list="${DATA}/${collection}-batches/09.${lang}-${TARGET_LANG}"
+	local batch_list="${COLLECTIONS[$collection]}-batches/09.${lang}-${TARGET_LANG}"
 	
 	if ! test -e $batch_list; then
-		find ${DATA}/cleaning/${TARGET_LANG}-${lang}/ \
-			-mindepth 1 -maxdepth 1 -type f -regex ".*/raw-${collection}\.${TARGET_LANG}-${lang}\.[0-9]+$" \
-			> $batch_list
+		find ${COLLECTIONS[$collection]}-cleaning/${TARGET_LANG}-${lang}/ \
+			-mindepth 1 \
+			-maxdepth 1 \
+			-type f \
+			-regex ".*/raw-${collection}\.${TARGET_LANG}-${lang}\.[0-9]+$" \
+			> $batch_list.$$ \
+			&& mv $batch_list.$$ $batch_list
 	fi
 
 	echo $batch_list
@@ -21,7 +25,7 @@ function make_batch_list_all {
 
 function make_batch_list_retry {
 	local collection="$1" lang="$2"
-	local batch_list="${DATA}/${collection}-batches/09.${lang}-${TARGET_LANG}".$(date '+%Y%m%d%H%M%S')
+	local batch_list="${COLLECTIONS[$collection]}-batches/09.${lang}-${TARGET_LANG}".$(date '+%Y%m%d%H%M%S')
 
 	cat `make_batch_list_all "$@"` | while read batch; do
 		batch_num=$(echo $batch | sed -n 's/.*\([0-9]\{1,\}\)$/\1/p')
@@ -48,7 +52,7 @@ for lang in $*; do
 			--ignore_long \
 			--ignore_orthography \
 			--ignore_segmentation"
-		export BICLEANER="python ${HOME}/rds/rds-t2-cs119/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
+		export BICLEANER="python ${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
 		export BICLEANER_PARAMS="\
 			$BICLEANER_PARAMS \
 			--processes 2 \
@@ -57,9 +61,9 @@ for lang in $*; do
 	fi
 
 	if [[ $lang == 'ko' ]]; then
-		export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119/cwang/bicleaner/model/korean/${TARGET_LANG}-${lang}.yaml"
+		export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/korean/${TARGET_LANG}-${lang}.yaml"
 	elif [[ $lang == 'zh' ]]; then
-		export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119/cwang/bicleaner/model/chinese/${TARGET_LANG}-${lang}.yaml"
+		export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/chinese/${TARGET_LANG}-${lang}.yaml"
 	else
 		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
 		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
