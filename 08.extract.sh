@@ -15,5 +15,6 @@ for lang in $*; do
 		-e ${SLURM_LOGS}/08.extract-%A.err \
 		-o ${SLURM_LOGS}/08.extract-%A.out \
 		$SCRIPTS/08.extract $collection $lang \
-		$DATA/${collection}-corpora/${collection}-unclean.${TARGET_LANG}-${lang}.gz
+		${COLLECTIONS[$collection]}-cleaning/${TARGET_LANG}-$lang \
+		${COLLECTIONS[$collection]}-corpora/${collection}-unclean.${TARGET_LANG}-${lang}.gz
 done
