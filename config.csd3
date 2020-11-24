@@ -32,10 +32,13 @@ export MOSES=$PREFIX/src/mosesdecoder
 export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 export MOSES_ARGS="--threads 16"
 export MOSES_INI=moses2.ini
-export DATA=/rds/project/rds-48gU72OtDNY/hieu
-#export DATA=/rds/project/rds-48gU72OtDNY/internet_archive
+#export DATA=/rds/project/rds-48gU72OtDNY/hieu
+export DATA=/rds/project/rds-48gU72OtDNY/internet_archive
 #export DATA=/rds/project/rds-48gU72OtDNY/paracrawl
 #export DATA=/rds/project/rds-48gU72OtDNY/jelmervdl/voice-of-america
+
+export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/internet_archive/cleaning
+
 export SCRATCH=/local
 export TARGET_LANG=${TARGET_LANG:-en}
 #export TARGET_LANG=es
@@ -47,13 +50,12 @@ export BICLEANER_PARAMS="--score_only -q"
 export BICLEANER_MODELS="/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models"
 export BITEXTOR="$PREFIX/src/bitextor"
 
-# $DATA is used to construct the path to were batch listings are stored
-#export DATA=/rds/project/t2_vol4/rds-t2-cs119
-#declare -A COLLECTIONS=(
-#	["wide00006"]="$DATA/internet_archive/wide00006"
-#	["wide00015"]="$DATA/internet_archive/wide00015"
-#	["hieu"]="$DATA/hieu/hieu"
-#)
+COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"
+declare -A COLLECTIONS=(
+	["wide00006"]="$COLLECTION_ROOT/internet_archive/wide00006"
+	["wide00015"]="$COLLECTION_ROOT/internet_archive/wide00015"
+	["hieu"]="$COLLECTION_ROOT/hieu/hieu"
+)
 
 export SLURM_LOGS="/home/%u/logs"
 

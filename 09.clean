@@ -25,11 +25,13 @@ cat $batch \
 cat $FIXED \
 | cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
 | paste $FIXED - \
+| fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
+| sed -e "s/$/\t${collection}/" \
 | tee \
 	>(gzip -9c > $CLASSIFIED) \
 	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > ${output_prefix}.stats.raw) \
-| python $BITEXTOR/bitextor-filterbicleaner.py --threshold $BICLEANER_THRESHOLD \
-| python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner" -s \
+| awk "\$7 >= ${BICLEANER_THRESHOLD}" \
+| python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
 | gzip -9c \
 > $FILTERED
