@@ -4,7 +4,8 @@ module purge
 
 # Also explicitly puring these (except PATH) to get rid of
 # any user defined environment.
-unset INCLUDE LIB CPATH LIBRARY_PATH LD_LIBRARY_PATH
+#unset INCLUDE LIB CPATH LD_LIBRARY_PATH LIBRARY_PATH
+unset LD_LIBRARY_PATH
 
 module load \
 	python/3.8 \
