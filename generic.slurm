@@ -33,19 +33,20 @@ BATCHES=$1
 shift
 
 # Try to make/take the most of this node.
-THREADS=$(( $SLURM_CPUS_ON_NODE / $SLURM_TASKS_PER_NODE ))
-export THREADS=$(( $THREADS > ${SLURM_CPUS_PER_TASK:-1} ? $THREADS : ${SLURM_CPUS_PER_TASK:-1} ))
+AVAILABLE_THREADS=$(( $SLURM_CPUS_ON_NODE / $SLURM_TASKS_PER_NODE ))
+THREADS=${SLURM_CPUS_PER_TASK:-$AVAILABLE_THREADS}
+export THREADS=$(( $THREADS > 1 ? $THREADS : 1 ))
 
-TMPDIR=${SCRATCH}/$(basename "$1").$$
-mkdir -p ${TMPDIR} || exit 255
-export TMPDIR
+SCRATCH_BASED_TMPDIR=${SCRATCH}/$(basename "$1").$$
+mkdir -p ${SCRATCH_BASED_TMPDIR} || exit 255
+export TMPDIR=$SCRATCH_BASED_TMPDIR
 
-chown :rds-48gU72OtDNY-users $TMPDIR
-chmod g+s $TMPDIR
+chown :rds-48gU72OtDNY-users $SCRATCH_BASED_TMPDIR
+chmod g+s $SCRATCH_BASED_TMPDIR
 
 cleanup () {
-	echo "Cleaning up scratch director $TMPDIR"
-	rm -rf $TMPDIR
+	echo "Cleaning up scratch director $SCRATCH_BASED_TMPDIR"
+	rm -rf $SCRATCH_BASED_TMPDIR
 }
 trap cleanup EXIT
 
