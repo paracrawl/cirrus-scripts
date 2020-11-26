@@ -14,28 +14,32 @@ output_prefix="${TARGET_LANG}-${lang}.${collection}.${batch_num}"
 
 pushd $(dirname $batch)
 
-FIXED=$TMPDIR/fixed.$$
-CLASSIFIED=$TMPDIR/classified.$$.gz
-FILTERED=$TMPDIR/filtered${BICLEANER_THRESHOLD/./}.$$.gz
+TMP_FIXED=$TMPDIR/fixed.$$
+trap "rm -f $TMP_FIXED" EXIT
+
+CLASSIFIED=${output_prefix}.classified.gz
+FILTERED=${output_prefix}.filtered${BICLEANER_THRESHOLD/./}.gz
+STATS=${output_prefix}.stats.raw
 
 # Note: separate from the second pipeline because of the `paste $FIXED` in there.
 cat $batch \
-| bifixer - $FIXED $TARGET_LANG $lang $BIFIXER_PARAMS
+| bifixer - - $TARGET_LANG $lang $BIFIXER_PARAMS \
+> $TMP_FIXED
 
-cat $FIXED \
+cat $TMP_FIXED \
 | cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
 | paste $FIXED - \
 | fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
 | sed -e "s/$/\t${collection}/" \
 | tee \
-	>(gzip -9c > $CLASSIFIED) \
-	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > ${output_prefix}.stats.raw) \
+	>(pigz -9c > $CLASSIFIED.$$) \
+	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$$) \
 | awk "\$7 >= ${BICLEANER_THRESHOLD}" \
 | python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
-| gzip -9c \
-> $FILTERED
+| pigz -9c \
+> $FILTERED.$$
 
-mv $CLASSIFIED ${output_prefix}.classified.gz
-mv $FILTERED ${output_prefix}.filtered${BICLEANER_THRESHOLD/./}.gz
-rm $FIXED
+mv $CLASSIFIED.$$ $CLASSIFIED
+mv $FILTERED.$$ $FILTERED
+mv $STATS.$$ $STATS
