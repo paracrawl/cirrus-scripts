@@ -1,0 +1,31 @@
+#!/bin/bash
+set -euo pipefail
+
+output_file="$1"
+shift
+
+batch_lists="$@"
+
+TMPDIR=$(mktemp -d -p $(dirname $output_file))
+test -d "$TMPDIR"
+trap "rm -rf $TMPDIR" EXIT
+
+mkdir -p $(dirname $output_file)
+
+cat $@ \
+| while read batch; do
+	echo "Reading $batch" >&2
+	pigz -cd $batch
+done \
+| LC_ALL=C sort \
+	-t$'\t' \
+	-k5,5 \
+	-k6,6nr \
+	--compress-program=gzip \
+	-T $TMPDIR \
+	--parallel=$SLURM_CPUS_ON_NODE -S 80% \
+| pigz \
+> $output_file.$$
+
+echo "Moving $output_file.$$ to $output_file"
+mv $output_file.$$ $output_file
