@@ -1,9 +1,12 @@
 /.schedule-log
 /env/bin
+/env/etc
 /env/go
 /env/include
 /env/lib
 /env/lib64
+/env/libexec
+/env/scripts
 /env/share
 /env/pyvenv.cfg
 /env/src/*/build/
