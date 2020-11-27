@@ -8,27 +8,26 @@ lang=$2
 batch=$3
 
 # Extract the last numbery part from the batch name
-batch_num=$(echo $batch | sed -n 's/.*\([0-9]\{1,\}\)$/\1/p')
-
-output_prefix="${TARGET_LANG}-${lang}.${collection}.${batch_num}"
+batch_num=$(basename $batch | sed -n 's/^\([0-9]\{1,\}\)\..*$/\1/p')
 
 pushd $(dirname $batch)
 
-TMP_FIXED=$TMPDIR/fixed.$$
+TMP_FIXED=$TMPDIR/${batch_num}.fixed.$$
 trap "rm -f $TMP_FIXED" EXIT
 
-CLASSIFIED=${output_prefix}.classified.gz
-FILTERED=${output_prefix}.filtered${BICLEANER_THRESHOLD/./}.gz
-STATS=${output_prefix}.stats.raw
+CLASSIFIED=${batch_num}.classified.gz
+FILTERED=${batch_num}.filtered${BICLEANER_THRESHOLD/./}.gz
+STATS=${batch_num}.stats
 
-# Note: separate from the second pipeline because of the `paste $FIXED` in there.
+# Note: separate from the second pipeline because of the `paste $TMP_FIXED` later on.
 cat $batch \
 | bifixer - - $TARGET_LANG $lang $BIFIXER_PARAMS \
+| ${SCRIPTS}/filter-unicode.py \
 > $TMP_FIXED
 
 cat $TMP_FIXED \
 | cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
-| paste $FIXED - \
+| paste $TMP_FIXED - \
 | fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
 | sed -e "s/$/\t${collection}/" \
 | tee \

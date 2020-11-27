@@ -10,12 +10,12 @@ function make_batch_list {
 	local collection=$2
 	local batch_list=${COLLECTIONS[$collection]}-batches/11.${lang}-${TARGET_LANG}
 
-	if ! test -e $batch_list || true; then
+	if ! test -e $batch_list; then
 		find ${COLLECTIONS[$collection]}-cleaning/${TARGET_LANG}-${lang}/ \
 			-mindepth 1 \
 			-maxdepth 1 \
 			-type f \
-			-regex ".*/${TARGET_LANG}-${lang}\.${collection}\.[0-9]+\.filtered${BICLEANER_THRESHOLD/./}.gz$" \
+			-regex ".*/[0-9]+\.filtered${BICLEANER_THRESHOLD/./}\.gz$" \
 			> $batch_list.$$ \
 			&& mv $batch_list.$$ $batch_list
 	fi
