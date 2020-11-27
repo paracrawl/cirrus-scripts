@@ -14,18 +14,18 @@ function list_numeric_dirs {
 
 function make_batch_list_all {
 	local collection="$1" lang="$2"
-	if ! test -e ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}; then
-		for shard in $(list_numeric_dirs ${DATA}/${collection}-shards/${lang}/); do
+	if ! test -e ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}; then
+		for shard in $(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${lang}/); do
 			join -j2 \
 				<(list_numeric_dirs $shard) \
-				<(list_numeric_dirs ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $shard))
-		done > ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
+				<(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${TARGET_LANG}/$(basename $shard))
+		done > ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}
 	fi
-	echo ${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}
+	echo ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}
 }
 
 function make_batch_list_retry {
-	batch_list=${DATA}/${collection}-batches/06.${lang}-${TARGET_LANG}.$(date '+%Y%m%d%H%M%S')
+	batch_list=${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}.$(date '+%Y%m%d%H%M%S')
 
 	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
