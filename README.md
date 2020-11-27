@@ -7,7 +7,7 @@ Some steps are currently missing as they are not done on CSD3. Generally we assu
 # Data structure
 
 ```
-${DATA}/
+${COLLECTIONS[$collection]}/
   ${collection}-shards/
     ${lang}/
       ${shard}/
@@ -37,19 +37,74 @@ ${DATA}/
 
   ${collection}-batches/
     ${lang}                 : listing of paths to all batches in $lang
-    01.${lang}
+    01.$lang
     ...
-    05.${lang}              : generally symlinks to ${lang} listing, but can be
+    05.$lang                : generally symlinks to ${lang} listing, but can be
                               customised. These drive the job arrays. I.e. Slurms
                               ARRAY_ID matches a line in this file.
-    06.${lang}              : Same as above but Cartesian product of all batches
-                              in ${lang}/${shard}/* and en/${shard}/*. 
+    06.$lang-$TARGET_LANG   : Same as above but Cartesian product of all batches
+                              in ${lang}/${shard}/* and en/${shard}/*.
+    09.$lang-$TARGET_LANG
+    ...
+    11.$lang-$TARGET_LANG   : List of 1GB chunks of an unclean corpus that need
+                              to be cleaned.
 
   ${collection}-corpora/
     ${collection}-unclean.en-${lang}.gz : Merged version of aligned-[0-9] with 
                                           the urls merged back into them. Input
                                           for bifixer + bicleaner.
+
+  ${collection}-cleaning/
+    ${TARGET_LANG}-${lang}/
+      0000.raw              : Unclean sentence pairs, split in chunks of 1GB.
+      0000.classified.gz    : Output of bicleaner, quality classification.
+      0000.filtered??.gz    : Segment of classification that meets threshold.
+      0000.stats            : line count and word count of filtered segment.
+
+  ${DATA}/cleaning/
+    ${TARGET_LANG}-${lang}/
+      ${TARGET_LANG}-${lang}.${collections} …
+      [..].classified.gz    : Concatenation of all classified sentence pairs
+      [..].filtered??.gz    : Concatenation of all classified sentence pairs
+                              that met the threshold value.
+      [..].tmx.gz           : Deduplicated tmx file generated from the filtered
+                              sentence pairs.
+      [..].txt.gz           : Simple $TARGET_LANG [tab] $lang txt file of all
+                              deduplicated sentence pairs. Derived from tmx file.
+      
 ```
+
+# Compiling software
+Note: these notes are only tested on CSD3, and this process relies on modules
+that are probably only available on CSD3. Try this elsewhere at your own peril.
+
+First of all, make sure you check out all submodules:
+```sh
+git submodule update --init --recursive
+```
+
+In the `env/` directory you'll find a couple of files:
+```
+env/
+  setup.sh                  : Script to download & compile software into this
+                              env/ folder. It will also make this a python
+                              virtual env so that installations via pip will end
+                              up in here.
+  init.sh                   : Sets the env/ up as a valid location to search for
+                              compiled software. Similar to Python's virtualenv
+                              `activate` script.
+  shell.sh                  : Shortcut to open a shell with the environment
+                              set-up.
+  clean.sh                  : Removes all compiled code again. For when you want
+                              to run setup.sh with a clean start.
+  src/                      : Mostly submodules checked out via git. Some
+                              dependencies will be downloaded via setup.sh.
+  bin/, lib/, include/ ...  : The actual environment once it has been set up.
+```
+
+Note: You might want to disable compiling some software in `setup.sh` since you
+probably don't need moses2 and marian and Chinese tokenisers. Save time by not
+installing them :)
 
 # Running the pipeline
 Modify `config.csd3` to your liking. Especially the paths.
@@ -99,13 +154,15 @@ Scheduling step 4 to directly pick up after step 3:
 Each step consists of a couple of files, for example:
 ```
 03.split-text               : Actual code executed in this step for each batch
-03.split-text.sh            : Wrapper to schedule or retry step. Imports config.
 03.split-text.check.sh.     : Tool to validate output of step (runs interactive)
-03.split-text.slurm.        : Submission script that is submitted by the .sh
-                              wrapper. Contains where and for how long each
-                              step is executed, and does setup of the environment
-                              on the processing node if necessary.
+03.split-text.sh            : Submission script that sets SLURM parameters.
 ```
+
+Most scripts use `generic.slurm` as their "slurm" wrapper. This script functions
+a bit like `xargs`, in that it will run the command passed to it for each line
+in the batch list that is passed in as it's first argument. If it was started
+with --ntasks > 1, it will run ntasks in parallel. (To offload SLURM when there
+are many many batches to process, we have our own parallel executor.)
 
 All scheduling wrappers import `functions.sh` which parses some command line
 options:
@@ -120,10 +177,25 @@ options:
                           a previous job finishes without error.
 ```
 
+## Environment variables
+You can also control how many batches are to be processed per slurm job. For
+example, each job array job can process 64 batches, 4 in parallel by doing:
+```sh
+TPB=64 TPN=4 ./06.align.sh wide00006 zh
+```
+
+- **TPB**: tasks per "batch", which I now realise is exactly the opposite of
+"batches per task", which is the actual meaning…. Defaults to 1.
+- **TPN**: tasks per node, which translates to Slurm's --ntasks argument. Note that
+this defaults to the same value as TPB.
+- **SBATCH**: allows you to override which program is called for `sbatch` by
+the schedule function in `functions.sh`. Useful for debugging, i.e. calling it
+with `fake-sbatchs.sh` which will just run the task instead of scheduling it.
+
 Note that the configuration is imported during submission. It uses Slurm to pick
 up and transport the ENV to the eventual executed script. This way you can do
 manual tweaked submissions by just sourcing the config and calling `sbatch` by
-hand.
+hand, and you can change `config.csd3` without impacting already scheduled jobs.
 
 # Steps
 
@@ -203,5 +275,55 @@ Generates an uncleaned corpus that fits what is expected by bitextor. Basically
 it takes the output of step 6, pastes the urls back in and concatenates it per
 language in a single gzipped file under `${collection}-corpora`.
 
-## 08 and further
-See [paracrawl/clean-csd3](https://github.com/paracrawl/clean-csd3).
+
+**Note**: From here on the scripts are more or less copied over from
+[paracrawl/clean-csd3](https://github.com/paracrawl/clean-csd3). If you have a 
+low resource language, you can also just use `clean.sh` which concatenates all
+of the following steps into a single script.
+
+## 08.extract
+Takes the uncleaned corpus and splits it into chunks of 1GB again.
+
+Bit odd to first have shards & batches, then combine all of them, and then split
+then again right? I agree, and I would like to change it. But with the current
+set-up you'll see that some shards will yield much more than 1GB of sentence
+pairs while others will just yield a few kb. Some domains are just more
+interesting than others. Or larger. (I'm looking at you, dropbox.com…) By
+concatenating and then splitting again we're balancing them out again so all the
+cleaning job will run in about the same amount of time.
+
+## 09.clean
+Takes all the unclean chunks and pulls them through bifixer and bicleaner.
+
+bifixer fixes unicode errors, whitespace issues, etc. More importantly for the
+pipeline, it generates a hash that identifies the sentence pair. This hash is
+later used to deduplicate very similar sentence pairs from the tmx file.
+
+bicleaner classifies the quality of a sentence pair. This score is then used to
+filter out low quality sentence pairs (see `BICLEANER_THRESHOLD` in `config.csd3`)
+
+## 10.reduce-classified
+Just concatenates all classified sentence pair chunks. Not necessary for anything
+further down the pipeline, but paracrawl also publishes these files.
+
+## 11.reduce-filtered
+Concatenates all filtered sentence pair chunks.
+
+## 12.reduce-tmx
+Needs the output of step 11.
+
+Generates a tmx file. In this step the sentence pairs are deduplicated. The urls
+are maintained, so a single sentence pair can have multiple urls pointing to all
+the documents it occurred in, after filtering.
+
+The tmx file may also contain additional hints dropped by bicleaner for each
+sentence pair, and the collections where the sentence pair originates from.
+
+This tmx file is also immediately used to derive a txt file with just the
+sentence pairs. No urls, no scores, etc. 
+
+Note: Step 11 and 12 are not combined because step 11 needs many resources to
+sort all sentence pairs. Step 12 consists of just a single-threaded python
+script. It would be wasteful to hold up all the resources step 11 needed just
+because that python script in step 12 takes such a long time to finish. Hence
+step 12 is separate and asks for fewer resources.
