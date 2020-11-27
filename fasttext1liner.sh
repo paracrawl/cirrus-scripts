@@ -24,4 +24,7 @@ echo $DOCLANG , $FILE_IN
 paste "$FILE_IN" <(/home/cs-sifa1/fastText/fasttext predict /home/cs-sifa1/fastText/lang_detection/lid.176.bin "$FILE_IN")\
             | sed -r "s/__label__//" \
                         | gawk -F$"\t" -v DLANG="$DOCLANG" '{if ($2==DLANG) {print $1}}' 
-
+# if you just want to detect the language
+# zcat plain_text.gz | base64 -d | /home/cs-sifa1/fastText/fasttext predict /home/cs-sifa1/fastText/lang_detection/lid.176.bin - \
+#            | sed -r "s/__label__//" \
+#                        | gawk -F$"\t" -v DLANG="$DOCLANG" '{if ($2==DLANG) {print $1}}' 
