@@ -36,14 +36,10 @@ import time
 import locale
 import re
 import os
-import unicodedata
 from xml.sax.saxutils import escape
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/utils")
 from utils.common import open_xz_or_gzip_or_plain, dummy_open
-
-def remove_control_characters(text):
-    return "".join(ch for ch in text if unicodedata.category(ch)[0]!="C")
 
 def printseg(lang, seg_columns, urls, seg, fields_dict, mint, deferred=None, checksum=None, no_delete_seg=False):
     info_tag = []
@@ -57,7 +53,7 @@ def printseg(lang, seg_columns, urls, seg, fields_dict, mint, deferred=None, che
         print("     <prop type=\"checksum-seg\">" + checksum + "</prop>")
 
     if no_delete_seg or deferred is None:
-        print("     <seg>" + escape(remove_control_characters(seg)) + "</seg>")
+        print("     <seg>" + escape(seg) + "</seg>")
     else:
         print("     <seg></seg>")
     if "numTokensSL" in fields_dict and fields_dict["numTokensSL"] != "" and int(fields_dict["numTokensSL"]) < int(mint):
