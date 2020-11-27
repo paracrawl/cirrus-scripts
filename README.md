@@ -1,3 +1,6 @@
+# Paracrawl pipeline for non-Paracrawlers:
+See [this tutorial](https://docs.google.com/document/d/1YyjdWofZ65ib9qTnGiJ8n0Rvgm4PKRhwvnFYfXrSMRg/edit?usp=sharing), much more readable. If anything is unclear ping me on Slack and/or leave a comment in the Google document.
+
 # Paracrawl processing on CSD3
 This repository contains the scripts used by the University of Edinburgh for running the bitextor software on CSD3.
 
