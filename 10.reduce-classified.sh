@@ -14,7 +14,7 @@ function make_batch_list {
 			-mindepth 1 \
 			-maxdepth 1 \
 			-type f \
-			-regex ".*/${TARGET_LANG}-${lang}\.${collection}\.[0-9]+\.classified.gz$" \
+			-regex ".*/[0-9]+\.classified\.gz$" \
 			> $batch_list
 	fi
 

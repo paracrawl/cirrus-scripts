@@ -11,7 +11,7 @@ for lang in $*; do
 	schedule \
 		-J extract-$lang \
 		--cpus-per-task 1 \
-		--time 4:00:00 \
+		--time 24:00:00 \
 		-e ${SLURM_LOGS}/08.extract-%A.err \
 		-o ${SLURM_LOGS}/08.extract-%A.out \
 		$SCRIPTS/08.extract $collection $lang \

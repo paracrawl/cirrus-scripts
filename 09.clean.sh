@@ -15,7 +15,7 @@ function make_batch_list_all {
 			-mindepth 1 \
 			-maxdepth 1 \
 			-type f \
-			-regex ".*/raw-${collection}\.${TARGET_LANG}-${lang}\.[0-9]+$" \
+			-regex ".*/[0-9]+\.raw$" \
 			> $batch_list.$$ \
 			&& mv $batch_list.$$ $batch_list
 	fi
@@ -28,10 +28,10 @@ function make_batch_list_retry {
 	local batch_list="${COLLECTIONS[$collection]}-batches/09.${lang}-${TARGET_LANG}".$(date '+%Y%m%d%H%M%S')
 
 	cat `make_batch_list_all "$@"` | while read batch; do
-		batch_num=$(echo $batch | sed -n 's/.*\([0-9]\{1,\}\)$/\1/p')
-		output_prefix=$(dirname $batch)/${TARGET_LANG}-${lang}.${collection}.${batch_num}
-
-		if [[ ! -e ${output_prefix}.classified.gz ]] || [[ ! -e ${output_prefix}/filtered${BICLEAER_THRESHOLD/./}.gz ]]; then
+		batch_num=$(basename $batch | sed -n 's/^\([0-9]\{1,\}\)\..*$/\1/p')
+		
+		if [[ ! -e $(dirname $batch)/${batch_num}.classified.gz ]] || [[ ! -e $(dirname $batch)/${batch_num}.filtered${BICLEANER_THRESHOLD/./}.gz ]]; then
+			echo $batch >&2
 			echo $batch
 		fi
 	done | shuf > $batch_list
