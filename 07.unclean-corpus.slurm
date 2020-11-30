@@ -15,7 +15,7 @@ lang=$2
 DEST=${DATA}/${collection}-corpora/${collection}-unclean.${TARGET_LANG}-${lang}.gz
 cat ${DATA}/${collection}-batches/${lang} \
 | while read batch; do
-	for match in ${batch}/aligned-[0-9].gz; do
+	find $batch -maxdepth 1 -type f -regex '.*/aligned-[0-9]*.gz$' | while read match; do
 		echo $match 1>&2
 		paste <(gzip -cd ${match} \
 				| cut -f1-2 \

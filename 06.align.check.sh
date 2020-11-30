@@ -13,10 +13,10 @@ THREADS=${THREADS:-8}
 
 function make_batch_list {
 	local collection="$1" lang="$2"
-	for shard in $(ls -d ${DATA}/${collection}-shards/${lang}/*); do
+	for shard in $(ls -d ${COLLECTIONS[$collection]}-shards/${lang}/*); do
 		join -j2 \
 			<(ls -d $shard/*) \
-			<(ls -d ${DATA}/${collection}-shards/${TARGET_LANG}/$(basename $shard)/*)
+			<(ls -d ${COLLECTIONS[$collection]}-shards/${TARGET_LANG}/$(basename $shard)/*)
 	done
 }
 

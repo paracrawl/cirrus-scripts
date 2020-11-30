@@ -49,19 +49,19 @@ function confirm {
 
 function make_batch_list_all {
 	local step="$1" collection="$2" lang="$3"
-	local batch_list=${DATA}/${collection}-batches/${step}.${lang}
+	local batch_list=${COLLECTIONS[$collection]}-batches/${step}.${lang}
 
-	if ! test -f ${DATA}/${collection}-batches/${lang}; then
-		find ${DATA}/${collection}-shards/${lang} \
+	if ! test -f ${COLLECTIONS[$collection]}-batches/${lang}; then
+		find ${COLLECTIONS[$collection]}-shards/${lang} \
 			-mindepth 2 \
 			-maxdepth 2 \
 			-type d \
 			-regex '.*/[0-9]+/[0-9]+' \
-			> ${DATA}/${collection}-batches/${lang}
+			> ${COLLECTIONS[$collection]}-batches/${lang}
 	fi
 
 	rm -f ${batch_list}
-	ln -s ${DATA}/${collection}-batches/${lang} ${batch_list}
+	ln -s ${COLLECTIONS[$collection]}-batches/${lang} ${batch_list}
 
 	echo ${batch_list}
 }
@@ -69,7 +69,7 @@ function make_batch_list_all {
 
 function make_batch_list_retry {
 	local step="$1" collection="$2" lang="$3" output_file="$4"
-	local batch_list_retry=${DATA}/${collection}-batches/${step}.${lang}.$(date '+%Y%m%d%H%M%S')
+	local batch_list_retry=${COLLECTIONS[$collection]}-batches/${step}.${lang}.$(date '+%Y%m%d%H%M%S')
 
 	cat `make_batch_list_all "$@"` | while read BATCH; do
 		output=${BATCH}/${output_file}
@@ -110,7 +110,7 @@ function schedule {
 		--ntasks ${SLURM_TASKS_PER_NODE:-$TASKS_PER_BATCH}
 		--verbose
 	)
-	local job_id=$(sbatch "${options[@]}" "$@")
+	local job_id=$(${SBATCH:-sbatch} "${options[@]}" "$@")
 	echo $(date +%Y%m%d%H%M%S) $job_id "${options[@]}" "$@" >> ./.schedule-log
 	echo $job_id
 }

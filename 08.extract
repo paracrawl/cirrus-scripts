@@ -1,0 +1,37 @@
+#!/bin/bash
+set -euo pipefail
+
+collection=$1
+lang=$2
+dest=$3
+shift 3
+
+TMP_DEST=$dest.$$
+
+mkdir -p $dest $TMP_DEST
+
+corpus_pairs=$(pigz -cd $@ | wc -l)
+echo "Number of pairs in unclean corpus: $corpus_pairs"
+
+pigz -cd $@ \
+| cut -f 1-4 \
+| split \
+	--numeric-suffixes \
+	--additional-suffix=.raw\
+	--suffix-length=4 \
+	--line-bytes=1024M \
+	- \
+	$TMP_DEST/
+
+chunk_pairs=$(wc -l $TMP_DEST/[0-9][0-9][0-9][0-9].raw | tail -n1 | awk '{ print $1 }')
+echo "Number of pairs split accorss chunks: $chunk_pairs"
+
+if [[ $corpus_pairs != $chunk_pairs ]]; then
+	echo "Error: number of pairs does not match!"
+	exit 1
+fi
+
+mv $TMP_DEST/[0-9][0-9][0-9][0-9].raw $dest/
+
+rmdir $TMP_DEST
+
