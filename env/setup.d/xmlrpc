@@ -5,8 +5,7 @@ is-installed() {
 }
 
 install() {
-	curl -L "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stabl
-e/1.51.06/xmlrpc-c-1.51.06.tgz/download" | tar -zx
+	curl -L "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download" | tar -zx
 
 	pushd xmlrpc-c-1.51.06/
 
