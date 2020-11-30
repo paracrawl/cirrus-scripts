@@ -307,6 +307,12 @@ Generates an uncleaned corpus that fits what is expected by bitextor. Basically
 it takes the output of step 6, pastes the urls back in and concatenates it per
 language in a single gzipped file under `${collection}-corpora`.
 
+```sh
+./07.unclean-corpus.sh wide00015 zh
+```
+
+This command has no "resume" or "retry" option. It just concatenates everything
+it can find. If something was missing, you will have to concat again.
 
 **Note**: From here on the scripts are more or less copied over from
 [paracrawl/clean-csd3](https://github.com/paracrawl/clean-csd3). If you have a 
@@ -316,6 +322,10 @@ of the following steps into a single script.
 ## 08.extract
 Takes the uncleaned corpus and splits it into chunks of 1GB again.
 
+```sh
+./08.extract.sh wide00015 zh
+```
+
 Bit odd to first have shards & batches, then combine all of them, and then split
 then again right? I agree, and I would like to change it. But with the current
 set-up you'll see that some shards will yield much more than 1GB of sentence
@@ -323,6 +333,13 @@ pairs while others will just yield a few kb. Some domains are just more
 interesting than others. Or larger. (I'm looking at you, dropbox.com…) By
 concatenating and then splitting again we're balancing them out again so all the
 cleaning job will run in about the same amount of time.
+
+This step generates a whole bunch of
+`${COLLECTION[$collection]}-cleaning/en-zh/????.raw` files, each plain text.
+
+Note that this command has no resume option at this moment. If you suddenly
+find more shard/batches, you wll have to re-run step 7 and that will invalidate
+all the work done from that point on.
 
 ## 09.clean
 Takes all the unclean chunks and pulls them through bifixer and bicleaner.
@@ -334,12 +351,34 @@ later used to deduplicate very similar sentence pairs from the tmx file.
 bicleaner classifies the quality of a sentence pair. This score is then used to
 filter out low quality sentence pairs (see `BICLEANER_THRESHOLD` in `config.csd3`)
 
+This step generates the 
+`$COLLECTIONS[$collection]-cleaning/en-zh/????.{classfied,filtered04}.gz} files.
+
 ## 10.reduce-classified
 Just concatenates all classified sentence pair chunks. Not necessary for anything
 further down the pipeline, but paracrawl also publishes these files.
 
+**Note** the order of the arguments is now flipped because this step can be
+used to combine multiple collections into a single release.
+
+```sh
+./10.reduce-classified.sh zh wide00006 wide00015 hieu
+```
+
+This generates a file named 
+`$DATA/cleaning/en-zh/en-zh.hieu-wide00006-wide00015.classified.gz`.
+
 ## 11.reduce-filtered
 Concatenates all filtered sentence pair chunks.
+
+```sh
+./11.reduce-filtered.sh zh wide00006 wide000015 hieu
+```
+
+The output will be something like 
+`$DATA/cleaning/en-zh/en-zh.hieu-wide00006-wide00015.filtered04.gz`.
+
+This step can be run in parallel to 10.
 
 ## 12.reduce-tmx
 Needs the output of step 11.
@@ -352,7 +391,14 @@ The tmx file may also contain additional hints dropped by bicleaner for each
 sentence pair, and the collections where the sentence pair originates from.
 
 This tmx file is also immediately used to derive a txt file with just the
-sentence pairs. No urls, no scores, etc. 
+sentence pairs. No urls, no scores, etc.
+
+```sh
+./12.reduce-tmx.sh zh wide00006 wide00015 zh
+```
+
+The output will be in 
+`$DATA/cleaning/en-zh.hieu-wide00006-wide00015.{tmx,txt}.gz`.
 
 Note: Step 11 and 12 are not combined because step 11 needs many resources to
 sort all sentence pairs. Step 12 consists of just a single-threaded python
