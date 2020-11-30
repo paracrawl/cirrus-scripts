@@ -1,0 +1,14 @@
+#!/bin/bash
+
+depends() {
+	echo python
+}
+
+is-installed() {
+	test -x $PREFIX/bin/subword-nmt
+}
+
+install() {
+	pip install subword-nmt
+}
+

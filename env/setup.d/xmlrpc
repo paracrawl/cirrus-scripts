@@ -1,0 +1,19 @@
+#!/bin/bash
+
+is-installed() {
+	test -f $PREFIX/lib/libxmlrpc.so
+}
+
+install() {
+	curl -L "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stabl
+e/1.51.06/xmlrpc-c-1.51.06.tgz/download" | tar -zx
+
+	pushd xmlrpc-c-1.51.06/
+
+	./configure --prefix=$PREFIX
+	make
+	make install
+
+	popd
+}
+

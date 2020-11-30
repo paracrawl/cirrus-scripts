@@ -1,0 +1,22 @@
+#!/bin/bash
+
+is-installed() {
+	test -d $PREFIX/include/gperftools
+}
+
+install() {
+	test -d gperftools-2.8 || curl -L https://github.com/gperftools/gperftools/releases/download/gperftools-2.8/gperftools-2.8.tar.gz | tar -zx
+
+	pushd gperftools-2.8
+
+	./configure --prefix $PREFIX
+	
+	# Patch the makefile to not use `cp -p` because `-p` wont work on CSD3
+	cat Makefile | sed 's,\bcp -p\b,cp,g' > Makefile.patched
+	
+	make -f Makefile.patched -j8
+	make -f Makefile.patched install
+
+	popd
+}
+

@@ -13,13 +13,20 @@ module load \
 	gcc/9 \
 	cmake \
 	intel/mkl/2020.2 \
-	protobuf-3.4.0-gcc-5.4.0-zkpendv \
 	openssl-1.0.2k-gcc-5.4.0-lonhprt \
 	binutils-2.31.1-gcc-5.4.0-uyyspmn
 
-export PATH="$PREFIX/bin:$PATH"
+# protobuf-3.4.0-gcc-5.4.0-zkpendv \
+
+export GOPATH="$PREFIX/go"
+export PATH="$PREFIX/bin:$GOPATH/bin:$PATH"
 export INCLUDE="$PREFIX/include${INCLUDE:+:$INCLUDE}"
 export LIB="$PREFIX/lib${LIB:+:$LIB}"
 export CPATH="$PREFIX/include${CPATH:+:$CPATH}"
 export LIBRARY_PATH="$PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
 export LD_LIBRARY_PATH="$PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+# Note: this will make using KNL nodes a no-go
+export CFLAGS="-O3 -march=native -pipe"
+export CXXFLAGS="-O3 -march=native -pipe"
+

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/bicleaner-classify
+}
+
+depends() {
+	echo python kenlm
+}
+
+install() {
+	pip install bicleaner
+}
+

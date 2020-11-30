@@ -1,0 +1,16 @@
+#!/bin/bash
+
+depends() {
+	echo python
+}
+
+is-installed() {
+	python-package-exists mecab
+}
+
+install() {
+	pip install mecab-python3
+	pip install python-mecab-ko
+}
+
+

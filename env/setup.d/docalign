@@ -1,0 +1,23 @@
+#!/bin/bash
+
+depends() {
+	echo boost
+}
+
+is-installed() {
+	test -x $PREFIX/inb/docjoin
+}
+
+install() {
+	pushd bitextor/document-aligner
+
+	mkdir -p build && cd build
+
+	cmake .. \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DBUILD_TESTING=OFF
+	make -j8 docalign docjoin
+	cp bin/* $PREFIX/bin/
+
+	popd
+}

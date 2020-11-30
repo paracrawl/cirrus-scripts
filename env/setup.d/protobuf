@@ -1,0 +1,18 @@
+#!/bin/bash
+
+is-installed() {
+	command-exists protoc
+}
+
+install() {
+	text -d protobuf-3.13.0 || curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-cpp-3.13.0.tar.gz | tar -zx
+
+	pushd protobuf-3.13.0
+
+	./configure --prefix $PREFIX
+	make -j8
+	make install
+
+ 	popd
+}
+

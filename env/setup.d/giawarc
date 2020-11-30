@@ -1,0 +1,10 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $GOPATH/bin/giawarc
+}
+
+install() {
+	go get github.com/paracrawl/giawarc/cmd/giawarc
+}
+

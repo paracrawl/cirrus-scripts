@@ -1,0 +1,14 @@
+#!/bin/bash
+
+depends() {
+	echo python
+}
+
+is-installed() {
+	python-package-exists jieba
+}
+
+install() {
+	pip install jieba
+}
+
