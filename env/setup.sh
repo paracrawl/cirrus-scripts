@@ -80,7 +80,7 @@ run-module() {
 
 	case "$1" in
 		install)
-			(cd $PREFIX/src && install "${@:2}")
+			(set -euo pipefail; cd $PREFIX/src && install "${@:2}")
 			;;
 		*)
 			eval "$@"
@@ -100,6 +100,9 @@ list-dependencies() {
 	local module=$1
 	local visited=($@)
 	shift
+
+	# At least we depend on ourself being installed.
+	echo $module $module
 	
 	for dependency in $(run-module $module depends); do
 		if ! contains $dependency ${visited[@]}; then
