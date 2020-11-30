@@ -1,11 +1,13 @@
 #!/bin/bash
 
 is-installed() {
-	command-exists protoc
+	#command-exists protoc
+	test -x $PREFIX/bin/protoc
 }
 
 install() {
-	text -d protobuf-3.13.0 || curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-cpp-3.13.0.tar.gz | tar -zx
+	echo "EHLLO" >&2
+	test -d protobuf-3.13.0 || curl -L https://github.com/protocolbuffers/protobuf/releases/download/v3.13.0/protobuf-cpp-3.13.0.tar.gz | tar -zx
 
 	pushd protobuf-3.13.0
 
