@@ -1,0 +1,16 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/tmxt
+}
+
+depends() {
+	echo python
+}
+
+install() {
+	pip install -r tmxt/requirements.txt
+	echo "python $PREFIX/src/tmxt/tmxt.py \"\$@\"" > $PREFIX/bin/tmxt
+	chmod +x $PREFIX/bin/tmxt
+}
+

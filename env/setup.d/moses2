@@ -1,0 +1,17 @@
+#!/bin/bash
+
+is-installed() {
+	test -s $PREFIX/bin/moses2
+}
+
+depends() {
+	echo xmlrpc
+}
+
+install() {
+	pushd mosesdecoder
+
+	./bjam -j8 --prefix=$PREFIX moses2
+
+	popd
+}

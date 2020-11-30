@@ -1,0 +1,10 @@
+#!/bin/bash
+
+install() {
+	python3 -m venv $PREFIX
+}
+
+is-installed() {
+	test -x $PREFIX/bin/python
+}
+

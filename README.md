@@ -100,14 +100,43 @@ env/
                               set-up.
   clean.sh                  : Removes all compiled code again. For when you want
                               to run setup.sh with a clean start.
+  setup.d/                  : Recipes for compiling dependencies. Used by 
+                              setup.sh.
   src/                      : Mostly submodules checked out via git. Some
                               dependencies will be downloaded via setup.sh.
   bin/, lib/, include/ ...  : The actual environment once it has been set up.
 ```
 
-Note: You might want to disable compiling some software in `setup.sh` since you
-probably don't need moses2 and marian and Chinese tokenisers. Save time by not
-installing them :)
+If you just need specific software, like bicleaner and bitextor, you can do this.
+The setup.sh script will figure out the dependencies.
+```
+./setup.sh install bicleaner bitextor
+```
+
+If you expect to need everything, just do
+```
+./setup.sh install-all
+```
+
+To see what's already installed, you can use
+```
+./setup.sh status
+```
+
+Dependencies per step:
+01: giawarc  
+02: giashard  
+03: preprocess  
+04: preprocess; maybe marian-fbgemm, moses2, subword, depends on your translation model  
+05: preprocess; maybe jieba, mecab  
+06: preprocess docalign bleualign  
+07:  
+08:  
+09: preprocess bifixer bicleaner  
+10:  
+11:  
+12: tmxt  
+
 
 # Running the pipeline
 Modify `config.csd3` to your liking. Especially the paths.

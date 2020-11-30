@@ -1,0 +1,16 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/bifixer
+}
+
+depends() {
+	echo python
+}
+
+install() {
+	pip install -r bifixer/requirements.txt
+	echo "python $PREFIX/src/bifixer/bifixer/bifixer.py \"\$@\"" \
+		> $PREFIX/bin/bifixer
+	chmod +x $PREFIX/bin/bifixer
+}

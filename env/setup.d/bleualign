@@ -1,0 +1,24 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/bleualign_cpp
+}
+
+depends() {
+	echo boost
+}
+
+install() {
+	pushd bitextor/bleualign-cpp
+
+	mkdir -p build && cd build
+
+	cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX
+	make -j8 bleualign_cpp
+	cp libbleualign_cpp_lib.so $PREFIX/lib/
+	cp bleualign_cpp $PREFIX/bin/
+	chrpath -d $PREFIX/bin/bleualign_cpp
+
+	popd
+}
+

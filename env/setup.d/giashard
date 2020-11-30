@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $GOPATH/bin/giashard
+}
+
+install() {
+	go get github.com/paracrawl/giashard/cmd/giashard
+}
+
+
