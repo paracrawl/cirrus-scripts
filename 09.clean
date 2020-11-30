@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euxo pipefail
+
+source $SCRIPTS/env/init.sh
+
+collection=$1
+lang=$2
+batch=$3
+
+# Extract the last numbery part from the batch name
+batch_num=$(basename $batch | sed -n 's/^\([0-9]\{1,\}\)\..*$/\1/p')
+
+pushd $(dirname $batch)
+
+TMP_FIXED=$TMPDIR/${batch_num}.fixed.$$
+trap "rm -f $TMP_FIXED" EXIT
+
+CLASSIFIED=${batch_num}.classified.gz
+FILTERED=${batch_num}.filtered${BICLEANER_THRESHOLD/./}.gz
+STATS=${batch_num}.stats
+
+# Note: separate from the second pipeline because of the `paste $TMP_FIXED` later on.
+cat $batch \
+| bifixer - - $TARGET_LANG $lang $BIFIXER_PARAMS \
+| ${SCRIPTS}/filter-unicode.py \
+> $TMP_FIXED
+
+cat $TMP_FIXED \
+| cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
+| paste $TMP_FIXED - \
+| fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
+| sed -e "s/$/\t${collection}/" \
+| tee \
+	>(pigz -9c > $CLASSIFIED.$$) \
+	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$$) \
+| awk "\$7 >= ${BICLEANER_THRESHOLD}" \
+| python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner,collection" -s \
+| LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
+| pigz -9c \
+> $FILTERED.$$
+
+mv $CLASSIFIED.$$ $CLASSIFIED
+mv $FILTERED.$$ $FILTERED
+mv $STATS.$$ $STATS
