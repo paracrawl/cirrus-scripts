@@ -75,7 +75,7 @@ cat $FIXED \
 | $PREPROCESS_CACHE -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
 | paste $FIXED - \
 | tee >(pigz -c > $CLASSIFIED.$$ && mv $CLASSIFIED.$$ $CLASSIFIED) \
-| awk "\$7 >= ${BICLEANER_THRESHOLD}" \
+| awk -F"\t" "\$7 >= ${BICLEANER_THRESHOLD}" \
 | LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr -T $TMPDIR --parallel=$THREADS -S 80% \
 | python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner" -s \
 | tee >(pigz -c > $FILTERED.$$ && mv $FILTERED.$$ $FILTERED) \

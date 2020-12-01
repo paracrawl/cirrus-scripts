@@ -33,7 +33,7 @@ cat $TMP_FIXED \
 | tee \
 	>(pigz -9c > $CLASSIFIED.$$) \
 	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$$) \
-| awk "\$7 >= ${BICLEANER_THRESHOLD}" \
+| awk -F"\t" "\$7 >= ${BICLEANER_THRESHOLD}" \
 | python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k5,5 -k6,6nr \
 | pigz -9c \
