@@ -1,29 +1,31 @@
-#!/bin/sh
-#SBATCH -J giawarc
-#SBATCH -A t2-cs119-knl
-#SBATCH -p knl
-#SBATCH -N 1
-#SBATCH --exclusive
-#SBATCH --time 36:00:00
-#SBATCH -e /home/cs-wait1/logs/01.giawarc-%A_%a.err
-#SBATCH -o /home/cs-wait1/logs/01.giawarc-%A_%a.out
+#!/bin/bash
+set -euo pipefail
 
-. ./config.csd3
-DATA=${DATA}/../hieu
-META=${DATA}/hieu-batches
-INPUT=${DATA}/hieu-warcs
-TXTOUT=${DATA}/hieu-text
+# GROUP_SIZE is specified by submission script
+GROUP_END=$(($GROUP_SIZE * $SLURM_ARRAY_TASK_ID)) # Slurm starts counting at 1
+GROUP_START=$(($GROUP_END - $GROUP_SIZE))
 
-module load parallel
+GNU_PARALLEL=/lustre/sw/gnu-parallel/20170322/bin/parallel
 
-BATCH="${META}/warcs.${SLURM_ARRAY_TASK_ID}"
+trap "exit" INT TERM
+trap "kill 0" EXIT
 
-for f in `cat ${BATCH}`; do
-	base=`echo $f | sed 's/\.gz$//'`
-	rm -rf ${TXTOUT}/$base
-	mkdir -p ${TXTOUT}/$base
-done
+task () {
+    set -euo pipefail
+    local batch=$1
+    local output=/beegfs/paracrawl/data/ia/wide00015-text/$(basename $(dirname $batch))/$(basename $batch .warc.gz)
+    mkdir -p $output.$$
+    $HOME/bin/giawarc -o $output.$$ $batch
+    mv $output.$$ $output
+}
 
-echo `date +%s` `date` "Processing $BATCH"
-cat ${BATCH} | sed 's/\.gz$//' | parallel -j 64 $GIAWARC -f bilang -o ${TXTOUT}/'{}' ${INPUT}/'{}'.gz
-echo `date +%s` `date` "Done $BATCH"
+#mpstat 30 > $HOME/logs/01.giawarc-${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}.stat &
+#stat_pid=$!
+
+export -f task
+
+awk "NR>${GROUP_START}&&NR<=${GROUP_END}" "$BATCH_LIST" \
+| $GNU_PARALLEL -j${SLURM_CPUS_ON_NODE} task '{}'
+
+#kill $stat_pid
+
