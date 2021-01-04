@@ -1,0 +1,21 @@
+#!/bin/bash
+
+is-installed() {
+	test -f $PREFIX/include/zip.h
+}
+
+install() {
+	test -d libzip-1.7.3 || curl -L "https://libzip.org/download/libzip-1.7.3.tar.xz" | tar -xJ
+	
+	pushd libzip-1.7.3
+
+	rm -rf build
+	mkdir build
+	cd build
+
+	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release ..
+	make
+	make install
+	
+	popd
+}

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+is-installed() {
+	test -d $PREFIX/include/uchardet
+}
+
+install() {
+	test -d uchardet-0.0.7 || curl -L "https://www.freedesktop.org/software/uchardet/releases/uchardet-0.0.7.tar.xz" | tar -xJ
+	
+	pushd uchardet-0.0.7
+
+	rm -rf build
+	mkdir build
+	cd build
+
+	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release ..
+	make
+	make install
+	
+	popd
+}
