@@ -12,3 +12,4 @@
 /env/src/*/build/
 /env/src/uchardet*
 /env/src/libzip*
+/env/src/boost*
