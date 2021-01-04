@@ -10,14 +10,13 @@ depends() {
 
 install() {
 	pushd warc2text
+	git submodule update --init
 
 	mkdir -p build && cd build
 
 	cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX
 	make -j8 warc2text
-	#cp libbleualign_cpp_lib.so $PREFIX/lib/
-	#cp warc2text $PREFIX/bin/
-	#chrpath -d $PREFIX/bin/bleualign_cpp
+	cp bin/warc2text $PREFIX/bin/
 
 	popd
 }
