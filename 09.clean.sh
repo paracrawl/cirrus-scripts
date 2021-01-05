@@ -3,7 +3,7 @@
 ## create and submit the batches on csd3 for alignment
 set -euo pipefail
 
-. ./config.csd3
+. ./config.sh
 . ./functions.sh
 
 function make_batch_list_all {

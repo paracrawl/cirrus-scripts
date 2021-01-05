@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-. ./config.csd3
+. ./config.sh
 . ./functions.sh
 
 lang=$1

@@ -3,7 +3,7 @@
 ## create and submit the batches on csd3 for translation
 set -euo pipefail
 
-. config.csd3
+. config.sh
 . functions.sh
 . translate.sh
 export -f get_group_boundaries task

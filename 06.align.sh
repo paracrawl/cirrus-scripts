@@ -3,10 +3,8 @@
 ## create and submit the batches on csd3 for alignment
 set -euo pipefail
 
-. ./config.csd3
-. ${SCRIPTS}/functions.sh
-
-export -f get_group_boundaries task
+. ./config.sh
+. ./functions.sh
 
 function list_numeric_dirs {
 	find "$@" -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]*'

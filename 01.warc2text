@@ -1,0 +1,15 @@
+#!/bin/bash
+set -euo pipefail
+
+batch="$2"
+output="$1/$(basename $batch)"
+
+mkdir -p $output.$$
+
+warc2text \
+	--verbose \
+	--tag-filters $PREFIX/mt-filter-list.txt \
+	--output $output.$$ \
+	--pdfpass $output.$$/pdf.warc.gz
+
+mv $output.$$ $output
