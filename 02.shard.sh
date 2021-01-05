@@ -1,6 +1,6 @@
 #!/bin/bash
 . ./functions.sh
-. ./config.csd3
+. ./config.sh
 
 COLLECTION=$1
 shift

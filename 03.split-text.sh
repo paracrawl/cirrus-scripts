@@ -4,10 +4,7 @@
 
 set -euo pipefail
 
-# Module inherited by the job script.
-module load perl-5.26.2-gcc-7.2.0-2ys4uai
-
-. config.csd3
+. config.sh
 . functions.sh
 
 collection=$1

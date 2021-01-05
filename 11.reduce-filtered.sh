@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-. ./config.csd3
+. ./config.sh
 . ./functions.sh
 
 # Makes a batch list (a list of all .classified.gz files for a single collection/language pair)
