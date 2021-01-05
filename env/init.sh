@@ -1,6 +1,8 @@
 PREFIX=$(dirname $(realpath "${BASH_SOURCE[0]}"))
 
-source $PREFIX/init.d/*.sh
+for initfile in $PREFIX/init.d/*.sh; do
+	source $initfile
+done
 
 # Also explicitly puring these (except PATH) to get rid of
 # any user defined environment.
