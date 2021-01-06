@@ -18,7 +18,14 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list \n"
 		if confirm; then 
-			schedule -J count-${lang} -a $job_list 98.count.slurm $lang $batch_list
+			schedule \
+				-J count-${lang} \
+				-a $job_list \
+				 --time 4:00:00 \
+				-e ${SLURM_LOGS}/98.count-%A_%a.err \
+				-o ${SLURM_LOGS}/98.count-%A_%a.out \
+				${SCRIPTS}/generic.slurm $batch_list \
+				${SCRIPTS}/98.count
 		fi
 	fi
 done
