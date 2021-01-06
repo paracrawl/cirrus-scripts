@@ -12,19 +12,19 @@ shift
 
 for lang in $*; do
 	# Load in translation model config so we know ARCH
-	batch_list=$(make_batch_list 98 $collection $lang linecount.txt)
+	batch_list=$(make_batch_list 98 $collection $lang doccount.txt)
 	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list \n"
 		if confirm; then 
 			schedule \
-				-J count-${lang} \
+				-J doccount-${lang} \
 				-a $job_list \
 				 --time 4:00:00 \
-				-e ${SLURM_LOGS}/98.count-%A_%a.err \
-				-o ${SLURM_LOGS}/98.count-%A_%a.out \
+				-e ${SLURM_LOGS}/97.doccount-%A_%a.err \
+				-o ${SLURM_LOGS}/97.doccount-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
-				${SCRIPTS}/98.count
+				${SCRIPTS}/97.doccount
 		fi
 	fi
 done
