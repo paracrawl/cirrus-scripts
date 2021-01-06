@@ -1,0 +1,2 @@
+#!/bin/bash
+pigz -cd $1/sentences_en.gz | base64 -d | wc -l > $1/linecount.txt
