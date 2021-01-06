@@ -1,0 +1,23 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/warc2text
+}
+
+depends() {
+	echo boost libzip uchardet
+}
+
+install() {
+	pushd warc2text
+	git submodule update --init
+
+	mkdir -p build && cd build
+
+	cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX
+	make -j8 warc2text
+	cp bin/warc2text $PREFIX/bin/
+
+	popd
+}
+

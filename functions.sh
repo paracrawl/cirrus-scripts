@@ -104,8 +104,6 @@ function make_job_list {
 function schedule {
 	local options=(
 		${SCHEDULE_OPTIONS[@]}
-		--account $SLURM_ACCOUNT
-		--partition $SLURM_PARTITION
 		--nodes 1
 		--ntasks ${SLURM_TASKS_PER_NODE:-$TASKS_PER_BATCH}
 		--verbose
