@@ -13,8 +13,14 @@ install() {
 	mkdir build
 	cd build
 
-	cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release ..
-	make
+	cmake .. \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DBUILD_DOC=OFF \
+		-DBUILD_EXAMPLES=OFF \
+		-DBUILD_SHARED_LIBS=ON \
+		-DBUILD_TOOLS=OFF
+	make -j8
 	make install
 	
 	popd
