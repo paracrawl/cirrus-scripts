@@ -20,3 +20,6 @@
 [submodule "env/src/kenlm"]
 	path = env/src/kenlm
 	url = https://github.com/kpu/kenlm.git
+[submodule "env/src/warc2text"]
+	path = env/src/warc2text
+	url = git@github.com:bitextor/warc2text.git
