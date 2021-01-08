@@ -1,0 +1,14 @@
+#!/bin/bash
+
+depends() {
+	echo python
+}
+
+is-installed() {
+	python-package-exists internetarchive && test -x $PREFIX/bin/ia
+}
+
+install() {
+	pip install internetarchive
+}
+
