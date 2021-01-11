@@ -8,8 +8,9 @@ mkdir -p $output.$$
 
 warc2text \
 	--verbose \
-	--tag-filters $PREFIX/mt-filter-list.txt \
+	--tag-filters $SCRIPTS/mt-filter-list.txt \
 	--output $output.$$ \
-	--pdfpass $output.$$/pdf.warc.gz
+	--pdfpass $output.$$/pdf.warc.gz \
+	$batch/*.warc.gz
 
 mv $output.$$ $output
