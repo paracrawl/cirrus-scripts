@@ -27,7 +27,6 @@
 #
 
 set -euo pipefail
-module load parallel
 
 BATCHES=$1
 shift

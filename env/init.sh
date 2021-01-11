@@ -1,3 +1,4 @@
+#!/bin/bash
 PREFIX=$(dirname $(realpath "${BASH_SOURCE[0]}"))
 
 # Also explicitly puring these (except PATH) to get rid of

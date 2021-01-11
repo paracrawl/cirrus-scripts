@@ -1,3 +1,6 @@
+#!/bin/bash
+export PREFIX # So it's also available in job scripts
+
 # For Pashto (not paracrawl)
 export MARIAN=$PREFIX/bin/marian-decoder-cpu
 export BPE=$PREFIX/bin/subword_nmt

@@ -2,6 +2,8 @@
 
 if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	module purge && module load \
+		slurm \
+		parallel \
 		python/3.8 \
 		perl-5.26.2-gcc-7.2.0-2ys4uai \
 		cmake \
