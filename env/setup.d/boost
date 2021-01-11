@@ -4,11 +4,19 @@ is-installed() {
 	test -d $PREFIX/include/boost
 }
 
+depends() {
+	echo lzma
+}
+
 install() {
 	test -d boost_1_74_0 || curl -L https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz | tar -zx
 	pushd boost_1_74_0
 	./bootstrap.sh --prefix=$PREFIX
-	./b2 install
+	./b2 \
+		--without-mpi \
+		--without-graph_parallel \
+		--build-dir=build \
+		install
 	popd
 }
 
