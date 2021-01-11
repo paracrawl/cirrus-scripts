@@ -10,7 +10,7 @@ depends() {
 
 install() {
 	pushd warc2text
-	git submodule update --init
+	git submodule update --init --recursive
 
 	mkdir -p build && cd build
 
