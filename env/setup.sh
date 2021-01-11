@@ -141,11 +141,42 @@ list-status() {
 install-modules() {
 	set -euo pipefail
 
+	local force=false
+	local dryrun=false
+
+	while getopts "df" opt; do
+		case "$opt" in
+			f)
+				force=true
+				;;
+			d)
+				dryrun=true
+				;;
+			\?)
+				echo "Usage: $0 install [ -h ] [ -f ] <package>"
+				echo " -h     print this message"
+				echo " -d     dry run, don't actually do anything"
+				echo " -f     do not check if already installed"
+				exit 0
+				;;
+			:)
+				echo "Invalid option -${opt}" 1>&2
+				exit 1
+				;;
+		esac
+	done
+
+	shift $((OPTIND - 1))
+
 	list-dependency-graph $@ \
 	| while read module; do
-		if ! run-module $module is-installed; then
-			printf "${green}%s${reset} is installing...\n" $module >&2
-			run-module $module install
+		if ! run-module $module is-installed || ($force && [[ " $@ " =~ " $module " ]] ); then
+			if ! $dryrun ; then
+				printf "${green}%s${reset} is installing...\n" $module >&2
+				run-module $module install
+			else
+				printf "${green}%s${reset} will be installed\n" $module >&2
+			fi
 		else
 			printf "${green}%s${reset} is already installed\n" $module >&2
 		fi
