@@ -1,0 +1,76 @@
+div	id	mqtranslate
+div	id	wporg-translate
+div	id	wp-translate
+div	id	qtranslate
+link	id	wporg-translate-css
+link	rel	alternate machine-translated-from
+script	src	qtranslate-x
+
+## Google translate widget
+# script	src	googleTranslateElementInit
+# div	id	google_translate_element
+
+## ???
+# a	href	translate.wordpress.org
+
+##
+## The following rules are based on popular translation plugins for web
+## publishing platforms, in other words: Wordpress.
+##
+
+## Catches GTranslate plugin for Wordpress which does translation server-side
+## (through a proxy server). Could also be detected by comment string at the end
+## of document that translation server adds:
+## "<!-- delivered by GTranslate v8.0.11 in 96ms visit https://gtranslate.io -->"
+# div	id	gtranslate
+# div	widget	GTranslate_widget2
+# link	id	gtranslate-style-css
+a	onclick	doGTranslate\('.{2}\|.{2}'\)
+
+## Catches http://transposh.org/
+# script	src	transposh.js
+# script	src	http://tdn.gtranslate.net/tdn-bin/queue.js
+# script	src	https://tdns3.gtranslate.net/tdn-bin/queue.js
+# a	href	https://gtranslate.io
+# img	src	transposh-translation-filter-for-wordpress
+meta	name	translation-stats
+
+## TranslatePress. First two patterns seem to be always there, but only when
+## automatic translation is used the last (empty data-trp-gettext attributes on
+## all text elements) starts to show up.
+# body	class	translatepress
+# script	src	trp-translate-dom-changes\.js
+a	data-trp-gettext	$^
+
+## Loco Translate doesn't seem to do automated full page translation, it only
+## shows suggestions for translations inside Wordpress editor. There is however
+## a plugin called "Automatic Translate Addon For Loco Translate" that makes this
+## stupidly easy? Looking further into the code, the free option just adds a js
+## Yandex widget. So nothing our crawler would have caught.
+
+## polylang also doesn't seem to do automatic translation. So no need to filter it.
+## There are other plugins for Polylang that do offer automatic translation through
+## translation services like Lingotek.
+# div	class	widget_polylang
+
+## Weglot seems to be backed by a paid service that uses at least some form of
+## manual labour to vet translations. However, it does offer automatic translations
+## using DeepL.
+div	id	weglot
+
+## Google Website Translator by Prisna just embeds Google translate JS api.
+
+## WP Translate – WordPress Translation Plugin by HahnCreativeGroup seems to be
+## just JS again.
+
+## Translate Your WP Website Hassle Free! by Ishai Jaffe offers "SEO support"
+## which often means our crawler will pick it up. So let's see...
+## Okay, service is called Babic, and the Wordpress plugin uses a proxy server.
+## I haven't found a demo site that uses this (SEO support this way is not free.)
+
+## Localize – Website Translation Integration (I have some... a lot of questions
+## while reading this PHP code) It does add the language to the url, but
+## translation seems to be handled by calling to the API from localizejs.com from
+## JavaScript.
+
+## Translate by Translate.com also just embeds Javascript.
