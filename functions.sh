@@ -107,6 +107,7 @@ function schedule {
 		--nodes 1
 		--ntasks ${SLURM_TASKS_PER_NODE:-$TASKS_PER_BATCH}
 		--verbose
+		--export ALL
 	)
 	local job_id=$(${SBATCH:-sbatch} "${options[@]}" "$@")
 	echo $(date +%Y%m%d%H%M%S) $job_id "${options[@]}" "$@" >> ./.schedule-log
