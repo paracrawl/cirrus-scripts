@@ -6,9 +6,11 @@ link	id	wporg-translate-css
 link	rel	alternate machine-translated-from
 script	src	qtranslate-x
 
-## Google translate widget
-# script	src	googleTranslateElementInit
-# div	id	google_translate_element
+## Google translate widget. Filtering these with the assumption that anyone that
+## added this widget to their website had no intention of also publishing manually
+## translated pages. Downside: this will reduce the amount of monolingual data.
+script	src	googleTranslateElementInit
+div	id	google_translate_element
 
 ## ???
 # a	href	translate.wordpress.org
@@ -25,13 +27,13 @@ script	src	qtranslate-x
 # div	id	gtranslate
 # div	widget	GTranslate_widget2
 # link	id	gtranslate-style-css
+# script	src	http://tdn.gtranslate.net/tdn-bin/queue.js
+# script	src	https://tdns3.gtranslate.net/tdn-bin/queue.js
+# a	href	https://gtranslate.io
 a	onclick	doGTranslate\('.{2}\|.{2}'\)
 
 ## Catches http://transposh.org/
 # script	src	transposh.js
-# script	src	http://tdn.gtranslate.net/tdn-bin/queue.js
-# script	src	https://tdns3.gtranslate.net/tdn-bin/queue.js
-# a	href	https://gtranslate.io
 # img	src	transposh-translation-filter-for-wordpress
 meta	name	translation-stats
 
@@ -58,7 +60,7 @@ a	data-trp-gettext	$^
 ## using DeepL.
 div	id	weglot
 
-## Google Website Translator by Prisna just embeds Google translate JS api.
+## Google Website Translator by Prisna just embeds Google translate JS widget.
 
 ## WP Translate – WordPress Translation Plugin by HahnCreativeGroup seems to be
 ## just JS again.
