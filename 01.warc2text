@@ -7,7 +7,7 @@ output="$1/$(basename $batch)"
 mkdir -p $output.$$
 
 warc2text \
-	--tag-filters $SCRIPTS/mt-filter-list.txt \
+	--tag-filters $SCRIPTS/mt-filter-list.annotated \
 	--output $output.$$ \
 	--pdfpass $output.$$/pdf.warc.gz \
 	$batch/*.warc.gz
