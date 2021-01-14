@@ -6,11 +6,10 @@ link	id	wporg-translate-css
 link	rel	alternate machine-translated-from
 script	src	qtranslate-x
 
-## Google translate widget. Filtering these with the assumption that anyone that
-## added this widget to their website had no intention of also publishing manually
-## translated pages. Downside: this will reduce the amount of monolingual data.
-script	src	googleTranslateElementInit
-div	id	google_translate_element
+## Google translate widget. Not filtering on it since it is being used as a
+## fall-back on some websites that do have bilingual data.
+# script	src	googleTranslateElementInit
+# div	id	google_translate_element
 
 ## ???
 # a	href	translate.wordpress.org
