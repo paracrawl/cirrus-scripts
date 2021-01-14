@@ -36,18 +36,21 @@ AVAILABLE_THREADS=$(( $SLURM_CPUS_ON_NODE / $SLURM_TASKS_PER_NODE ))
 THREADS=${SLURM_CPUS_PER_TASK:-$AVAILABLE_THREADS}
 export THREADS=$(( $THREADS > 1 ? $THREADS : 1 ))
 
-SCRATCH_BASED_TMPDIR=${SCRATCH}/$(basename "$1").$$
-mkdir -p ${SCRATCH_BASED_TMPDIR} || exit 255
-export TMPDIR=$SCRATCH_BASED_TMPDIR
+# $SCRATCH is not set on Cirrus. $TMPDIR on Cirrus is shared-memory.
+if [ ! -z "${SCRATCH:-}" ]; then
+	SCRATCH_BASED_TMPDIR=${SCRATCH}/$(basename "$1").$$
+	mkdir -p ${SCRATCH_BASED_TMPDIR} || exit 255
+	export TMPDIR=$SCRATCH_BASED_TMPDIR
 
-chown :rds-48gU72OtDNY-users $SCRATCH_BASED_TMPDIR
-chmod g+s $SCRATCH_BASED_TMPDIR
+	chown :rds-48gU72OtDNY-users $SCRATCH_BASED_TMPDIR
+	chmod g+s $SCRATCH_BASED_TMPDIR
 
-cleanup () {
-	echo "Cleaning up scratch director $SCRATCH_BASED_TMPDIR"
-	rm -rf $SCRATCH_BASED_TMPDIR
-}
-trap cleanup EXIT
+	cleanup () {
+		echo "Cleaning up scratch director $SCRATCH_BASED_TMPDIR"
+		rm -rf $SCRATCH_BASED_TMPDIR
+	}
+	trap cleanup EXIT
+fi
 
 GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( $GROUP_END - $TASKS_PER_BATCH ))
