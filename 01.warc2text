@@ -6,10 +6,14 @@ output="$1/$(basename $batch)"
 
 mkdir -p $output.$$
 
+ls -l $batch/*.warc.gz > $output.$$/warc2text.log
+
 warc2text \
 	--tag-filters $SCRIPTS/mt-filter-list.annotated \
 	--output $output.$$ \
 	--pdfpass $output.$$/pdf.warc.gz \
-	$batch/*.warc.gz
+	$batch/*.warc.gz \
+	2> >(tee -a $output.$$/warc2text.log >&2)
 
 mv $output.$$ $output
+
