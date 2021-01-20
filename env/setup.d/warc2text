@@ -5,7 +5,7 @@ is-installed() {
 }
 
 depends() {
-	echo boost libzip uchardet
+	echo boost libzip uchardet icu4c
 }
 
 install() {
