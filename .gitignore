@@ -6,6 +6,7 @@
 /env/lib
 /env/lib64
 /env/libexec
+/env/sbin
 /env/scripts
 /env/share
 /env/pyvenv.cfg
@@ -13,3 +14,4 @@
 /env/src/uchardet*
 /env/src/libzip*
 /env/src/boost*
+/env/src/icu
