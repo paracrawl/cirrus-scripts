@@ -5,7 +5,7 @@ is-installed() {
 }
 
 depends() {
-	echo boost
+	echo boost icu4c
 }
 
 install() {
