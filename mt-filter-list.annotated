@@ -29,7 +29,7 @@ script	src	qtranslate-x
 # script	src	http://tdn.gtranslate.net/tdn-bin/queue.js
 # script	src	https://tdns3.gtranslate.net/tdn-bin/queue.js
 # a	href	https://gtranslate.io
-a	onclick	doGTranslate\('.{2}\|.{2}'\)
+a	onclick	doGTranslate\(\'.{2}\|.{2}\'\)
 
 ## Catches http://transposh.org/
 # script	src	transposh.js

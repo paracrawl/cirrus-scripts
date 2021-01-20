@@ -13,8 +13,8 @@ if [[ "$(hostname)" =~ "cirrus" ]]; then
 	export SLURM_LOGS="$HOME/logs"
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
-	export SBATCH_ACCOUNT=dc007
-	export SBATCH_PARTITION=paracrawl
-	export SBATCH_QOS=paracrawl
+	export SBATCH_ACCOUNT=ec166-guest
+	export SBATCH_PARTITION=standard
+	export SBATCH_QOS=standard
 fi
 
