@@ -1,7 +1,10 @@
 #!/bin/bash
 
 is-installed() {
-	test -f $PREFIX/include/unicode/utf8.h
+	#test -f $PREFIX/include/unicode/utf8.h
+
+	# Just test whether there is some version available
+	type -P icu-config > /dev/null
 }
 
 install() {

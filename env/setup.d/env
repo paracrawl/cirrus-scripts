@@ -1,0 +1,10 @@
+#!/bin/bash
+
+is-installed() {
+	test -d $PREFIX/bin
+}
+
+install() {
+	mkdir -p $PREFIX/{lib,bin,include}
+	ln -fs $PREFIX/lib $PREFIX/lib64
+}
