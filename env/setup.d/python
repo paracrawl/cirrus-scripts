@@ -4,6 +4,10 @@ install() {
 	python3 -m venv $PREFIX
 }
 
+depends() {
+	echo env
+}
+
 is-installed() {
 	test -x $PREFIX/bin/python
 }

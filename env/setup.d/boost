@@ -5,7 +5,7 @@ is-installed() {
 }
 
 depends() {
-	echo lzma
+	echo env icu4c lzma
 }
 
 install() {

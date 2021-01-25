@@ -17,9 +17,11 @@ is-installed() {
 	fi
 }
 
+depends() {
+	echo env
+}
+
 install() {
-	mkdir -p $PREFIX/include $PREFIX/lib
-	ln -fs $PREFIX/lib $PREFIX/lib64
 	ln -fs /usr/local/software/spack/current/opt/spack/linux-rhel7-x86_64/gcc-7.2.0/xz-5.2.4-v7gjh3hab2muhuen2qgqmcczo5gogxtk/include/* $PREFIX/include
 	ln -fs /usr/local/software/spack/current/opt/spack/linux-rhel7-x86_64/gcc-7.2.0/xz-5.2.4-v7gjh3hab2muhuen2qgqmcczo5gogxtk/lib/liblzma.* $PREFIX/lib/
 }
