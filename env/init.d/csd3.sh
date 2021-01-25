@@ -2,6 +2,7 @@
 
 if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	module purge && module load \
+		rhel7/global \
 		slurm \
 		parallel \
 		python/3.8 \
