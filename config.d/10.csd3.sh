@@ -59,6 +59,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		["wide00006"]="$COLLECTION_ROOT/internet_archive/wide00006"
 		["wide00015"]="$COLLECTION_ROOT/internet_archive/wide00015"
 		["hieu"]="$COLLECTION_ROOT/hieu/hieu"
+		["GWB-20191109192916"]="$COLLECTION_ROOT/internet_archive/GWB-20191109192916"
 	)
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
