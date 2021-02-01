@@ -1,0 +1,44 @@
+#!/bin/bash
+set -euo pipefail
+ulimit -n 2048
+
+export JOB_LIST=$1
+export LANGUAGE=$2
+export OUTPUT_DIR=$3
+
+function merge_shard() {
+	local SHARD=$1
+	for i in $(seq ${JOB_LIST/-/ }); do
+		batches=(
+			${batches[@]:-}
+			$(ls -d ${OUTPUT_DIR}/${LANGUAGE}.$(printf '%03d' $i)/${SHARD}/*/)
+		)
+	done
+
+	printf '%s\n' "${batches[@]}"
+
+	giamerge \
+		-f plain_text,url,source \
+		-b 3072 \
+		-o ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$ \
+		"${batches[@]}"
+	
+	# Move to permanent position
+	mv ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}{~$$,}
+	
+	# Delete the partial shards to free up space
+	#rm -r "${batches[@]}"
+}
+
+export -f merge_shard
+
+SHARDS_PER_TASK=16
+SHARD_END=$((SLURM_ARRAY_TASK_ID * SHARDS_PER_TASK))
+SHARD_START=$((SHARD_END - SHARDS_PER_TASK))
+
+parallel \
+	-j${SLURM_TASKS_PER_NODE} \
+	--line-buffer \
+	--tag \
+	merge_shard '{}' ::: $(seq $SHARD_START $((SHARD_END - 1)))
+

@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+ulimit -n 16384
+
+BATCH_LIST=$1
+LANGUAGE=$2
+OUTPUT_DIR=$3
+
+GROUP_SIZE=$BATCHES_PER_TASK
+GROUP_END=$(($GROUP_SIZE * $SLURM_ARRAY_TASK_ID))
+GROUP_START=$(($GROUP_END - $GROUP_SIZE))
+echo $GROUP_START to $GROUP_END 1>&2
+
+SHARD_PATH=$OUTPUT_DIR/$LANGUAGE.$(printf '%03d' $SLURM_ARRAY_TASK_ID)
+mkdir $SHARD_PATH.$$
+
+cat "$BATCH_LIST" \
+| awk "NR > $GROUP_START && NR <= $GROUP_END" \
+| xargs giashard -f text,url -b 1024 -n 8 -o $SHARD_PATH.$$
+
+# Fix filenames
+for BATCH in $SHARD_PATH.$$/*/*/; do
+	mv $BATCH/{text,plain_text}.gz
+done
+
+mv $SHARD_PATH.$$ $SHARD_PATH

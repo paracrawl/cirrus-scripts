@@ -5,7 +5,7 @@ is-installed() {
 }
 
 install() {
-	go get github.com/paracrawl/giashard/cmd/giashard
+	go get -u github.com/paracrawl/giashard/cmd/giashard
 }
 
 
