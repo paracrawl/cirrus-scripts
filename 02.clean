@@ -1,0 +1,16 @@
+#!/bin/bash
+set -euo pipefail
+ulimit -n 2048
+
+export JOB_LIST=$1
+export LANGUAGE=$2
+export OUTPUT_DIR=$3
+
+function batch_names() {
+	for i in $(seq ${JOB_LIST/-/ }); do
+		echo ${OUTPUT_DIR}/${LANGUAGE}.$(printf '%03d' $i)/
+	done
+}
+
+batch_names | parallel --line-buffer --tag rm -rf '{}'
+
