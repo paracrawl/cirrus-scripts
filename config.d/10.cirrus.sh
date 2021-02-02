@@ -8,6 +8,11 @@ if [[ "$(hostname)" =~ "cirrus" ]]; then
 	# want to fill commoncrawl folders with processing data.
 	declare -A COLLECTIONS=(
 		["wide00015"]="/beegfs/paracrawl/data/ia/wide00015"
+		["cc-2016-30"]="/beegfs/paracrawl/data/common_crawl/CC-MAIN-2016-30"
+		["cc-2017-30"]="/beegfs/paracrawl/data/common_crawl/CC-MAIN-2017-30"
+		["cc-2018-30"]="/beegfs/paracrawl/data/common_crawl/CC-MAIN-2018-30"
+		["cc-2019-18"]="/beegfs/paracrawl/data/common_crawl/CC-MAIN-2019-18"
+		["cc-2019-35"]="/beegfs/paracrawl/data/common_crawl/CC-MAIN-2019-35"
 	)
 
 	export SLURM_LOGS="$HOME/logs"
