@@ -15,3 +15,5 @@
 /env/src/libzip*
 /env/src/boost*
 /env/src/icu
+/env/src/protobuf*
+/env/src/gperftools*
