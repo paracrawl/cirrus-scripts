@@ -1,7 +1,7 @@
 #!/bin/bash
 
 depends() {
-	echo gperftools protobuf boost
+	echo gperftools boost # protobuf
 }
 
 is-installed() {
