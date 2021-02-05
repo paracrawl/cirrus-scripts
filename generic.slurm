@@ -56,4 +56,13 @@ GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( $GROUP_END - $TASKS_PER_BATCH ))
 
 awk "NR > $GROUP_START && NR <= $GROUP_END" $BATCHES \
-| parallel -j${SLURM_TASKS_PER_NODE} --line-buffer --colsep " " "$@" "{}"
+| parallel \
+	-j${SLURM_TASKS_PER_NODE} \
+	--line-buffer \
+	--colsep $'\t' \
+	--tagstring '[{}]' \
+	'echo start $(date "+%Y-%m-%d %H:%M:%S")' \; \
+	"$@" "{}" \; \
+	'echo finish $(date "+%Y-%m-%d %H:%M:%S")'
+
+	
