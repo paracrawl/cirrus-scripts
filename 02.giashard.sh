@@ -5,7 +5,7 @@ set -euo pipefail
 . ./functions.sh
 
 # Note: tasks-per-batch here determines how many parts the sharding is split into
-export BATCHES_PER_TASK=1024
+export BATCHES_PER_TASK=128
 export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
 
 function make_batch_list() {
