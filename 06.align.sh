@@ -14,7 +14,7 @@ function make_batch_list_all {
 	local collection="$1" lang="$2"
 	if ! test -e ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}; then
 		for shard in $(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${lang}/); do
-			join -j2 \
+			join -t$'\t' -j2 \
 				<(list_numeric_dirs $shard) \
 				<(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${TARGET_LANG}/$(basename $shard))
 		done > ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}
@@ -29,7 +29,7 @@ function make_batch_list_retry {
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
 		if [[ -e $SRC_BATCH/tokenised_en.gz ]] && [[ ! -e $alignments ]]; then
 			echo $alignments 1>&2
-			echo $SRC_BATCH $REF_BATCH
+			printf '%s\t%s\n' "$SRC_BATCH" "$REF_BATCH"
 		fi
 	done | shuf > $batch_list
 
