@@ -9,10 +9,9 @@ model_is_en () {
 }
 
 model_nb_en () {
-    MODEL=${MODELS}/prompsit-system/moses.BLEUALIGN_MOSES_NB_EN.nb-en
-    MOSES_BIN=$MOSES/bin/moses
-    MOSES_INI=moses.ini
-    TRUECASE_MODEL=truecaser.nb
+	export MODEL=$HOME/src/students/nben/nben.student.tiny11/config.intgemm8bitalpha.yml
+	export MODEL_IMPL=translate_marian_cpu
+	export -f translate_marian_cpu
 }
 
 model_nn_en () {
@@ -271,16 +270,9 @@ translate_marian() {
 }
 
 translate_marian_cpu() {
-    local SLANG="$1"
-    shift
-
-    pushd . > /dev/null
-    cd "$MODEL"
-    ../marian-dev-intgemm/marian-decoder -c $MODEL/config.yml \
+    marian-decoder-cpu -c $MODEL \
         --quiet --quiet-translation \
-        --cpu-threads 16 \
-        --max-length-crop
-    popd > /dev/null
+        --cpu-threads $THREADS
 }
 
 readlines () {

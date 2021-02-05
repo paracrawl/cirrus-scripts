@@ -1,0 +1,29 @@
+#!/bin/bash
+set -euo pipefail
+
+LANGUAGE=$1
+BATCH=$2
+INPUT_FILE=$BATCH/sentences.gz
+OUTPUT_FILE=$(dirname $INPUT_FILE)/sentences_${TARGET_LANG}.gz
+
+# Make sure these vars are at least available to the subprocess
+export LANGUAGE MODEL_IMPL
+export -f $MODEL_IMPL
+
+gzip -cd $INPUT_FILE \
+| b64filter cache foldfilter -s -w ${TRANSLATE_FOLD_COLUMN:-500} \
+	bash -u -e -o pipefail -c '$MODEL_IMPL $LANGUAGE' \
+| gzip -9c > ${OUTPUT_FILE%%.gz}.$$.gz
+
+docs_src=$(gzip -dc $INPUT_FILE | wc -l)
+docs_dst=$(gzip -dc ${OUTPUT_FILE%%.gz}.$$.gz | wc -l)
+echo "Expecting $docs_src documents found $docs_dst"
+test "$docs_src" -eq "$docs_dst" || exit 1
+
+lines_src=$(gzip -cd $INPUT_FILE | base64 -d | wc -l)
+lines_dst=$(gzip -cd ${OUTPUT_FILE%%.gz}.$$.gz | base64 -d | wc -l)
+echo "Expecting $lines_src lines, found $lines_dst"
+test "$lines_src" -eq "$lines_dst" || exit 1
+
+mv ${OUTPUT_FILE%%.gz}.$$.gz ${OUTPUT_FILE}
+
