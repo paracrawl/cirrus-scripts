@@ -1,7 +1,3 @@
-[submodule "src/marian-fbgemm"]
-	path = env/src/marian-fbgemm
-	url = https://github.com/XapaJIaMnu/marian-dev.git
-	branch = 8bitgpu
 [submodule "env/bitextor"]
 	path = env/src/bitextor
 	url = https://github.com/bitextor/bitextor.git
@@ -23,3 +19,6 @@
 [submodule "env/src/warc2text"]
 	path = env/src/warc2text
 	url = git@github.com:bitextor/warc2text.git
+[submodule "env/src/marian-dev"]
+	path = env/src/marian-dev
+	url = git@github.com:browsermt/marian-dev.git

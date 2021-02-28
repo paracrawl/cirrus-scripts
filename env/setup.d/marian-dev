@@ -1,0 +1,31 @@
+#!/bin/bash
+
+depends() {
+	echo gperftools boost # protobuf
+}
+
+is-installed() {
+	test -x $PREFIX/bin/marian-decoder
+}
+
+install() {
+	pushd marian-dev/
+
+	git submodule update --init --recursive
+
+	#rm -rf build && mkdir -p build && cd build
+	mkdir -p build && cd build
+
+	cmake ..\
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DUSE_SENTENCEPIECE=ON \
+		-DCOMPILE_CPU=ON \
+		-DCOMPILE_CUDA=OFF \
+		-DUSE_STATIC_LIBS=ON
+
+	make -j8 marian_decoder
+	cp marian-decoder $PREFIX/bin/marian-decoder
+
+	popd
+}
+

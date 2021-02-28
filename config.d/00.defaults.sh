@@ -1,11 +1,6 @@
 #!/bin/bash
 export PREFIX # So it's also available in job scripts
 
-# For Pashto (not paracrawl)
-export MARIAN=$PREFIX/bin/marian-decoder-cpu
-export BPE=$PREFIX/bin/subword_nmt
-export JIEBA="$PREFIX/bin/python -m jieba"
-
 export PYTHON=$PREFIX/bin/python
 export PERL=perl
 export KPU=$PREFIX/src/preprocess
@@ -19,12 +14,7 @@ export TOKENISER="$PERL $KPU/moses/tokenizer/tokenizer.perl" # We're doing Briti
 export BLEUALIGN=$PREFIX/bin/bleualign_cpp
 export SCRIPTS=$(dirname $PREFIX) # strip off the "env" part.
 export BITEXTOR="$PREFIX/src/bitextor"
-export MODELS=
-export MOSES=$PREFIX/src/mosesdecoder
-export MOSES_BIN=$PREFIX/bin/moses2
-export MOSES_ARGS="--threads 16"
-export MOSES_INI=moses2.ini
-
+export MODEL_DIR="$PREFIX/../models"
 export TARGET_LANG=${TARGET_LANG:-en}
 
 export SLURM_LOGS="/home/%u/logs"
