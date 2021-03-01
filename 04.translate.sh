@@ -18,11 +18,15 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
+			# Note that you can control --cpus-per-task from here. However, it's a bit
+			# tricky to get the right value. Too many and the intgemm marian will cry
+			# about running out of memory (even though you're only asking for 128mb per
+			# process)
 			schedule \
 				-J translate-${lang}-${collection} \
 				-a $job_list \
 				--time 24:00:00 \
-				--cpus-per-task 8 \
+				--cpus-per-task 6 \
 				-e $SLURM_LOGS/04.translate-${lang}-%A_%a.err \
 				-o $SLURM_LOGS/04.translate-${lang}-%A_%a.out \
 				$SCRIPTS/generic.slurm $batch_list \
