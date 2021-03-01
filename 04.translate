@@ -9,18 +9,18 @@ TMPSFX=${JOB_ID:-$$}
 
 # Make sure these vars are at least available to the subprocess
 gzip -cd $INPUT_FILE \
-| b64filter cache $MODEL_DIR/$LANGUAGE-${TARGET_LANG}/translate.sh \
-| gzip -9c > ${OUTPUT_FILE}.$TMPSFX
+| b64filter cache $MODEL_DIR/$LANGUAGE-$TARGET_LANG/translate.sh \
+| gzip -9c > $OUTPUT_FILE.$TMPSFX
 
 docs_src=$(gzip -dc $INPUT_FILE | wc -l)
-docs_dst=$(gzip -dc ${OUTPUT_FILE%%.gz}.$$.gz | wc -l)
+docs_dst=$(gzip -dc $OUTPUT_FILE.$TMPSFX | wc -l)
 echo "Expecting $docs_src documents found $docs_dst"
 test "$docs_src" -eq "$docs_dst" || exit 1
 
 lines_src=$(gzip -cd $INPUT_FILE | base64 -d | wc -l)
-lines_dst=$(gzip -cd ${OUTPUT_FILE%%.gz}.$$.gz | base64 -d | wc -l)
+lines_dst=$(gzip -cd $OUTPUT_FILE.$TMPSFX | base64 -d | wc -l)
 echo "Expecting $lines_src lines, found $lines_dst"
 test "$lines_src" -eq "$lines_dst" || exit 1
 
-mv ${OUTPUT_FILE}.$TMPSFX ${OUTPUT_FILE}
+mv $OUTPUT_FILE.$TMPSFX $OUTPUT_FILE
 
