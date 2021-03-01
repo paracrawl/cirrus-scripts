@@ -5,7 +5,7 @@ set -euo pipefail
 . ./functions.sh
 
 # Note: tasks-per-batch here determines how many parts the sharding is split into
-export BATCHES_PER_TASK=128
+export BATCHES_PER_TASK=4 # 4 for CommonCrawl, 128 good for others, 512 more for IA data
 export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
 
 function make_batch_list() {
@@ -47,7 +47,7 @@ for language in $@; do
 				-J merge-${language}-${collection} \
 				--dependency afterok:$shard_job_id \
 				-a 1-16 \
-				--time 12:00:00 \
+				--time 24:00:00 \
 				--cpus-per-task 4 \
 				-e ${SLURM_LOGS}/02.merge-${language}-%A_%a.err \
 				-o ${SLURM_LOGS}/02.merge-${language}-%A_%a.out \
@@ -56,7 +56,7 @@ for language in $@; do
 			schedule \
 				-J clean-${language}-${collection} \
 				--dependency afterok:$merge_job_id \
-				--time 12:00:00 \
+				--time 4:00:00 \
 				--cpus-per-task 1 \
 				-e ${SLURM_LOGS}/02.clean-${language}-%A_%a.out \
 				-o ${SLURM_LOGS}/02.clean-${language}-%A_%a.out \
