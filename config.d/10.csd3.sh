@@ -56,11 +56,16 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 
 	COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"
 	declare -A COLLECTIONS=(
-		["wide00015"]="$COLLECTION_ROOT/internet_archive/wide00015"
+		["wide00015"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00015"
 		["wide00006"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00006"
 		["hieu"]="$COLLECTION_ROOT/paracrawl/data/hieu/hieu"
-		["GWB-20191109192916"]="$COLLECTION_ROOT/paracrawl/data/ia/GWB-20191109192916"
+		["gwb"]="$COLLECTION_ROOT/paracrawl/data/ia/GWB-20191109192916"
 		["philipp"]="$COLLECTION_ROOT/paracrawl/data/philipp/philipp"
+		["cc-2016-30"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2016-30"
+		["cc-2017-30"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2017-30"
+		["cc-2018-30"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2018-30"
+		["cc-2019-18"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2019-18"
+		["cc-2019-35"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2019-35"
 	)
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
