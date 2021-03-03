@@ -24,4 +24,14 @@ if confirm; then
 			"${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.tmx.gz" \
 			"${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.txt.gz" \
 			"${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
+
+	schedule \
+		-J reduce-tmx-deferred-${lang} \
+		--time 36:00:00 \
+		--exclusive \
+		-e ${SLURM_LOGS}/12.reduce-tmx-%A.err \
+		-o ${SLURM_LOGS}/12.reduce-tmx-%A.out \
+		12.reduce-tmx-deferred ${lang} \
+			"${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.tmx.gz" \
+			"${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
 fi
