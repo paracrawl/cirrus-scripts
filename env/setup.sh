@@ -2,7 +2,6 @@
 set -euo pipefail
 
 source $(dirname ${BASH_SOURCE[0]})/init.sh "$@"
-export PREFIX
 
 red="\e[0;91m"
 blue="\e[0;94m"
