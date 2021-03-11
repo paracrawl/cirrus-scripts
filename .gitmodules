@@ -22,3 +22,7 @@
 [submodule "env/src/marian-dev"]
 	path = env/src/marian-dev
 	url = git@github.com:browsermt/marian-dev.git
+[submodule "env/src/prepocess-batch-dedupe"]
+	path = env/src/preprocess-batch-dedupe/
+	url = https://github.com/jelmervdl/preprocess.git
+	branch = batch-dedupe
