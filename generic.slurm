@@ -61,8 +61,8 @@ awk "NR > $GROUP_START && NR <= $GROUP_END" $BATCHES \
 	--line-buffer \
 	--colsep $'\t' \
 	--tagstring '[{}]' \
-	'echo start $(date "+%Y-%m-%d %H:%M:%S")' \; \
-	"JOB_ID=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}_{#}" "$@" "{}" \; \
-	'echo finish $(date "+%Y-%m-%d %H:%M:%S")'
+	'echo start $(date "+%Y-%m-%d %H:%M:%S")' \
+	"&& JOB_ID=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID}_{#}" "$@" '{}' \
+	'&& echo finish $(date "+%Y-%m-%d %H:%M:%S")'
 
 	
