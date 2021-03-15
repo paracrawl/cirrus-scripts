@@ -9,16 +9,15 @@ depends() {
 }
 
 install() {
-	pushd bitextor/bleualign-cpp
+	pushd bleualign-cpp
 
+	git submodule update --init
 	mkdir -p build && cd build
-
-	cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX
+	cmake .. \
+		-DCMAKE_INSTALL_PREFIX=$PREFIX \
+		-DCMAKE_BUILD_TYPE=Release
 	make -j8 bleualign_cpp
-	cp libbleualign_cpp_lib.so $PREFIX/lib/
 	cp bleualign_cpp $PREFIX/bin/
-	chrpath -d $PREFIX/bin/bleualign_cpp
-
 	popd
 }
 
