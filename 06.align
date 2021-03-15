@@ -53,7 +53,7 @@ parallel \
 	--pipe \
 	--group \
 	-l 1 \
-	${BLEUALIGN} --bleu-threshold 0.2 \
+	${BLEUALIGN} --print-sent-hash --bleu-threshold 0.2 \
 | gzip -c \
 > $OUTPUT
 
