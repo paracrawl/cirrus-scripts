@@ -26,3 +26,6 @@
 	path = env/src/preprocess-batch-dedupe/
 	url = https://github.com/jelmervdl/preprocess.git
 	branch = batch-dedupe
+[submodule "env/src/bleualign-cpp"]
+	path = env/src/bleualign-cpp
+	url = https://github.com/bitextor/bleualign-cpp.git
