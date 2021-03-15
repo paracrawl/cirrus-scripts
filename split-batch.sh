@@ -6,7 +6,6 @@ basename() {
 }
 
 files=(
-	mime
 	plain_text
 	sentences
 	sentences_en
@@ -29,7 +28,7 @@ N=$1
 shift
 
 for batch in "$@"; do
-	lines=$(pigz -cd $batch/mime.gz | wc -l)
+	lines=$(pigz -cd $batch/source.gz | wc -l)
 	lines_per_part=$(( $lines / $N + 1))
 
 	offset=$(find_offset $batch/..)
