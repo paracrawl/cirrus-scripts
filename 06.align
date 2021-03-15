@@ -51,7 +51,7 @@ parallel \
 	--pipe \
 	--group \
 	-l 1 \
-	${BLEUALIGN} --bleu-threshold 0.2 \
+	${BLEUALIGN} --print-sent-hash --bleu-threshold 0.2 \
 | gzip -c \
 > ${SRC_BATCH}/aligned-${REF_BATCH_ID}.$TMPSFX.gz
 mv ${SRC_BATCH}/aligned-${REF_BATCH_ID}{.$TMPSFX,}.gz
