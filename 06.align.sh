@@ -46,7 +46,7 @@ for lang in $*; do
 		prompt "Scheduling $job_list\n"
 		if confirm; then
 			schedule \
-				-J align-${lang} \
+				-J align-${lang%~*}-${collection} \
 				-a $job_list \
 				--time 12:00:00 \
 				--cpus-per-task=4 \
@@ -54,7 +54,7 @@ for lang in $*; do
 				-e ${SLURM_LOGS}/06.align-%A_%a.err \
 				-o ${SLURM_LOGS}/06.align-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
-				${SCRIPTS}/06.align $lang
+				${SCRIPTS}/06.align ${lang%~*}
 		fi
 	fi
 done
