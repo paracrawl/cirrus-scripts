@@ -10,7 +10,7 @@ function make_batch_list_all() {
 	local batch_list=${COLLECTIONS[$collection]}-batches/00.${language}
 	if [ ! -e $batch_list ]; then
 		for shard in $(seq 0 255); do
-			printf "%s" ${COLLECTIONS[$collection]}-shards/${language}/${shard}
+			printf "%s" ${COLLECTIONS[$collection]}-shards/${language%~*}/${shard}
 
 			for coll in ${!COLLECTIONS[@]}; do
 				# Don't try to merged ourselves
@@ -53,15 +53,15 @@ for language in $@; do
 		prompt "$batch_list: Run $job_list merge-dedupe?"
 		if confirm; then
 			schedule \
-				-J dedupe-${language}-${collection} \
+				-J dedupe-${language%~*}-${collection} \
 				-a $job_list \
 				--time 24:00:00 \
 				--cpus-per-task 4 \
-				--mem-per-cpu 8G \
+				--mem-per-cpu 16G \
 				-e ${SLURM_LOGS}/00.dedupe-%A_%a.err \
 				-o ${SLURM_LOGS}/01.dedupe-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
-				${SCRIPTS}/00.merge-dedupe $language
+				${SCRIPTS}/00.merge-dedupe ${language%~*}
 		fi
 	fi
 done

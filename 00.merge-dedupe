@@ -1,29 +1,31 @@
 #!/bin/bash
-set -euxo pipefail
+set -euo pipefail
 LANGUAGE=$1
 TARGET_SHARD=$2
 shift 2
 
 declare -a OPTIONS=(
+	-v
 	-b $(( 3 * 1024 * 1024 * 1024 ))
+	-l $(( 1024 * 1024 ))
 )
 
 if [ "$LANGUAGE" = "en" ]; then
 	OPTIONS+=(
 		-c source.gz url.gz
-		-d plain_text.gz sentences.gz
+		-d sentences.gz
 		-u sentences.gz
 	)
 else
 	OPTIONS+=(
 		-c source.gz url.gz
-		-d plain_text.gz sentences.gz sentences_en.gz
+		-d sentences.gz sentences_en.gz
 		-u sentences.gz
 	)
 fi
 
 SHARD_DIRS=$(find "$@" -mindepth 1 -maxdepth 1 -type d -regex '.*/[0-9]+$')
-echo "Merging $SHARD_DIRS into $TARGET_SHARD"
+echo Merging $SHARD_DIRS into $TARGET_SHARD # intentionally not quoted so SHARD_DIRS becomes a single line
 
 mkdir -p ${TARGET_SHARD}.${JOB_ID}
 pushd ${TARGET_SHARD}.${JOB_ID}
