@@ -4,17 +4,15 @@ ulimit -n 16384
 
 SLANG="$1"
 BATCH="$2"
+TMPSFX=${JOB_ID:-$$}
 
-# Special case for tokenizing "en" (or es if we're in the mood)
-# TODO: Refactor this out (mainly mv all already tokenized stuff)
-# since there isn't really a good reason to make this distinction.
-if [[ "$SLANG" == "$TARGET_LANG" ]]; then
-	INPUT=sentences
-	OUTPUT=tokenised
+if [[ $SLANG == $TARGET_LANG ]]; then
+	INPUT="sentences"
 else
 	INPUT="sentences_${TARGET_LANG}"
-	OUTPUT="tokenised_${TARGET_LANG}"
 fi
+
+OUTPUT="tokenised_${TARGET_LANG}"
 
 tokenise() {
 	# Tokenizer gets really unhappy with all-dot lines
@@ -25,25 +23,25 @@ export -f tokenise
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/${INPUT}.gz gzip -dc \
-| ${B64FILTER} ${CACHE} bash -c tokenise \
+| b64filter cache bash -c tokenise \
 | gzip -9c \
-> ${TMPDIR}/${OUTPUT}.$$.gz
+> ${TMPDIR}/${OUTPUT}.$TMPSFX.gz
 
 echo "Checking output"
 
 docs_st=$(gzip -cd ${BATCH}/${INPUT}.gz | wc -l)
-docs_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | wc -l)
+docs_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$TMPSFX.gz | wc -l)
 echo "Expecting $docs_st documents, found $docs_tk"
 test $docs_st -eq $docs_tk || exit 1
 
 lines_st=$(gzip -cd ${BATCH}/${INPUT}.gz | base64 -d | wc -l)
-lines_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$$.gz | base64 -d | wc -l)
+lines_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$TMPSFX.gz | base64 -d | wc -l)
 echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
 # Two-step move because the first one might fail and leave an
 # incomplete file behind, which is tricky to detect.
-mv ${TMPDIR}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.$$.gz
-mv ${BATCH}/${OUTPUT}.$$.gz ${BATCH}/${OUTPUT}.gz
+mv ${TMPDIR}/${OUTPUT}.$TMPSFX.gz ${BATCH}/${OUTPUT}.$TMPSFX.gz
+mv ${BATCH}/${OUTPUT}.$TMPSFX.gz ${BATCH}/${OUTPUT}.gz
 
 echo "Moved result (${SLANG}) ${BATCH}/${OUTPUT}.gz"

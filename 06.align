@@ -12,9 +12,7 @@ REF_BATCH_ID=$(basename $REF_BATCH)
 PAIR_FORMAT='{"shard": "'$SHARD_ID'", "'$SLANG'":'$SRC_BATCH_ID', "'$TARGET_LANG'":'$REF_BATCH_ID'}'
 TIME_FORMAT='{"user":"%U", "system":"%S", "elapsed":"%E", "cpu":"%P", "text":%X, "data":%D, "max":%M, "inputs":%I, "output":%O, "major":%F, "minor":%R, "swaps":%W}'
 
-# We're writing tmpdir to scratch as well since I don't trust /tmp under memory pressure
-TMPDIR=$(mktemp -d --tmpdir=$SCRATCH)
-OUTPUT=$(mktemp --suffix=.gz --tmpdir=$TMPDIR)
+TMPSFX=${JOB_ID:-$$}
 
 filter_long_pairs() {
 	# Prevent extreme stuff from making it to bleualign, which would be unhappy
@@ -35,16 +33,16 @@ export -f filter_long_pairs
 
 /usr/bin/time -f '{"task":"docalign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
-	${SRC_BATCH}/tokenised_${TARGET_LANG}.gz \
-	${REF_BATCH}/tokenised.gz \
-| tee ${SRC_BATCH}/pairs-${REF_BATCH_ID}.txt \
+	${SRC_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
+	${REF_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
+| tee ${SRC_BATCH}/pairs-${TARGET_LANG%~*}-${REF_BATCH_ID}.txt \
 | cut -f2-3 \
 | ${DOCJOIN} \
 	-li\
 	-ri\
 	-l ${SRC_BATCH}/sentences.gz\
 	-r ${REF_BATCH}/sentences.gz\
-	-l ${SRC_BATCH}/sentences_${TARGET_LANG}.gz\
+	-l ${SRC_BATCH}/sentences_${TARGET_LANG%~*}.gz\
 | /usr/bin/time -f '{"task":"bleualign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 parallel \
 	--tmpdir=$TMPDIR \
@@ -55,12 +53,6 @@ parallel \
 	-l 1 \
 	${BLEUALIGN} --bleu-threshold 0.2 \
 | gzip -c \
-> $OUTPUT
+> ${SRC_BATCH}/aligned-${REF_BATCH_ID}.$TMPSFX.gz
+mv ${SRC_BATCH}/aligned-${REF_BATCH_ID}{.$TMPSFX,}.gz
 
-echo "Copying result"
-
-DEST=${SRC_BATCH}/aligned-${REF_BATCH_ID}.gz
-cp $OUTPUT $DEST.$$
-mv $DEST.$$ $DEST
-echo "Copied result (${SLANG}) ${SRC_BATCH} to ${DEST}"
-rm $OUTPUT
