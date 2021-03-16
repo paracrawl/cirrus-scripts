@@ -3,6 +3,7 @@
 ## create and submit the batches on csd3 for alignment
 set -euo pipefail
 
+. ./env/init.sh
 . ./config.sh
 . ./functions.sh
 
@@ -49,8 +50,8 @@ for lang in $*; do
 				-J align-${lang%~*}-${collection} \
 				-a $job_list \
 				--time 12:00:00 \
-				--cpus-per-task=4 \
-				--mem-per-cpu=8192 \
+				--cpus-per-task 4 \
+				--mem-per-cpu 8192 \
 				-e ${SLURM_LOGS}/06.align-%A_%a.err \
 				-o ${SLURM_LOGS}/06.align-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
