@@ -9,7 +9,7 @@ SHARD_ID=$(basename $(dirname $SRC_BATCH))
 SRC_BATCH_ID=$(basename $SRC_BATCH)
 REF_BATCH_ID=$(basename $REF_BATCH)
 
-PAIR_FORMAT='{"shard": "'$SHARD_ID'", "'$SLANG'":'$SRC_BATCH_ID', "'$TARGET_LANG'":'$REF_BATCH_ID'}'
+PAIR_FORMAT='{"shard": "'$SHARD_ID'", "'${SLANG%~*}'":'$SRC_BATCH_ID', "'${TARGET_LANG%~*}'":'$REF_BATCH_ID'}'
 TIME_FORMAT='{"user":"%U", "system":"%S", "elapsed":"%E", "cpu":"%P", "text":%X, "data":%D, "max":%M, "inputs":%I, "output":%O, "major":%F, "minor":%R, "swaps":%W}'
 
 TMPSFX=${JOB_ID:-$$}
@@ -36,7 +36,6 @@ ${DOCALIGN} -j ${THREADS} --threshold 0.1 \
 	${SRC_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
 	${REF_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
 | tee ${SRC_BATCH}/pairs-${TARGET_LANG%~*}-${REF_BATCH_ID}.txt \
-| cut -f2-3 \
 | ${DOCJOIN} \
 	-li\
 	-ri\
