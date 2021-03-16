@@ -1,22 +1,22 @@
 #!/bin/bash
-set -euxo pipefail
+set -euo pipefail
 ulimit -n 16384
 
 SLANG="$1"
 BATCH="$2"
 TMPSFX=${JOB_ID:-$$}
 
-if [[ $SLANG == $TARGET_LANG ]]; then
+if [[ $SLANG == ${TARGET_LANG%~*} ]]; then
 	INPUT="sentences"
 else
-	INPUT="sentences_${TARGET_LANG}"
+	INPUT="sentences_${TARGET_LANG%~*}"
 fi
 
-OUTPUT="tokenised_${TARGET_LANG}"
+OUTPUT="tokenised_${TARGET_LANG%~*}"
 
 tokenise() {
 	# Tokenizer gets really unhappy with all-dot lines
-	sed 's/^\.\.\.\.*$/.../' | $TOKENISER -a -q -l $TARGET_LANG
+	sed 's/^\.\.\.\.*$/.../' | $TOKENISER -a -q -l ${TARGET_LANG%~*}
 }
 export -f tokenise
 
