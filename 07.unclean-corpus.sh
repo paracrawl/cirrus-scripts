@@ -9,6 +9,7 @@ collection=$1
 shift
 
 for lang in $*; do
+	mkdir -p ${COLLECTIONS[$collection]}-corpora
 	schedule \
 		-J corpus-${lang%~*}-${collection} \
 		--time 24:00:00 \

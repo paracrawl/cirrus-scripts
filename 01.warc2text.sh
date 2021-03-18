@@ -7,7 +7,11 @@ set -euo pipefail
 function make_batch_list_all() {
 	local collection=$1
 	local batch_list=${COLLECTIONS[$collection]}-batches/01
-	if [ ! -e $batch_list ]; then
+	if [[ ! -d ${COLLECTIONS[$collection]}-batches ]]; then
+		mkdir ${COLLECTIONS[$collection]}-batches
+	fi
+
+	if $FORCE_INDEX_BATCHES || [[ ! -e $batch_list ]]; then
 		# This assumes all subdirectories are warc collections. Maybe a bit presumptuous.
 		find ${COLLECTIONS[$collection]}-warcs/ -mindepth 1 -maxdepth 1 -type d \
 			> $batch_list
