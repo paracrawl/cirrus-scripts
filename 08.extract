@@ -13,8 +13,9 @@ mkdir -p $dest $TMP_DEST
 corpus_pairs=$(pigz -cd $@ | wc -l)
 echo "Number of pairs in unclean corpus: $corpus_pairs"
 
+# Take url1,url2,seg1,seg1,checksum1,checksum2 fields
 pigz -cd $@ \
-| cut -f 1-4 \
+| cut -f 1-4,6,7 \
 | split \
 	--numeric-suffixes \
 	--additional-suffix=.raw\

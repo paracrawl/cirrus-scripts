@@ -25,7 +25,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
 		export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
-		export BICLEANER_THRESHOLD="0.7"
+		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="--score_only -q"
 
 		if [[ $lang == 'ko' ]] || [[ $lang == 'zh' ]]; then

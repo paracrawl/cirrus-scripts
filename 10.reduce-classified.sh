@@ -36,7 +36,7 @@ for collection in $collections; do
 	batch_lists+=( $batch_list )
 done
 
-output_file="${DATA}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.classified.gz"
+output_file="${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.classified.gz"
 
 if [ ! -f $output_file ]; then
 	prompt "Scheduling 1-1 for combining $batch_count batches across ${#batch_lists[@]} collections\n"

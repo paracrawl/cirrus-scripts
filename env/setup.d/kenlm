@@ -10,13 +10,13 @@ depends() {
 
 install() {
 	pushd kenlm
+
 	mkdir -p build && cd build
 
 	module load eigen/latest
 	cmake .. -DKENLM_MAX_ORDER=7 -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX
 	make -j8 install
-	
-	pip3 install .. --install-option="--max_order 7"
 
+	pip3 install .. --install-option="--max_order 7"
 	popd
 }
