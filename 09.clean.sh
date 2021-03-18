@@ -3,6 +3,7 @@
 ## create and submit the batches on csd3 for alignment
 set -euo pipefail
 
+. env/init.sh
 . ./config.sh
 . ./functions.sh
 
@@ -59,7 +60,7 @@ for lang in $*; do
 				--cpus-per-task 2 \
 				-e ${SLURM_LOGS}/09.clean-%A_%a.err \
 				-o ${SLURM_LOGS}/09.clean-%A_%a.out \
-				generic.slurm $batch_list 09.clean ${collection} ${lang}
+				generic.slurm $batch_list ${SCRIPTS}/09.clean ${collection} ${lang}
 		fi
 	fi
 done
