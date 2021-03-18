@@ -1,27 +1,33 @@
 #!/bin/bash
-set -euxo pipefail
-
-source $SCRIPTS/env/init.sh
+set -euo pipefail
+shopt -s extglob
 
 collection=$1
 lang=$2
-batch=$3
+target_lang_data=$3
+batch=$4
+shard=$(basename $(dirname $batch))
 
-# Extract the last numbery part from the batch name
-batch_num=$(basename $batch | sed -n 's/^\([0-9]\{1,\}\)\..*$/\1/p')
+TMPSFX=${JOB_ID:-$$}
+TMP_FIXED=$batch/fixed.$TMPSFX
+CLASSIFIED=$batch/classified.gz
+FILTERED=$batch/filtered${BICLEANER_THRESHOLD/./}.gz
+STATS=$batch/stats.txt
 
-pushd $(dirname $batch)
-
-TMP_FIXED=$TMPDIR/${batch_num}.fixed.$$
-trap "rm -f $TMP_FIXED" EXIT
-
-CLASSIFIED=${batch_num}.classified.gz
-FILTERED=${batch_num}.filtered${BICLEANER_THRESHOLD/./}.gz
-STATS=${batch_num}.stats
-
-# Note: separate from the second pipeline because of the `paste $TMP_FIXED` later on.
-cat $batch \
-| bifixer - - $TARGET_LANG $lang $BIFIXER_PARAMS \
+for match in $batch/aligned-+([0-9]).gz; do
+	echo $match 1>&2
+	matched_batch=$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')
+	paste <(gzip -cd ${match} \
+			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' \
+			| docjoin \
+				-r ${target_lang_data}/${shard}/${matched_batch}/url.gz \
+				-l $(dirname ${match})/url.gz) \
+			<(gzip -cd $match | cut -f4) \
+			<(gzip -cd $match | cut -f3) \
+			<(gzip -cd $match | cut -f5-)
+done \
+| cut -f1-4,6,7 \
+| bifixer - - ${TARGET_LANG%~*} ${lang%~*} $BIFIXER_PARAMS \
 | ${SCRIPTS}/filter-unicode.py \
 > $TMP_FIXED
 
@@ -31,14 +37,15 @@ cat $TMP_FIXED \
 | fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
 | sed -e "s/$/\t${collection}/" \
 | tee \
-	>(pigz -9c > $CLASSIFIED.$$) \
-	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$$) \
+	>(pigz -9c > $CLASSIFIED.$TMPSFX) \
+	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$TMPSFX) \
 | awk -F"\t" "\$9 >= ${BICLEANER_THRESHOLD}" \
-| python $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection" -s \
+| python3 $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k7,7 -k8,8nr \
 | pigz -9c \
-> $FILTERED.$$
+> $FILTERED.$TMPSFX
 
-mv $CLASSIFIED.$$ $CLASSIFIED
-mv $FILTERED.$$ $FILTERED
-mv $STATS.$$ $STATS
+mv $CLASSIFIED.$TMPSFX $CLASSIFIED
+mv $FILTERED.$TMPSFX $FILTERED
+mv $STATS.$TMPSFX $STATS
+rm $TMP_FIXED

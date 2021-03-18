@@ -15,7 +15,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	export MOSES=$PREFIX/src/mosesdecoder
 	export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 
-	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/internet_archive/cleaning
+	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/paracrawl/clean
 	
 	# Works better this way.
 	export SCRATCH=/local
@@ -28,7 +28,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="--score_only -q"
 
-		if [[ $lang == 'ko' ]] || [[ $lang == 'zh' ]]; then
+		if [[ ${lang%~*} == 'ko' ]] || [[ ${lang%~*} == 'zh' ]]; then
 			export BIFIXER_PARAMS="\
 				$BIFIXER_PARAMS \
 				--ignore_characters \
@@ -44,13 +44,13 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		fi
 
 		if [[ $lang == 'ko' ]]; then
-			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/korean/${TARGET_LANG}-${lang}.yaml"
+			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/korean/${TARGET_LANG%~*}-${lang%~*}.yaml"
 		elif [[ $lang == 'zh' ]]; then
-			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/chinese/${TARGET_LANG}-${lang}.yaml"
+			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/chinese/${TARGET_LANG%~*}-${lang%~*}.yaml"
 		else
 			# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
 			# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
-			export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.yaml
+			export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
 		fi
 	}
 
@@ -82,6 +82,6 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	# to as many as necessary to process all tasks in parallel. Individual
 	# .slurm job definitions define how many cpus should be allocated per
 	# task.
-	export SLURM_TASKS_PER_NODE=${TPN:-}
+	export SLURM_TASKS_PER_NODE=${TPN:-1}
 fi
 
