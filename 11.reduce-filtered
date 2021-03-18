@@ -19,8 +19,8 @@ cat $@ \
 done \
 | LC_ALL=C sort \
 	-t$'\t' \
-	-k5,5 \
-	-k6,6nr \
+	-k7,7 \
+	-k8,8nr \
 	--compress-program=gzip \
 	-T $TMPDIR \
 	--parallel=$SLURM_CPUS_ON_NODE -S 80% \
