@@ -10,7 +10,7 @@ depends() {
 
 install() {
 	pip install -r tmxt/requirements.txt
-	echo "python $PREFIX/src/tmxt/tmxt.py \"\$@\"" > $PREFIX/bin/tmxt
+	echo "python3 $PREFIX/src/tmxt/tmxt.py \"\$@\"" > $PREFIX/bin/tmxt
 	chmod +x $PREFIX/bin/tmxt
 }
 

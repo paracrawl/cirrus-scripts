@@ -17,3 +17,5 @@
 /env/src/icu
 /env/src/protobuf*
 /env/src/gperftools*
+/env/src/xmlrpc*
+/env/src/Python-*

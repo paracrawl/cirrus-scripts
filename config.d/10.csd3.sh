@@ -35,7 +35,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 				--ignore_long \
 				--ignore_orthography \
 				--ignore_segmentation"
-			export BICLEANER="python ${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
+			export BICLEANER="python3 ${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
 			export BICLEANER_PARAMS="\
 				$BICLEANER_PARAMS \
 				--processes 2 \

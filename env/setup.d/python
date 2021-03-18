@@ -1,7 +1,14 @@
 #!/bin/bash
 
 install() {
-	python3 -m venv $PREFIX
+	test -d Python-3.8.8 || curl -L 'https://www.python.org/ftp/python/3.8.8/Python-3.8.8.tgz' | tar -xz
+	pushd Python-3.8.8
+	./configure \
+		--prefix=$PREFIX \
+		--enable-optimizations
+	make -j8
+	make install
+	popd
 }
 
 depends() {
@@ -9,6 +16,6 @@ depends() {
 }
 
 is-installed() {
-	test -x $PREFIX/bin/python
+	test -x $PREFIX/bin/python3
 }
 

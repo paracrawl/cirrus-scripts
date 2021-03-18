@@ -2,32 +2,6 @@ function join_by {
 	paste -sd "$1" -
 }
 
-function group_ranges {
-	local start=
-	local prev=
-	while read el; do
-		if [ ! -z "$prev" ] && [ "$el" -eq $(( $prev + 1 )) ]; then
-			prev=$el
-		else
-			if [ -z "$prev" ]; then
-				true
-			elif [ "$start" -eq "$prev" ]; then
-				echo $start
-			else
-				echo $start-$prev
-			fi
-			prev=$el
-			start=$el
-		fi
-	done
-	if [ ! -z "$start" ]; then
-		if [ "$start" -eq "$prev" ]; then
-			echo $start
-		else
-			echo $start-$prev
-		fi
-	fi
-}
 
 function prompt {
 	printf "$@" 1>&2
@@ -51,7 +25,11 @@ function make_batch_list_all {
 	local step="$1" collection="$2" lang="$3"
 	local batch_list=${COLLECTIONS[$collection]}-batches/${step}.${lang}
 
-	if ! test -f ${COLLECTIONS[$collection]}-batches/${lang}; then
+	if [[ ! -d ${COLLECTIONS[$collection]}-batches ]]; then
+		mkdir ${COLLECTIONS[$collection]}-batches
+	fi
+
+	if $FORCE_INDEX_BATCHES || [[ ! -f ${COLLECTIONS[$collection]}-batches/${lang} ]]; then
 		find ${COLLECTIONS[$collection]}-shards/${lang} \
 			-mindepth 2 \
 			-maxdepth 2 \
@@ -115,65 +93,19 @@ function schedule {
 }
 
 
-function is_marked_valid {
-	local marker=".validated-$1"
-	local batch="$2"
-	shift 2
-
-	local latest_file=$(cd "$batch"; ls -1t "$@" | head -n1)
-	if [ -z "$latest_file" ]; then
-		return 1
-	elif [ ! -f $batch/$marker ]; then
-		return 1
-	elif [ $batch/$latest_file -nt $batch/$marker ]; then
-		return 1
-	else
-		return 0
-	fi
-}
-
-
-function mark_valid {
-	local marker=".validated-$1"
-	local batch="$2"
-	touch "$batch/$marker"
-}
-
-
-function get_group_boundaries {
-	local n_batches=`< "${1}" wc -l`
-	local task_id=${2}
-	GROUP_END=$(( ${TASKS_PER_BATCH} * ${task_id} ))
-	GROUP_START=$(( 1 + $GROUP_END - ${TASKS_PER_BATCH}))
-	if [ "${GROUP_END}" -gt "${n_batches}" ]; then
-		GROUP_END=${n_batches}
-	fi
-
-	echo "${GROUP_START},${GROUP_END}"
-}
-
-
-function task() {
-	set -euo pipefail
-	local BATCH_ID=$1
-
-	BATCH=`head -${BATCH_ID} ${BATCHES} | tail -1`
-
-	echo `date` "Starting whole node job ${BATCH_ID} on ${HOSTNAME}"
-	echo "Batch: ${BATCH}"
-	${CMD} ${SLANG} ${BATCH}
-	echo `date` "Done whole node job ${BATCH_ID} on ${HOSTNAME}"
-}
-
-
 declare -g TEST=false
 declare -g RETRY=false
+declare -g FORCE_INDEX_BATCHES=false
 declare -g ALWAYS_YES=${ALWAYS_YES:-false}
 declare -g SCHEDULE_OPTIONS=(--parsable)
 declare -g STEPS=""
 
 while (( "$#" )); do
 	case "$1" in
+		-f|--force)
+			FORCE_INDEX_BATCHES=true
+			shift
+			;;
 		-r|--retry)
 			RETRY=true
 			shift

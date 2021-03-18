@@ -9,8 +9,8 @@ is-installed() {
 }
 
 install() {
-	pip install mecab-python3
-	pip install python-mecab-ko
+	pip3 install mecab-python3
+	pip3 install python-mecab-ko
 }
 
 

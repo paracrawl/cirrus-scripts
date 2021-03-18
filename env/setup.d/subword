@@ -9,6 +9,6 @@ is-installed() {
 }
 
 install() {
-	pip install subword-nmt
+	pip3 install subword-nmt
 }
 

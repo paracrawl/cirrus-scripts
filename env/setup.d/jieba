@@ -9,6 +9,6 @@ is-installed() {
 }
 
 install() {
-	pip install jieba
+	pip3 install jieba
 }
 

@@ -28,8 +28,8 @@ function-exists() {
 
 python-package-exists() {
 	# Tests if the default python has a package installed (without loading it)
-	test -x $PREFIX/bin/python \
-	&& $PREFIX/bin/python -c "import sys,pkgutil; sys.exit(0 if pkgutil.find_loader('$1') else 1)"
+	test -x $PREFIX/bin/python3 \
+	&& $PREFIX/bin/python3 -c "import sys,pkgutil; sys.exit(0 if pkgutil.find_loader('$1') else 1)"
 }
 
 contains() {
@@ -85,6 +85,10 @@ run-module() {
 			eval "$@"
 			;;
 	esac
+}
+
+edit-module() {
+	$EDITOR $(module-path $1)
 }
 
 list-modules() {
@@ -208,8 +212,11 @@ case "$1" in
 	status)
 		list-status
 		;;
+	edit)
+		edit-module $2
+		;;
 	*)
-		echo "Usage: $0 list|install|install-all" >&2
+		echo "Usage: $0 list|edit|install|install-all" >&2
 		exit 1
 		;;
 esac
