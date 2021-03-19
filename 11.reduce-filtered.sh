@@ -1,27 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+. ./env/init.sh
 . ./config.sh
 . ./functions.sh
-
-# Makes a batch list (a list of all .classified.gz files for a single collection/language pair)
-function make_batch_list {
-	local lang=$1
-	local collection=$2
-	local batch_list=${COLLECTIONS[$collection]}-batches/11.${lang}-${TARGET_LANG}
-
-	if ! test -e $batch_list; then
-		find ${COLLECTIONS[$collection]}-cleaning/${TARGET_LANG}-${lang}/ \
-			-mindepth 1 \
-			-maxdepth 1 \
-			-type f \
-			-regex ".*/[0-9]+\.filtered${BICLEANER_THRESHOLD/./}\.gz$" \
-			> $batch_list.$$ \
-			&& mv $batch_list.$$ $batch_list
-	fi
-
-	echo $batch_list
-}
 
 lang=$1
 shift
@@ -36,7 +18,7 @@ declare -a batch_lists
 batch_count=0
 
 for collection in $collections; do
-	batch_list=$(make_batch_list $lang $collection)
+	batch_list=$(make_batch_list 11 $collection $lang)
 	batch_count=$(( $batch_count + $(cat $batch_list | wc -l) ))
 	batch_lists+=( $batch_list )
 done
@@ -52,6 +34,6 @@ if [ ! -f $output_file ]; then
 			--exclusive \
 			-e ${SLURM_LOGS}/11.reduce-filtered-%A.err \
 			-o ${SLURM_LOGS}/11.reduce-filtered-%A.out \
-			11.reduce-filtered ${output_file} ${batch_lists[@]}
+			${SCRIPTS}/11.reduce-filtered ${output_file} ${batch_lists[@]}
 	fi
 fi

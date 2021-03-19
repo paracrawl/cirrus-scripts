@@ -1,25 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+. ./env/init.sh
 . ./config.sh
 . ./functions.sh
-
-function make_batch_list {
-	echo "make_batch_list $@" >&2
-	local collection=$1 lang=$2
-	local batch_list=${COLLECTIONS[$collection]}-batches/10.${lang}-${TARGET_LANG}
-
-	if ! test -e $batch_list; then
-		find ${COLLECTIONS[$collection]}-cleaning/${TARGET_LANG}-${lang}/ \
-			-mindepth 1 \
-			-maxdepth 1 \
-			-type f \
-			-regex ".*/[0-9]+\.classified\.gz$" \
-			> $batch_list
-	fi
-
-	echo $batch_list
-}
 
 lang=$1
 shift
@@ -31,7 +15,7 @@ declare -a batch_lists
 batch_count=0
 
 for collection in $collections; do
-	batch_list=$(make_batch_list $collection $lang)
+	batch_list=$(make_batch_list_all 10 $collection $lang)
 	batch_count=$(( $batch_count + $(cat $batch_list | wc -l) ))
 	batch_lists+=( $batch_list )
 done
@@ -42,11 +26,11 @@ if [ ! -f $output_file ]; then
 	prompt "Scheduling 1-1 for combining $batch_count batches across ${#batch_lists[@]} collections\n"
 	if confirm; then
 		schedule \
-			-J reduce-classified-${lang} \
+			-J reduce-classified-${lang%~*} \
 			--time 24:00:00 \
 			--cpus-per-task 1 \
 			-e ${SLURM_LOGS}/10.reduce-classified-%A.err \
 			-o ${SLURM_LOGS}/10.reduce-classified-%A.out \
-			10.reduce-classified ${output_file} ${batch_lists[@]}
+			${SCRIPTS}/10.reduce-classified ${output_file} ${batch_lists[@]}
 	fi
 fi

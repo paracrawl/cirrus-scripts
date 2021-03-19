@@ -1,16 +1,17 @@
 #!/bin/bash
 set -euo pipefail
-
 output_file=$1
 shift
+
+TMPSFX=${JOB_ID:-$$}
 
 mkdir -p $(dirname $output_file)
 
 cat $@ \
 | while read batch; do
 	echo "Reading $batch" >&2
-	cat $batch
+	cat $batch/classified.gz
 done \
-> $output_file.$$
+> $output_file.$TMPSFX
 
-mv $output_file.$$ $output_file
+mv $output_file.$TMPSFX $output_file

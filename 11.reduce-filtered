@@ -4,9 +4,8 @@ set -euo pipefail
 output_file="$1"
 shift
 
-batch_lists="$@"
-
-TMPDIR=$(mktemp -d -p $(dirname $output_file))
+TMPSFX=${JOB_ID:-$$}
+TMPDIR=$(mktemp -d --tmpdir=$(dirname $output_file) --suffix=_$TMPSFX)
 test -d "$TMPDIR"
 trap "rm -rf $TMPDIR" EXIT
 
@@ -15,7 +14,7 @@ mkdir -p $(dirname $output_file)
 cat $@ \
 | while read batch; do
 	echo "Reading $batch" >&2
-	pigz -cd $batch
+	pigz -cd $batch/filtered${BICLEANER_THRESHOLD/./}.gz
 done \
 | LC_ALL=C sort \
 	-t$'\t' \
@@ -25,7 +24,7 @@ done \
 	-T $TMPDIR \
 	--parallel=$SLURM_CPUS_ON_NODE -S 80% \
 | pigz \
-> $output_file.$$
+> $output_file.$TMPSFX
 
-echo "Moving $output_file.$$ to $output_file"
-mv $output_file.$$ $output_file
+echo "Moving $output_file.$TMPSFX to $output_file"
+mv $output_file.$TMPSFX $output_file

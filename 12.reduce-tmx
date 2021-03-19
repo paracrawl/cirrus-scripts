@@ -1,7 +1,6 @@
 #!/bin/bash
-set -euxo pipefail
-
-source $SCRIPTS/env/init.sh
+set -euo pipefail
+TMPSFX=${JOB_ID:-$$}
 
 lang=$1
 tmx_output=$2
@@ -11,19 +10,19 @@ filtered_input=$@
 
 pigz -cd $filtered_input \
 | PYTHONPATH=$PREFIX/src/bitextor python3 ${SCRIPTS}/bitextor-buildTMX.py \
-	--lang1 ${TARGET_LANG} --lang2 ${lang} \
+	--lang1 ${TARGET_LANG%~*} --lang2 ${lang} \
 	-c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection,lengthratio,numTokensSL,numTokensTL" \
 	--no-delete-seg \
 	--dedup "bifixerhash" \
 | tee >(pigz > $tmx_output.$$) \
-| tmxt --codelist=${TARGET_LANG},${lang} \
+| tmxt --codelist=${TARGET_LANG%~*},${lang} \
 | pigz \
-> $txt_output.$$
+> $txt_output.$TMPSFX
 
-echo "Moving $txt_output.$$ to $txt_output"
-mv $txt_output.$$ $txt_output
+echo "Moving $txt_output.$TMPSFX to $txt_output"
+mv $txt_output.$TMPSFX $txt_output
 
 # (Note: compressing tmx might not have finished yet but a simple rename should
 # maintain the file handle. I hope.)
-echo "Moving $tmx_output.$$ to $tmx_output"
-mv $tmx_output.$$ $tmx_output
+echo "Moving $tmx_output.$TMPSFX to $tmx_output"
+mv $tmx_output.$TMPSFX $tmx_output

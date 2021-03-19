@@ -178,22 +178,22 @@ with open_xz_or_gzip_or_plain(options.clean_alignments, 'rt') if options.clean_a
         if prev_hash == "" and options.dedup:
             bestseg1 = fieldsdict['seg1']
             bestseg2 = fieldsdict['seg2']
-            urls1.add(fieldsdict['url1'])
-            urls2.add(fieldsdict['url2'])
+            urls1.update(fieldsdict['url1'].split(' '))
+            urls2.update(fieldsdict['url2'].split(' '))
             if 'collection' in fieldsdict.keys():
                 collections.add(fieldsdict['collection'])
             prev_hash = line_hash
             prev_fieldsdict = dict(fieldsdict)
         elif prev_hash == line_hash and options.dedup:
-            urls1.add(fieldsdict['url1'])
-            urls2.add(fieldsdict['url2'])
+            urls1.update(fieldsdict['url1'].split(' '))
+            urls2.update(fieldsdict['url2'].split(' '))
             if 'collection' in fieldsdict.keys():
                 collections.add(fieldsdict['collection'])
             prev_hash = line_hash
             prev_fieldsdict = dict(fieldsdict)
         elif not options.dedup:
-            urls1.add(fieldsdict['url1'])
-            urls2.add(fieldsdict['url2'])
+            urls1.update(fieldsdict['url1'].split(' '))
+            urls2.update(fieldsdict['url2'].split(' '))
             if 'collection' in fieldsdict.keys():
                 collections.add(fieldsdict['collection'])
             idcounter += 1
@@ -214,8 +214,8 @@ with open_xz_or_gzip_or_plain(options.clean_alignments, 'rt') if options.clean_a
             collections = set()
             bestseg1 = fieldsdict['seg1']
             bestseg2 = fieldsdict['seg2']
-            urls1.add(fieldsdict['url1'])
-            urls2.add(fieldsdict['url2'])
+            urls1.update(fieldsdict['url1'].split(' '))
+            urls2.update(fieldsdict['url2'].split(' '))
             if 'collection' in fieldsdict.keys():
                 collections.add(fieldsdict['collection'])
             prev_hash = line_hash
