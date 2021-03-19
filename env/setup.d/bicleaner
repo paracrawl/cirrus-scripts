@@ -9,6 +9,6 @@ depends() {
 }
 
 install() {
-	pip3 install bicleaner psutil
+	pip3 install -U bicleaner psutil
 }
 
