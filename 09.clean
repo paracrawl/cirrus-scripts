@@ -34,7 +34,7 @@ done \
 cat $TMP_FIXED \
 | cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
 | paste $TMP_FIXED - \
-| fgrep -ivf ${SCRIPTS}/filtered-terms.txt \
+| (fgrep -ivf ${SCRIPTS}/filtered-terms.txt || true) \
 | sed -e "s/$/\t${collection}/" \
 | tee \
 	>(pigz -9c > $CLASSIFIED.$TMPSFX) \
@@ -43,7 +43,11 @@ cat $TMP_FIXED \
 | python3 $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k7,7 -k8,8nr \
 | pigz -9c \
-> $FILTERED.$TMPSFX
+> $FILTERED.$TMPSFX \
+|| { 
+	echo "Error in pipeline: ${PIPESTATUS[@]}"
+	exit 1
+}
 
 mv $CLASSIFIED.$TMPSFX $CLASSIFIED
 mv $FILTERED.$TMPSFX $FILTERED
