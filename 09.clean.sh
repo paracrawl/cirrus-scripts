@@ -28,7 +28,7 @@ for lang in $*; do
 				-e ${SLURM_LOGS}/09.clean-%A_%a.err \
 				-o ${SLURM_LOGS}/09.clean-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
-				${SCRIPTS}/09.clean ${collection} ${lang} \
+				${SCRIPTS}/09.clean ${collection} ${lang%~*} \
 				${COLLECTIONS[$collection]}-shards/${TARGET_LANG}
 		fi
 	fi

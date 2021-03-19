@@ -22,9 +22,9 @@ if confirm; then
 		-e ${SLURM_LOGS}/12.reduce-tmx-%A.err \
 		-o ${SLURM_LOGS}/12.reduce-tmx-%A.out \
 		${SCRIPTS}/12.reduce-tmx ${lang%~*} \
-			"${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.tmx.gz" \
-			"${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.txt.gz" \
-			"${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
+			"${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.tmx.gz" \
+			"${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.txt.gz" \
+			"${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
 
 	schedule \
 		-J reduce-tmx-deferred-${lang%~*} \
@@ -33,6 +33,6 @@ if confirm; then
 		-e ${SLURM_LOGS}/12.reduce-tmx-%A.err \
 		-o ${SLURM_LOGS}/12.reduce-tmx-%A.out \
 		${SCRIPTS}/12.reduce-tmx-deferred ${lang%~*} \
-			"${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.deferred.tmx.gz" \
-			"${DATA_CLEANING}/cleaning/${TARGET_LANG}-${lang}/${TARGET_LANG}-${lang}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
+			"${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.deferred.tmx.gz" \
+			"${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
 fi
