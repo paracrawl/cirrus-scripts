@@ -44,7 +44,7 @@ for language in $@; do
 				${SCRIPTS}/02.giashard $batch_list $language $output_dir)
 			echo $shard_job_id
 			merge_job_id=$(schedule \
-				-J merge-${language}-${collection} \
+				-J merge-shard-${language}-${collection} \
 				--dependency afterok:$shard_job_id \
 				-a 1-16 \
 				--time 24:00:00 \
@@ -54,7 +54,7 @@ for language in $@; do
 				${SCRIPTS}/02.giamerge $job_list $language $output_dir)
 			echo $merge_job_id
 			schedule \
-				-J clean-${language}-${collection} \
+				-J clean-shard-${language}-${collection} \
 				--dependency afterok:$merge_job_id \
 				--time 4:00:00 \
 				--cpus-per-task 1 \
