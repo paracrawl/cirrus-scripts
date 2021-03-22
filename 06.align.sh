@@ -51,7 +51,6 @@ for lang in $*; do
 				-a $job_list \
 				--time 12:00:00 \
 				--cpus-per-task 4 \
-				--mem-per-cpu 8192 \
 				-e ${SLURM_LOGS}/06.align-%A_%a.err \
 				-o ${SLURM_LOGS}/06.align-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
