@@ -4,7 +4,7 @@ set -euo pipefail
 LANGUAGE=$1
 BATCH=$2
 INPUT_FILE=$BATCH/sentences.gz
-OUTPUT_FILE=$(dirname $INPUT_FILE)/sentences_${TARGET_LANG}.gz
+OUTPUT_FILE=$(dirname $INPUT_FILE)/sentences_${TARGET_LANG%~*}.gz
 TMPSFX=${JOB_ID:-$$}
 
 docs_src=$(gzip -dc $INPUT_FILE | wc -l)
@@ -15,7 +15,7 @@ export SIZE_HINT=$lines_src
 
 # Make sure these vars are at least available to the subprocess
 gzip -cd $INPUT_FILE \
-| b64filter cache $MODEL_DIR/$LANGUAGE-$TARGET_LANG/translate.sh \
+| b64filter cache $MODEL_DIR/${LANGUAGE}-${TARGET_LANG%~*}/translate.sh \
 | gzip -9c > $OUTPUT_FILE.$TMPSFX
 
 docs_dst=$(gzip -dc $OUTPUT_FILE.$TMPSFX | wc -l)
