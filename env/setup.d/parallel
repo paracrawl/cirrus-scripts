@@ -1,0 +1,16 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/parallel
+}
+
+install() {
+	test -d parallel-20210322 || curl -L "https://mirror.koddos.net/gnu/parallel/parallel-20210322.tar.bz2" | tar -xj
+	
+	pushd parallel-20210322
+
+	./configure --prefix=$PREFIX
+	make -j8 install
+	
+	popd
+}
