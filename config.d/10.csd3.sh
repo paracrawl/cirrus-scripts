@@ -1,13 +1,10 @@
 if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
-	# For translating to Spanish
-	export APERTIUM=/rds/project/rds-48gU72OtDNY/jelmervdl/apertium
-
 	# For Pashto (not paracrawl)
 	export MARIAN=/rds/project/rds-48gU72OtDNY/romang/marian-dev/build-static
 	export BPE=/rds/project/rds-48gU72OtDNY/romang/subword-nmt/subword_nmt
 	export JIEBA="/rds/project/rds-48gU72OtDNY/jelmervdl/jieba/bin/python -m jieba"
 
-	export LD_LIBRARY_PATH=$APERTIUM/lib:/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
+	export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
 	export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 	export MODELS=/rds/project/rds-48gU72OtDNY/models
 	
