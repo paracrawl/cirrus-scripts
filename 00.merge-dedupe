@@ -10,7 +10,7 @@ declare -a OPTIONS=(
 	-l $(( 1024 * 1024 ))
 )
 
-if [ "$LANGUAGE" = "en" ]; then
+if [ "$LANGUAGE" = "${TARGET_LANG%~*}" ]; then
 	OPTIONS+=(
 		-c source.gz url.gz
 		-d sentences.gz
@@ -19,7 +19,7 @@ if [ "$LANGUAGE" = "en" ]; then
 else
 	OPTIONS+=(
 		-c source.gz url.gz
-		-d sentences.gz sentences_en.gz
+		-d sentences.gz sentences_${TARGET_LANG%~*}.gz
 		-u sentences.gz
 	)
 fi
