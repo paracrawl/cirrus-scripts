@@ -5,7 +5,7 @@ set -euo pipefail
 . ./functions.sh
 
 # Note: tasks-per-batch here determines how many parts the sharding is split into
-export BATCHES_PER_TASK=4 # 4 for CommonCrawl, 128 good for others, 512 more for IA data
+export BATCHES_PER_TASK=128 # 4 for CommonCrawl, 128 good for others, 512 more for IA data
 export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
 
 function make_batch_list() {
