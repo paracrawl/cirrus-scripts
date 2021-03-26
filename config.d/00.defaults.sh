@@ -15,7 +15,7 @@ export BLEUALIGN=$PREFIX/bin/bleualign_cpp
 export SCRIPTS=$(dirname $PREFIX) # strip off the "env" part.
 export BITEXTOR="$PREFIX/src/bitextor"
 export MODEL_DIR="$PREFIX/../models"
-export TARGET_LANG=${TARGET_LANG:-en}
+export TARGET_LANG=${TARGET_LANG:-en~dedup}
 
 export SLURM_LOGS="/home/%u/logs"
 #export SBATCH_ACCOUNT=
