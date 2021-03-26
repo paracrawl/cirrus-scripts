@@ -1,0 +1,17 @@
+is-installed() {
+	test -x $PREFIX/bin/lrx-proc
+}
+
+depends() {
+	echo apertium lttoolbox
+}
+
+install() {
+	local VERSION=0.2.7
+	test -d apertium-lex-tools-$VERSION || curl -L "https://github.com/apertium/apertium-lex-tools/archive/refs/tags/v$VERSION.tar.gz" | tar -xz
+	pushd apertium-lex-tools-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make -j3
+	make install
+	popd
+}

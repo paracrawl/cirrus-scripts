@@ -1,0 +1,18 @@
+#!/bin/bash
+is-installed() {
+	test -x $PREFIX/bin/apertium
+}
+
+depends() {
+	echo lttoolbox
+}
+
+install() {
+	test -d apertium-3.7.1 || curl -L 'https://github.com/apertium/apertium/archive/refs/tags/v3.7.1.tar.gz' | tar -xz
+
+	pushd apertium-3.7.1
+	./autogen.sh --prefix=$PREFIX
+	make -j8
+	make install
+	popd
+}

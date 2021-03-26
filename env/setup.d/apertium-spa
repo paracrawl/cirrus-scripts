@@ -1,0 +1,17 @@
+is-installed() {
+	test -d $PREFIX/share/apertium/apertium-spa
+}
+
+depends() {
+	echo apertium apertium-lex-tools
+}
+
+install() {
+	local VERSION=c3d59e60718c3bc8f1675025d56af333ae4d500a
+	test -d apertium-spa-$VERSION || curl -L "https://github.com/apertium/apertium-spa/archive/$VERSION.tar.gz" | tar -xz
+	pushd apertium-spa-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make
+	make install
+	popd
+}

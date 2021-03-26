@@ -1,0 +1,17 @@
+is-installed() {
+	test -d $PREFIX/share/apertium/apertium-es-gl
+}
+
+depends() {
+	echo apertium cg3 apertium-spa
+}
+
+install() {
+	local VERSION=a9c32c42610fe829f4a8104501e1af871157e84d
+	test -d "apertium-es-gl-$VERSION" | curl -L "https://github.com/apertium/apertium-es-gl/archive/$VERSION.tar.gz" | tar -xz
+	pushd apertium-es-gl-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make
+	make install
+	popd
+}

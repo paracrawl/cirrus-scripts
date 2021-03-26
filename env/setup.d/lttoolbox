@@ -1,0 +1,19 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/lt-comp
+}
+
+depends() {
+	echo env
+}
+
+install() {
+	test -d lttoolbox-3.5.3 || curl -L "https://github.com/apertium/lttoolbox/archive/refs/tags/v3.5.3.tar.gz" | tar -xz
+	
+	pushd lttoolbox-3.5.3
+	./autogen.sh --prefix=$PREFIX
+	make -j8
+	make install
+	popd
+}

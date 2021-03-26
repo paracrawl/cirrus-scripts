@@ -1,0 +1,17 @@
+is-installed() {
+	test -d $PREFIX/share/apertium/apertium-eu-es
+}
+
+depends() {
+	echo apertium
+}
+
+install() {
+	local VERSION=f138058c85b6e7ecc595f9ae218272a4a6e9b93b
+	test -d "apertium-eu-es-$VERSION" | curl -L "https://github.com/apertium/apertium-eu-es/archive/$VERSION.tar.gz" | tar -xz
+	pushd apertium-eu-es-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make
+	make install
+	popd
+}

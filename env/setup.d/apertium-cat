@@ -1,0 +1,17 @@
+is-installed() {
+	test -d $PREFIX/share/apertium/apertium-cat
+}
+
+depends() {
+	echo apertium apertium-lex-tools
+}
+
+install() {
+	local VERSION=93df6275166000ed2df8ceb14a7625b8e9e3a8e1
+	test -d apertium-cat-$VERSION || curl -L "https://github.com/apertium/apertium-cat/archive/$VERSION.tar.gz" | tar -xz
+	pushd apertium-cat-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make
+	make install
+	popd
+}

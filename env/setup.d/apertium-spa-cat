@@ -1,0 +1,17 @@
+is-installed() {
+	test -d $PREFIX/share/apertium/apertium-spa-cat
+}
+
+depends() {
+	echo apertium cg3 apertium-{spa,cat}
+}
+
+install() {
+	local VERSION=4b80b6e69311221f94640bf54d93f21ea29e6403
+	test -d "apertium-spa-cat-$VERSION" | curl -L "https://github.com/apertium/apertium-spa-cat/archive/$VERSION.tar.gz" | tar -xz
+	pushd apertium-spa-cat-$VERSION
+	./autogen.sh --prefix=$PREFIX
+	make
+	make install
+	popd
+}

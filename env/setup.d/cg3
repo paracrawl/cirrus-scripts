@@ -1,0 +1,17 @@
+is-installed() {
+	test -x $PREFIX/bin/cg-comp
+}
+
+depends() {
+	echo env
+}
+
+install() {
+	local VERSION=1.3.2
+	test -d "cg3-$VERSION" | curl -L "https://github.com/TinoDidriksen/cg3/archive/refs/tags/v${VERSION}.tar.gz" | tar -xz
+	pushd cg3-$VERSION
+	./cmake.sh --prefix=$PREFIX
+	make -j3
+	make install
+	popd
+}
