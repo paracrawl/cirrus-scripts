@@ -14,14 +14,24 @@ CLASSIFIED=$batch/classified.gz
 FILTERED=$batch/filtered${BICLEANER_THRESHOLD/./}.gz
 STATS=$batch/stats.txt
 
+if [ ! -z "${CLIP_URLS:-}" ]; then
+	read_urls() {
+		gzip -cd $@ | awk -F ' ' '{ print $1 }' # Read only one url from the space-separated rows
+	}
+else
+	read_urls() {
+		cat $@ # Just pass through
+	}
+fi
+
 for match in $batch/aligned-+([0-9]).gz; do
 	echo $match 1>&2
 	matched_batch=$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')
 	paste <(gzip -cd ${match} \
 			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' \
 			| docjoin \
-				-r ${target_lang_data}/${shard}/${matched_batch}/url.gz \
-				-l $(dirname ${match})/url.gz) \
+				-r <(read_urls ${target_lang_data}/${shard}/${matched_batch}/url.gz) \
+				-l <(read_urls $(dirname ${match})/url.gz)) \
 			<(gzip -cd $match | cut -f4) \
 			<(gzip -cd $match | cut -f3) \
 			<(gzip -cd $match | cut -f5-)
