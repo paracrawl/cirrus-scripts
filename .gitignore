@@ -19,3 +19,7 @@
 /env/src/gperftools*
 /env/src/xmlrpc*
 /env/src/Python-*
+/env/src/apertium-*
+/env/src/cg3-*
+/env/src/lttoolbox-*
+/env/src/parallel-*
