@@ -37,6 +37,15 @@ function make_batch_list_retry {
 	echo $batch_list
 }
 
+declare -a ADDITIONAL_OPTIONS=()
+
+# Quick hack, should be a --option option, but functions.sh doesn't
+# allow for that at the moment. Someday...
+if [[ ! -z ${OOM_PROOF:-} ]]; then
+	ADDITIONAL_OPTIONS=(--mem-per-cpu 8G)
+	export BLEUALIGN_THREADS=1
+fi
+
 collection=$1
 shift
 
@@ -51,6 +60,7 @@ for lang in $*; do
 				-a $job_list \
 				--time 12:00:00 \
 				--cpus-per-task 4 \
+				${ADDITIONAL_OPTIONS[@]} \
 				-e ${SLURM_LOGS}/06.align-%A_%a.err \
 				-o ${SLURM_LOGS}/06.align-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
