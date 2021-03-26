@@ -6,7 +6,6 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	module purge && module load \
 		rhel7/global \
 		slurm \
-		parallel \
 		perl-5.26.2-gcc-7.2.0-2ys4uai \
 		cmake \
 		gcc/8 `# CUDA10.2 can't deal with gcc > 8` \
