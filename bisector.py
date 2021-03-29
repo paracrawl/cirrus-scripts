@@ -22,6 +22,10 @@ class Reader(Thread):
 			self.queue.put(line)
 
 
+class CrashingChild(Exception):
+	pass
+
+
 class UnexpectedOutput(Exception):
 	def __init__(self, got, expected):
 		super().__init__("Expected {} lines, got {}".format(expected, got))
