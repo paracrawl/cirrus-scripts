@@ -129,12 +129,20 @@ def grouper(iterable, n):
 
 
 def main(argv):
-	if len(argv) <= 1:
+	argv = argv[1:] # Ditch program name
+	target_size = 1
+
+	# optional extract target size argument
+	if len(argv) > 0 and argv[0].isnumeric():
+		target_size = int(argv[0])
+		argv = argv[1:]
+	
+	if len(argv) == 0:
 		raise ValueError('Missing child command')
 
 	for chunk in grouper(enumerate(sys.stdin.buffer, start=1), 1024):
 		try:
-			for line in try_chunk(argv[1:], chunk, target_size=1):
+			for line in try_chunk(argv, chunk, target_size=target_size):
 				sys.stdout.buffer.write(line)
 		except TroublesomeInput as e:
 			sys.stderr.write("{!s}:\n{}".format(e, e.bytes().decode()))
