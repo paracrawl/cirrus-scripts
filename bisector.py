@@ -32,10 +32,12 @@ class UnexpectedOutput(Exception):
 
 
 class TroublesomeInput(Exception):
-	def __init__(self, line, lineno=None):
-		self.line = line
-		self.lineno = lineno
-		super().__init__("Troublesome input on line {}: {!r}".format(lineno, line))
+	def __init__(self, lines):
+		super().__init__("Troublesome input on line {start} to {end}".format(start=lines[0][0], end=lines[-1][0]))
+		self.lines = lines
+
+	def bytes(self):
+		return b"".join(line[1] for line in self.lines)
 
 
 class Child:
@@ -102,13 +104,13 @@ def try_chunk(argv, lines, target_size=1):
 	except UnexpectedOutput as e:
 		print("Trouble between lines {} to {}: {}".format(lines[0][0], lines[-1][0], e), file=sys.stderr)
 		if len(lines) <= target_size:
-			raise TroublesomeInput(line=lines[0][1], lineno=lines[0][0])
+			raise TroublesomeInput(lines=lines)
 		else:
 			output = []
 			for n, chunk in enumerate(grouper(lines, int(ceil(len(lines) / 2)))):
 				output += try_chunk(argv, chunk, target_size=target_size)
 
-			print("When processing the chunk {} to {} in smaller chunks, to processing errors occurred".format(lines[0][0], lines[-1][0]), file=sys.stderr)
+			print("While processing the chunk {} to {} in smaller chunks instead, no errors occurred".format(lines[0][0], lines[-1][0]), file=sys.stderr)
 	
 	return output
 
@@ -135,7 +137,7 @@ def main(argv):
 			for line in try_chunk(argv[1:], chunk, target_size=1):
 				sys.stdout.buffer.write(line)
 		except TroublesomeInput as e:
-			sys.stderr.write("Error with line {}: {}".format(e.lineno, e.line.decode()))
+			sys.stderr.write("{!s}:\n{}".format(e, e.bytes().decode()))
 			return 1
 
 	return 0
