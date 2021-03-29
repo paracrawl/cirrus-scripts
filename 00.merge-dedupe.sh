@@ -8,7 +8,7 @@ function make_batch_list_all() {
 	local collection=$1
 	local language=$2
 	local batch_list=${COLLECTIONS[$collection]}-batches/00.${language}
-	if [ ! -e $batch_list ]; then
+	if $FORCE_INDEX_BATCHES || [ ! -e $batch_list ]; then
 		for shard in $(seq 0 255); do
 			printf "%s" ${COLLECTIONS[$collection]}-shards/${language%~*}/${shard}
 

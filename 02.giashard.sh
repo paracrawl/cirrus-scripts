@@ -12,7 +12,7 @@ function make_batch_list() {
 	local collection=$1
 	local language=$2
 	local batch_list=${COLLECTIONS[$collection]}-batches/02.${language}
-	if [ ! -e $batch_list ]; then
+	if $FORCE_INDEX_BATCHES || [ ! -e $batch_list ]; then
 		find ${COLLECTIONS[$collection]}-text/ -mindepth 2 -maxdepth 2 -type d -name $language > $batch_list
 	fi
 	echo $batch_list

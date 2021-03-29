@@ -13,7 +13,7 @@ function list_numeric_dirs {
 
 function make_batch_list_all {
 	local collection="$1" lang="$2"
-	if ! test -e ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}; then
+	if $FORCE_INDEX_BATCHES || ! test -e ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}; then
 		for shard in $(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${lang}/); do
 			join -t$'\t' -j2 \
 				<(list_numeric_dirs $shard) \

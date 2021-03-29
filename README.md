@@ -37,6 +37,9 @@ ${COLLECTIONS[$collection]}/
                               en-index, $lang-doc, $en-doc, $lang-translated-doc
                               The number refers to the $batch in en/$shard/$batch
                               it is aligned with.
+          classified.gz     : All aligned document pairs concatenated, and
+                              processed with bifixer and bicleaner.
+          filtered05.gz     : File above, but filtered by score.
 
   ${collection}-batches/
     ${lang}                 : listing of paths to all batches in $lang
@@ -127,7 +130,7 @@ Dependencies per step:
 01: giawarc  
 02: giashard  
 03: preprocess  
-04: preprocess; maybe marian-fbgemm, moses2, subword, depends on your translation model  
+04: preprocess; maybe marian-dev, moses2, subword, depends on your translation model  
 05: preprocess; maybe jieba, mecab  
 06: preprocess docalign bleualign  
 07:  
@@ -139,19 +142,10 @@ Dependencies per step:
 
 
 # Running the pipeline
-Modify `config.csd3` to your liking. Especially the paths.
+Modify `config.d/10.csd3.sh` to your liking. Especially the paths.
 
-Then, from the cirrus-scripts working directory, run:
-```
-./pipeline.sh $collection $lang...
-```
-
-This will start checking output of each step, and either schedule that step to
-generate it (again) if something's wrong with it or if it is missing. It will
-also schedule all the next steps. It's rather interactive, you will have to click [y] a lot.
-
-You can run it again, or with the `-r` option, to resume or retry processing.
-Effectively it is just a wrapper around calling the individual steps.
+Then run the individual steps. There used to be a `pipeline.sh` file, but that
+no longer functioned, or was very slow, and thus was removed for now.
 
 # Running individual steps (examples)
 First time (assuming output from step 2 is already there). Will ask you to
@@ -168,13 +162,6 @@ Retry if some files didn't come through and need more time:
 ./03.split-text.sh -r --time 4:00:00 wide00006 mt
 ```
 
-Checkout output of that step, will print all files that don't exist or are
-corrupt to the stdout:
-
-```
-./03.split-text.check.sh wide00006 mt
-```
-
 Scheduling step 4 to directly pick up after step 3:
 
 ```
@@ -186,7 +173,6 @@ Scheduling step 4 to directly pick up after step 3:
 Each step consists of a couple of files, for example:
 ```
 03.split-text               : Actual code executed in this step for each batch
-03.split-text.check.sh.     : Tool to validate output of step (runs interactive)
 03.split-text.sh            : Submission script that sets SLURM parameters.
 ```
 
