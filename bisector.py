@@ -132,7 +132,7 @@ def main(argv):
 	if len(argv) <= 1:
 		raise ValueError('Missing child command')
 
-	for chunk in grouper(enumerate(sys.stdin.buffer), 1024):
+	for chunk in grouper(enumerate(sys.stdin.buffer, start=1), 1024):
 		try:
 			for line in try_chunk(argv[1:], chunk, target_size=1):
 				sys.stdout.buffer.write(line)
