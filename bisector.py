@@ -59,7 +59,7 @@ class Child:
 			self.close()
 
 	def start(self):
-		self.proc = subprocess.Popen(['stdbuf', '-i0', '-o0', *self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		self.proc = subprocess.Popen(self.argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 		self.reader = Reader(self.proc.stdout, self.queue)
 		self.reader.start()
 		self.alive = True
