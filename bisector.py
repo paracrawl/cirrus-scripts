@@ -8,6 +8,10 @@ from itertools import islice
 from math import ceil
 
 
+def prefix(prefix, lines):
+	return "\n".join(prefix + line for line in lines.split("\n"))
+
+
 class Reader(Thread):
 	def __init__(self, file, queue):
 		super().__init__()
@@ -19,7 +23,7 @@ class Reader(Thread):
 			line = self.file.readline()
 			if not line:
 				break
-			self.queue.put(line)
+			self.queue.put(line.rstrip(b"\n"))
 
 
 class CrashingChild(Exception):
@@ -27,17 +31,15 @@ class CrashingChild(Exception):
 
 
 class UnexpectedOutput(Exception):
-	def __init__(self, got, expected):
-		super().__init__("Expected {} lines, got {}".format(expected, got))
+	def __init__(self, lines, expected):
+		super().__init__("Expected {} line{}, got {}".format(expected, "s" if expected != 1 else "", len(lines)))
+		self.lines = lines
 
 
 class TroublesomeInput(Exception):
 	def __init__(self, lines):
 		super().__init__("Troublesome input on line {start} to {end}".format(start=lines[0][0], end=lines[-1][0]))
 		self.lines = lines
-
-	def bytes(self):
-		return b"".join(line[1] for line in self.lines)
 
 
 class Child:
@@ -88,23 +90,23 @@ class Child:
 def process_chunk(argv, lines):
 	with Child(argv) as child:
 		for line in lines:
-			child.proc.stdin.write(line)
+			child.proc.stdin.write(line + b"\n")
 		child.close()
 		output = child.readlines()
 	
 	if len(output) != len(lines):
-		raise UnexpectedOutput(len(output), len(lines))
+		raise UnexpectedOutput(output, len(lines))
 
 	return output
 
 
 def try_chunk(argv, lines, target_size=1):
 	try:
-		output = process_chunk(argv, list(line[1] for line in lines))
+		output = process_chunk(argv, list(line for _, line in lines))
 	except UnexpectedOutput as e:
 		print("Trouble between lines {} to {}: {}".format(lines[0][0], lines[-1][0], e), file=sys.stderr)
 		if len(lines) <= target_size:
-			raise TroublesomeInput(lines=lines)
+			raise TroublesomeInput(lines=lines) from e
 		else:
 			output = []
 			for n, chunk in enumerate(grouper(lines, int(ceil(len(lines) / 2)))):
@@ -142,10 +144,15 @@ def main(argv):
 
 	for chunk in grouper(enumerate(sys.stdin.buffer, start=1), 1024):
 		try:
-			for line in try_chunk(argv, chunk, target_size=target_size):
-				sys.stdout.buffer.write(line)
+			for line in try_chunk(argv, [(line_no, line.rstrip(b"\n")) for line_no, line in chunk], target_size=target_size):
+				sys.stdout.buffer.write(line + b"\n")
 		except TroublesomeInput as e:
-			sys.stderr.write("{!s}:\n{}".format(e, e.bytes().decode()))
+			sys.stderr.write("{error!s}:\n{input}\nOutput: ({len} line{plural})\n{output}\n".format(
+				error=e,
+				len=len(e.__cause__.lines),
+				plural="s" if len(e.__cause__.lines) != 1 else "",
+				input=prefix("> ", b"\n".join(line[1] for line in e.lines).decode()),
+				output=prefix("> ", b"\n".join(e.__cause__.lines).decode())))
 			return 1
 
 	return 0
