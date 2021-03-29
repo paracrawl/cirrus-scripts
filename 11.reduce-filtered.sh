@@ -25,7 +25,7 @@ done
 
 output_file="${DATA_CLEANING}/${TARGET_LANG}-${lang}/${TARGET_LANG%~*}-${lang%~*}.${collection_hash}.filtered${BICLEANER_THRESHOLD/./}.gz"
 
-if [ ! -f $output_file ]; then
+if [ ! -f $output_file ] || ! $RETRY; then
 	prompt "Scheduling 1-1 for combining $batch_count batches across ${#batch_lists[@]} collections\n"
 	if confirm; then
 		schedule \
