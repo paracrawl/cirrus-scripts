@@ -76,9 +76,16 @@ class Child:
 		if not self.alive:
 			return
 		self.alive = False
+		
+		# Indicate we're done with the child
 		self.proc.stdin.close()
+
+		# Wait for process to finish
 		if self.proc.wait() != 0:
 			raise CrashingChild()
+		
+		# Wait for reading to finish
+		self.reader.join()
 
 	def readlines(self):
 		output = []
