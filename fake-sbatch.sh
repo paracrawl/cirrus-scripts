@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+#set -euo pipefail
 
 export SLURM_TASKS_PER_NODE=1
 export SLURM_CPUS_ON_NODE=1

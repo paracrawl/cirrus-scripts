@@ -31,16 +31,19 @@ set -euo pipefail
 BATCHES=$1
 shift
 
-# Try to make/take the most of this node.
-AVAILABLE_THREADS=$(( $SLURM_CPUS_ON_NODE / $SLURM_TASKS_PER_NODE ))
-THREADS=${SLURM_CPUS_PER_TASK:-$AVAILABLE_THREADS}
-export THREADS=$(( $THREADS > 1 ? $THREADS : 1 ))
+if [ -z "${THREADS:-}" ]; then
+	# Try to make/take the most of this node.
+	AVAILABLE_THREADS=$(( $SLURM_CPUS_ON_NODE / $SLURM_TASKS_PER_NODE ))
+	THREADS=${SLURM_CPUS_PER_TASK:-$AVAILABLE_THREADS}
+	export THREADS=$(( $THREADS > 1 ? $THREADS : 1 ))
+fi
 
 # $SCRATCH is not set on Cirrus. $TMPDIR on Cirrus is shared-memory.
 if [ ! -z "${SCRATCH:-}" ]; then
 	SCRATCH_BASED_TMPDIR=${SCRATCH}/$(basename "$1").$$
 	mkdir -p ${SCRATCH_BASED_TMPDIR} || exit 255
 	export TMPDIR=$SCRATCH_BASED_TMPDIR
+	echo "TMPDIR=$TMPDIR"
 
 	chown :rds-48gU72OtDNY-users $SCRATCH_BASED_TMPDIR
 	chmod g+s $SCRATCH_BASED_TMPDIR
@@ -54,6 +57,8 @@ fi
 
 GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( $GROUP_END - $TASKS_PER_BATCH ))
+
+echo "Processing $GROUP_START to $GROUP_END with $THREADS threads"
 
 awk "NR > $GROUP_START && NR <= $GROUP_END" $BATCHES \
 | parallel \

@@ -123,8 +123,12 @@ while (( "$#" )); do
 			shift
 			;;
 		-j|--threads)
-			THREADS=$2
+			export THREADS=$2
 			shift 2
+			;;
+		-i|--interactive)
+			SBATCH=$SCRIPTS/fake-sbatch.sh
+			shift
 			;;
 		-t|--time)
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --time "$2")
