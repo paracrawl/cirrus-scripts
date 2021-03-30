@@ -4,7 +4,7 @@ is-installed() {
 }
 
 depends() {
-	echo lttoolbox
+	echo lttoolbox recode
 }
 
 install() {

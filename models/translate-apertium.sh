@@ -4,19 +4,20 @@ set -euo pipefail
 export MODEL=$1
 shift
 
-# Apertium messes up lines when encountering utf-8 nbsp. It
-# also has trouble with "^$", introducing a full stop and
-# skipping the line break altogether.
-# Note: eu has some oddity where it break on @ sometimes.
-# Adding `| tr '@' '.'` helps with that.
-
 translate-apertium() {
 	sed "s/\xc2\xad/ /g" \
-		| sed "s/\x00//g" \
-		| sed 's/\\^\\$//g' \
-		| apertium-destxt -i \
-		| apertium -f none -u $MODEL \
-		| apertium-retxt
+	| sed "s/\x00//g" \
+	| sed 's/&#10;//g' \
+	| sed -r 's/\^.?\$//g' \
+	| sed -r 's/^([-\.]?[0-9]+){25,}$//g' \
+	| sed -r 's/^(CONTAMINACIÓNVISUAL){25,}//g' \
+	| sed -r 's/^Ñ{250,}$//g' \
+	| sed -r 's/^[ÍI]{50,}$//g' \
+	| sed 's/^/<p>/g' \
+	| sed 's/$/<\/p>/g' \
+	| apertium -f html -u $MODEL \
+	| sed -r 's/<\/?p>//g' \
+	| recode html
 }
 
 ceil () {

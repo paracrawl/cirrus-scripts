@@ -1,0 +1,17 @@
+is-installed() {
+	test -x $PREFIX/bin/recode
+}
+
+depends() {
+	echo env
+}
+
+install() {
+	local VERSION=3.7.8
+	test -d "recode-$VERSION" || curl -L "https://github.com/rrthomas/recode/releases/download/v${VERSION}/recode-${VERSION}.tar.gz" | tar -xz
+	pushd recode-$VERSION
+	./configure --prefix=$PREFIX --target=x86_64
+	make
+	make install
+	popd
+}
