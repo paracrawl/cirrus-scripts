@@ -59,7 +59,8 @@ class Child:
 			self.close()
 
 	def start(self):
-		self.proc = subprocess.Popen(['stdbuf', '-i0', '-o0', *self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		#self.proc = subprocess.Popen(['stdbuf', '-i0', '-o0', *self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		self.proc = subprocess.Popen([*self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 		self.reader = Reader(self.proc.stdout, self.queue)
 		self.reader.start()
 		self.alive = True
@@ -81,8 +82,12 @@ class Child:
 		self.proc.stdin.close()
 
 		# Wait for process to finish
-		if self.proc.wait() != 0:
-			raise CrashingChild()
+		exit_code = self.proc.wait()
+		print(f"Stopped with {exit_code}", file=sys.stderr)
+		if exit_code != 0:
+			raise CrashingChild("{command} crashed with exit code {exit_code}".format(
+				command=" ".join(self.argv),
+				exit_code=exit_code))
 		
 		# Wait for reading to finish
 		self.reader.join()
@@ -107,17 +112,24 @@ def process_chunk(argv, lines):
 	return output
 
 
-def try_chunk(argv, lines, target_size=1):
+def try_chunk(argv, lines, target_size=1, report=None):
 	try:
 		output = process_chunk(argv, list(line for _, line in lines))
-	except UnexpectedOutput as e:
+	except (UnexpectedOutput, CrashingChild) as e:
 		print("Trouble between lines {} to {}: {}".format(lines[0][0], lines[-1][0], e), file=sys.stderr)
 		if len(lines) <= target_size:
-			raise TroublesomeInput(lines=lines) from e
+			try:
+				raise TroublesomeInput(lines=lines) from e
+			except TroublesomeInput as e:
+				if report:
+					report(e)
+					return [text for _, text in lines] # Just return the input as output
+				else:
+					raise
 		else:
 			output = []
 			for n, chunk in enumerate(grouper(lines, int(ceil(len(lines) / 2)))):
-				output += try_chunk(argv, chunk, target_size=target_size)
+				output += try_chunk(argv, chunk, target_size=target_size, report=report)
 
 			print("While processing the chunk {} to {} in smaller chunks instead, no errors occurred".format(lines[0][0], lines[-1][0]), file=sys.stderr)
 	
@@ -137,29 +149,45 @@ def grouper(iterable, n):
 			yield chunk
 
 
+def print_error(e):
+	if isinstance(e.__cause__, UnexpectedOutput):
+		sys.stderr.write("{error!s}:\n{input}\nOutput: ({len} line{plural})\n{output}\n".format(
+			error=e,
+			len=len(e.__cause__.lines),
+			plural="s" if len(e.__cause__.lines) != 1 else "",
+			input=prefix("> ", b"\n".join(line[1] for line in e.lines).decode()),
+			output=prefix("> ", b"\n".join(e.__cause__.lines).decode())))
+	else:
+		sys.stderr.write("{error!s}:\n{input}\nNo output because child crashed\n".format(
+			error=e,
+			input=prefix("> ", b"\n".join(line[1] for line in e.lines).decode())))
+
+
 def main(argv):
 	argv = argv[1:] # Ditch program name
 	target_size = 1
+	report = None
 
 	# optional extract target size argument
-	if len(argv) > 0 and argv[0].isnumeric():
-		target_size = int(argv[0])
-		argv = argv[1:]
+	while len(argv) > 0:
+		if argv[0].isnumeric():
+			target_size = int(argv[0])
+			argv = argv[1:]
+		elif argv[0] == "--ignore":
+			report = print_error
+			argv = argv[1:]
+		else:
+			break
 	
 	if len(argv) == 0:
-		raise ValueError('Missing child command')
+		raise ValueError("Missing child command")
 
-	for chunk in grouper(enumerate(sys.stdin.buffer, start=1), 1024):
+	for chunk in grouper(enumerate(sys.stdin.buffer, start=1), 8192):
 		try:
-			for line in try_chunk(argv, [(line_no, line.rstrip(b"\n")) for line_no, line in chunk], target_size=target_size):
+			for line in try_chunk(argv, [(line_no, line.rstrip(b"\n")) for line_no, line in chunk], target_size=target_size, report=report):
 				sys.stdout.buffer.write(line + b"\n")
 		except TroublesomeInput as e:
-			sys.stderr.write("{error!s}:\n{input}\nOutput: ({len} line{plural})\n{output}\n".format(
-				error=e,
-				len=len(e.__cause__.lines),
-				plural="s" if len(e.__cause__.lines) != 1 else "",
-				input=prefix("> ", b"\n".join(line[1] for line in e.lines).decode()),
-				output=prefix("> ", b"\n".join(e.__cause__.lines).decode())))
+			print_error(e)
 			return 1
 
 	return 0
