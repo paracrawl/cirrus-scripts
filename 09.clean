@@ -37,7 +37,8 @@ for match in $batch/aligned-+([0-9]).gz; do
 			<(gzip -cd $match | cut -f5-)
 done \
 | cut -f1-4,6,7 \
-| bifixer - - ${TARGET_LANG%~*} ${lang} $BIFIXER_PARAMS \
+| parallel -j $THREADS --pipe -k -l 30000 \
+	bifixer - - ${TARGET_LANG%~*} ${lang} $BIFIXER_PARAMS \
 | ${SCRIPTS}/filter-unicode.py \
 > $TMP_FIXED
 
