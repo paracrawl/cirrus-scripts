@@ -15,7 +15,7 @@ function make_batch_list_all {
 	local collection="$1" lang="$2"
 	if $FORCE_INDEX_BATCHES || ! test -e ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}; then
 		for shard in $(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${lang}/); do
-			join -t$'\t' -j2 \
+			join -t$'\t' -j2 -o 1.1,2.1 \
 				<(list_numeric_dirs $shard) \
 				<(list_numeric_dirs ${COLLECTIONS[$collection]}-shards/${TARGET_LANG}/$(basename $shard))
 		done > ${COLLECTIONS[$collection]}-batches/06.${lang}-${TARGET_LANG}
@@ -37,12 +37,17 @@ function make_batch_list_retry {
 	echo $batch_list
 }
 
-declare -a ADDITIONAL_OPTIONS=()
+declare -a OPTIONS=(
+	--time 12:00:00
+	--cpus-per-task 4
+	-e ${SLURM_LOGS}/06.align-%A_%a.err
+	-o ${SLURM_LOGS}/06.align-%A_%a.out
+)
 
 # Quick hack, should be a --option option, but functions.sh doesn't
 # allow for that at the moment. Someday...
 if [[ ! -z ${OOM_PROOF:-} ]]; then
-	ADDITIONAL_OPTIONS=(--mem-per-cpu 8G)
+	OPTIONS+=(--mem-per-cpu 8G)
 	export BLEUALIGN_THREADS=1
 fi
 
@@ -58,11 +63,7 @@ for lang in $*; do
 			schedule \
 				-J align-${lang%~*}-${collection} \
 				-a $job_list \
-				--time 12:00:00 \
-				--cpus-per-task 4 \
-				${ADDITIONAL_OPTIONS[@]} \
-				-e ${SLURM_LOGS}/06.align-%A_%a.err \
-				-o ${SLURM_LOGS}/06.align-%A_%a.out \
+				${OPTIONS[@]} \
 				${SCRIPTS}/generic.slurm $batch_list \
 				${SCRIPTS}/06.align ${lang%~*}
 		fi
