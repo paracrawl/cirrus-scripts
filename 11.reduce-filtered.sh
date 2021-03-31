@@ -29,7 +29,7 @@ if [ ! -f $output_file ] || ! $RETRY; then
 	prompt "Scheduling 1-1 for combining $batch_count batches across ${#batch_lists[@]} collections\n"
 	if confirm; then
 		schedule \
-			-J reduce-filtered-${lang} \
+			-J reduce-filtered-${lang%~*} \
 			--time 36:00:00 \
 			--exclusive \
 			-e ${SLURM_LOGS}/11.reduce-filtered-%A.err \

@@ -49,7 +49,6 @@ for language in $@; do
 				-a $job_list \
 				--time 24:00:00 \
 				--cpus-per-task 4 \
-				--mem-per-cpu 16G \
 				-e ${SLURM_LOGS}/00.dedupe-%A_%a.err \
 				-o ${SLURM_LOGS}/01.dedupe-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
