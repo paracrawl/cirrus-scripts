@@ -59,8 +59,7 @@ class Child:
 			self.close()
 
 	def start(self):
-		#self.proc = subprocess.Popen(['stdbuf', '-i0', '-o0', *self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-		self.proc = subprocess.Popen([*self.argv], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+		self.proc = subprocess.Popen(self.argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
 		self.reader = Reader(self.proc.stdout, self.queue)
 		self.reader.start()
 		self.alive = True
@@ -83,7 +82,6 @@ class Child:
 
 		# Wait for process to finish
 		exit_code = self.proc.wait()
-		print(f"Stopped with {exit_code}", file=sys.stderr)
 		if exit_code != 0:
 			raise CrashingChild("{command} crashed with exit code {exit_code}".format(
 				command=" ".join(self.argv),
