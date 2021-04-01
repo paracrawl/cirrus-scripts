@@ -28,7 +28,7 @@ function make_batch_list_retry {
 
 	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
-		if [[ -e $SRC_BATCH/tokenised_en.gz ]] && [[ ! -e $alignments ]]; then
+		if [[ -e $SRC_BATCH/tokenised_${TARGET_LANG%~*}.gz ]] && [[ ! -e $alignments ]]; then
 			echo $alignments 1>&2
 			printf '%s\t%s\n' "$SRC_BATCH" "$REF_BATCH"
 		fi
@@ -47,8 +47,8 @@ declare -a OPTIONS=(
 # Quick hack, should be a --option option, but functions.sh doesn't
 # allow for that at the moment. Someday...
 if [[ ! -z ${OOM_PROOF:-} ]]; then
-	OPTIONS+=(--mem-per-cpu 8G)
-	export BLEUALIGN_THREADS=1
+	OPTIONS+=(--mem-per-cpu 12G)
+	export BLEUALIGN_THREADS=4
 fi
 
 collection=$1
