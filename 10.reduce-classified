@@ -28,6 +28,6 @@ stats_file=$(dirname $output_file)/$(basename $output_file .classified.gz).stats
 echo "Language id: $lang" > $stats_file.$TMPSFX
 echo "raw" >> $stats_file.$TMPSFX
 echo "File Size: $SIZE" >> $stats_file.$TMPSFX
-echo "Sentence Pairs: $LINES" >> $stats_file.$TMPSFX
-echo "English words: $WORDS" >> $stats_file.$TMPSFX
+echo "Sentence Pairs: $LINE_COUNT" >> $stats_file.$TMPSFX
+echo "English words: $WORD_COUNT" >> $stats_file.$TMPSFX
 mv $stats_file.$TMPSFX $stats_file
