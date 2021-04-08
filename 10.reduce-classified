@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-output_file=$1
-shift
+lang=$1
+output_file=$2
+shift 2
 
 TMPSFX=${JOB_ID:-$$}
 
@@ -13,5 +14,20 @@ cat $@ \
 	cat $batch/classified.gz
 done \
 > $output_file.$TMPSFX
-
 mv $output_file.$TMPSFX $output_file
+
+sum() {
+	paste -s -d+ - | bc
+}
+
+LINE_COUNT=$(cat $@ | xargs -I{} cat {}/stats.txt | cut -f1 | sum)
+WORD_COUNT=$(cat $@ | xargs -I{} cat {}/stats.txt | cut -f2 | sum)
+SIZE=$(du -h $output_file | cut -f1)
+
+stats_file=$(dirname $output_file)/$(basename $output_file .classified.gz).stats.raw
+echo "Language id: $lang" > $stats_file.$TMPSFX
+echo "raw" >> $stats_file.$TMPSFX
+echo "File Size: $SIZE" >> $stats_file.$TMPSFX
+echo "Sentence Pairs: $LINES" >> $stats_file.$TMPSFX
+echo "English words: $WORDS" >> $stats_file.$TMPSFX
+mv $stats_file.$TMPSFX $stats_file

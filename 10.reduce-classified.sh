@@ -31,6 +31,6 @@ if [ ! -f $output_file ] || ! $RETRY; then
 			--cpus-per-task 1 \
 			-e ${SLURM_LOGS}/10.reduce-classified-%A.err \
 			-o ${SLURM_LOGS}/10.reduce-classified-%A.out \
-			${SCRIPTS}/10.reduce-classified ${output_file} ${batch_lists[@]}
+			${SCRIPTS}/10.reduce-classified ${lang%~*} ${output_file} ${batch_lists[@]}
 	fi
 fi
