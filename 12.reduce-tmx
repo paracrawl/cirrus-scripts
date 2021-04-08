@@ -26,3 +26,12 @@ mv $txt_output.$TMPSFX $txt_output
 # maintain the file handle. I hope.)
 echo "Moving $tmx_output.$TMPSFX to $tmx_output"
 mv $tmx_output.$TMPSFX $tmx_output
+
+stats_file=$(dirname $tmx_output)/$(basename $tmx_output .tmx.gz).stats.tmx
+echo "tmx" > $stats_file.$TMPSFX
+echo "TXT File Size: $(du -h $txt_output | cut -f 1)" >> $stats_file.$TMPSFX
+echo "TMX File Size: $(du -h $tmx_output | cut -f 1)" >> $stats_file.$TMPSFX
+WC=$(gzip -cd $txt_output | cut -f 1 | wc -wl | tr -s ' ')
+echo "Sentence Pairs: $(echo $WC | cut -d ' ' -f 1)" >> $stats_file.$TMPSFX
+echo "English words: $(echo $WC | cut -d ' ' -f 2)" >> $stats_file.$TMPSFX
+mv $stats_file.$TMPSFX $stats_file
