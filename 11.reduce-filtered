@@ -1,29 +1,28 @@
 #!/bin/bash
 set -euo pipefail
+ulimit -n 32768
 
 output_file="$1"
 shift
 
+# Set up temp directory
 TMPSFX=${JOB_ID:-$$}
 #TMPDIR=$(mktemp -d --tmpdir=$(dirname $output_file) --suffix=_$TMPSFX)
 TMPDIR=$(mktemp -d --tmpdir=$SCRATCH --suffix=_$TMPSFX)
 test -d "$TMPDIR"
 trap "rm -rf $TMPDIR" EXIT
 
+# Make sure we can write output
 mkdir -p $(dirname $output_file)
 
 cat $@ \
-| while read batch; do
-	echo "Reading $batch" >&2
-	pigz -cd $batch/filtered${BICLEANER_THRESHOLD/./}.gz
-done \
-| LC_ALL=C sort \
+| sed "s/$/\/filtered${BICLEANER_THRESHOLD/./}.gz/" \
+| LC_ALL=C merge_sort \
+	-f- \
+	-j${THREADS:-$SLURM_CPUS_ON_NODE} \
 	-t$'\t' \
 	-k7,7 \
 	-k8,8nr \
-	--compress-program=gzip \
-	-T $TMPDIR \
-	--parallel=$SLURM_CPUS_ON_NODE -S 60% \
 | pigz \
 > $output_file.$TMPSFX
 

@@ -31,7 +31,7 @@ if [ ! -f $output_file ] || ! $RETRY; then
 		schedule \
 			-J reduce-filtered-${lang%~*} \
 			--time 36:00:00 \
-			--exclusive \
+			--cpus-per-task 16 \
 			-e ${SLURM_LOGS}/11.reduce-filtered-%A.err \
 			-o ${SLURM_LOGS}/11.reduce-filtered-%A.out \
 			${SCRIPTS}/11.reduce-filtered ${output_file} ${batch_lists[@]}
