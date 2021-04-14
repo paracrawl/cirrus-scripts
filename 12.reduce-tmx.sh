@@ -35,7 +35,7 @@ if ( $needs_tmx || $needs_deferred ) && confirm; then
 		schedule \
 			-J reduce-tmx-${lang%~*} \
 			--time 36:00:00 \
-			--exclusive \
+			--cpus-per-task 4 \
 			-e ${SLURM_LOGS}/12.reduce-tmx-%A.err \
 			-o ${SLURM_LOGS}/12.reduce-tmx-%A.out \
 			${SCRIPTS}/12.reduce-tmx ${lang%~*} \
@@ -48,7 +48,7 @@ if ( $needs_tmx || $needs_deferred ) && confirm; then
 		schedule \
 			-J reduce-tmx-deferred-${lang%~*} \
 			--time 36:00:00 \
-			--exclusive \
+			--cpus-per-task 4 \
 			-e ${SLURM_LOGS}/12.reduce-tmx-%A.err \
 			-o ${SLURM_LOGS}/12.reduce-tmx-%A.out \
 			${SCRIPTS}/12.reduce-tmx-deferred ${lang%~*} \
