@@ -121,28 +121,31 @@ oparser.add_argument("-d", "--no-delete-seg", help="Avoid deleting <seg> if stan
 oparser.add_argument("-f", "--text-file-deduped", help="Filename to write the deduped input file",
                      dest="text_file_deduped")
 oparser.add_argument("--dedup", dest="dedup", help="Dedup entries and group urls using given columns. Like 'bifixerhash', 'seg1,seg2' , 'checksum1,checksum2'")
+oparser.add_argument("--offset", dest="offset", type=int, default=0, help="Start number for tuid attribute")
+oparser.add_argument("--partial", dest="partial", action='store_true', help="Generate only the <tuv/> elements")
 
 options = oparser.parse_args()
 
 with open_xz_or_gzip_or_plain(options.clean_alignments, 'rt') if options.clean_alignments else sys.stdin as reader,\
         open_xz_or_gzip_or_plain(options.text_file_deduped, 'wt') if options.text_file_deduped and options.dedup else dummy_open() as text_writer:
 
-    print("<?xml version=\"1.0\"?>")
-    print("<tmx version=\"1.4\">")
-    print(" <header")
-    print("   adminlang=\"" + locale.setlocale(locale.LC_ALL, '').split(".")[0].split("_")[0] + "\"")
-    print("   srclang=\"" + options.lang1 + "\"")
-    print("   o-tmf=\"PlainText\"")
-    print("   creationtool=\"bitextor\"")
-    print("   creationtoolversion=\"4.0\"")
-    print("   datatype=\"PlainText\"")
-    print("   segtype=\"sentence\"")
-    print("   creationdate=\"" + time.strftime("%Y%m%dT%H%M%S") + "\"")
-    print("   o-encoding=\"utf-8\">")
-    print(" </header>")
-    print(" <body>")
+    if not options.partial:
+        print("<?xml version=\"1.0\"?>")
+        print("<tmx version=\"1.4\">")
+        print(" <header")
+        print("   adminlang=\"" + locale.setlocale(locale.LC_ALL, '').split(".")[0].split("_")[0] + "\"")
+        print("   srclang=\"" + options.lang1 + "\"")
+        print("   o-tmf=\"PlainText\"")
+        print("   creationtool=\"bitextor\"")
+        print("   creationtoolversion=\"4.0\"")
+        print("   datatype=\"PlainText\"")
+        print("   segtype=\"sentence\"")
+        print("   creationdate=\"" + time.strftime("%Y%m%dT%H%M%S") + "\"")
+        print("   o-encoding=\"utf-8\">")
+        print(" </header>")
+        print(" <body>")
 
-    idcounter = 0
+    idcounter = options.offset
     prev_hash = ""
     prev_fieldsdict = dict()
     urls1 = set()
@@ -219,5 +222,7 @@ with open_xz_or_gzip_or_plain(options.clean_alignments, 'rt') if options.clean_a
             printtu(idcounter, options.lang1, options.lang2, columns, urls1, urls2, collections, fieldsdict, options.mint, options.no_delete_seg)
         if text_writer:
             text_writer.write("\t".join([x for x in fieldsdict.values() if x])+"\n")
-    print(" </body>")
-    print("</tmx>")
+
+    if not options.partial:
+        print(" </body>")
+        print("</tmx>")
