@@ -4,22 +4,34 @@ set -euo pipefail
 . ./config.sh
 . ./functions.sh
 
-# Note: tasks-per-batch here determines how many parts the sharding is split into
-export BATCHES_PER_TASK=128 # 4 for CommonCrawl, 128 good for others, 512 more for IA data
-export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
-
 function make_batch_list() {
 	local collection=$1
 	local language=$2
 	local batch_list=${COLLECTIONS[$collection]}-batches/02.${language}
 	if $FORCE_INDEX_BATCHES || [ ! -e $batch_list ]; then
-		find ${COLLECTIONS[$collection]}-text/ -mindepth 2 -maxdepth 2 -type d -name $language > $batch_list
+		find -L ${COLLECTIONS[$collection]}-text/ -mindepth 2 -maxdepth 2 -type d -name $language > $batch_list
 	fi
 	echo $batch_list
 }
 
 collection=$1
 shift
+
+# Note: tasks-per-batch here determines how many parts the sharding is split into
+case $collection in
+	wide*)
+		BATCHES_PER_TASK=512
+		;;
+	cc-*)
+		BATCHES_PER_TASK=4
+		;;
+	*)
+		BATCHES_PER_TASK=128
+		;;
+esac
+export BATCHES_PER_TASK
+
+export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
 
 for language in $@; do
 	batch_list=$(make_batch_list $collection $language)
