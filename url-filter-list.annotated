@@ -27,7 +27,6 @@
 ^(https?:)?(//)?autopatrul\.ru/
 ^(https?:)?(//)?lookxyz\.com/
 ^(https?:)?(//)?bilnummer\.se/
-^(https?:)?(//)?html\.alldatasheet[a-z]*\.[a-z]+/
 
 # Suspect aggregator sites
 ^(https?:)?(//)?pluscard\.org/
@@ -37,3 +36,9 @@
 ^(https?:)?(//)?ttvideos\.de/
 ^(https?:)?(//)?topdjset\.eu/
 ^(https?:)?(//)?ip-93-93-53-198\.dditscdn\.com/
+
+# Noise urls
+^(https?:)?(//)?m\.facebook\.com/login
+
+# Lots of data/pages, but yielded some value
+#^(https?:)?(//)?html\.alldatasheet[a-z]*\.[a-z]+/
