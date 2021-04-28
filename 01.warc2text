@@ -10,8 +10,11 @@ ls -l $batch/*.warc.gz > $output.$$/warc2text.log
 
 warc2text \
 	--tag-filters $SCRIPTS/mt-filter-list.annotated \
+	--url-filters $SCRIPTS/url-filter-list.annotated \
 	--output $output.$$ \
 	--pdfpass $output.$$/pdf.warc.gz \
+	--multilang \
+	${WARC2TEXT_OPTIONS:-} \
 	$batch/*.warc.gz \
 	2> >(tee -a $output.$$/warc2text.log >&2)
 
