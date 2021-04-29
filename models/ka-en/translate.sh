@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 #Upgrade to CUDA 10.1 (the default is 8.0)
 if [ ${#CUDA_INSTALL_PATH} != 0 ]; then
   module switch cuda/8.0 cuda/10.1
@@ -25,4 +27,4 @@ export LD_LIBRARY_PATH=/rds/project/t2_vol3/rds-t2-cs107/heafield/perftools/lib$
 module add protobuf-3.4.0-gcc-5.4.0-zkpendv
 
 source /rds/project/t2_vol3/rds-t2-cs107/sukanta/experiments/scripts/kaen/run01/translate.sh
-translate_marian ka -d 0 --quiet-translation
+translate_marian ka -d $CUDA_VISIBLE_DEVICES --quiet-translation
