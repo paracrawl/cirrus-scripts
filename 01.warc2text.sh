@@ -32,6 +32,15 @@ function make_batch_list_retry() {
 }
 
 for collection in $@; do
+	case $collection in
+		hieu|philipp)
+			export WARC2TEXT_OPTIONS=--encode-urls
+			;;
+		*)
+			export WARC2TEXT_OPTIONS=
+			;;
+	esac
+	
 	batch_list=$(make_batch_list $collection)
 	job_list=$(make_job_list $batch_list)
 	output_dir="${COLLECTIONS[$collection]}-text/"
@@ -40,7 +49,7 @@ for collection in $@; do
 		if confirm; then
 			schedule \
 				-J warc2text-${collection} \
-				-a $job_list \
+				-a ${job_list}%16 \
 				--time 24:00:00 \
 				--cpus-per-task 1\
 				-e ${SLURM_LOGS}/01.warc2text-%A_%a.err \

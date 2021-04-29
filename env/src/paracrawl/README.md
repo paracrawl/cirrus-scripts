@@ -1,7 +1,7 @@
 # batch_dedupe
 Deduplicate batches inside shards while maintaining column integrity.
 
-````
+```
 Usage: [options] <path/to/batch> [<path> ...]
 
 Batch options:
