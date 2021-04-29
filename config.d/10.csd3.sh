@@ -1,20 +1,16 @@
 if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
-	# For Pashto (not paracrawl)
-	export MARIAN=/rds/project/rds-48gU72OtDNY/romang/marian-dev/build-static
-	export BPE=/rds/project/rds-48gU72OtDNY/romang/subword-nmt/subword_nmt
-	export JIEBA="/rds/project/rds-48gU72OtDNY/jelmervdl/jieba/bin/python -m jieba"
-
-	export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
+	# Use faster perl
 	export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
-	export MODELS=/rds/project/rds-48gU72OtDNY/models
-	
+
 	# Use wwaites moses2 since I haven't been able to compile it succesfully yet.
+	export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
+	
 	export MOSES=$PREFIX/src/mosesdecoder
 	export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
 
 	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/paracrawl/clean
 	
-	# Works better this way.
+	# Works better this way. (Jelmer 4 months later: Really? Well, don't change it if isn't broken...)
 	export SCRATCH=/local
 
 	function bicleaner_model {
@@ -25,30 +21,9 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="--score_only -q"
 
-		if [[ ${lang%~*} == 'ko' ]] || [[ ${lang%~*} == 'zh' ]]; then
-			export BIFIXER_PARAMS="\
-				$BIFIXER_PARAMS \
-				--ignore_characters \
-				--ignore_long \
-				--ignore_orthography \
-				--ignore_segmentation"
-			export BICLEANER="python3 ${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/codes/bicleaner/bicleaner/bicleaner_classifier_full.py"
-			export BICLEANER_PARAMS="\
-				$BICLEANER_PARAMS \
-				--processes 2 \
-			" \
-			export BICLEANER_THRESHOLD=0.4
-		fi
-
-		if [[ $lang == 'ko' ]]; then
-			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/korean/${TARGET_LANG%~*}-${lang%~*}.yaml"
-		elif [[ $lang == 'zh' ]]; then
-			export BICLEANER_MODEL="${HOME}/rds/rds-t2-cs119-48gU72OtDNY/cwang/bicleaner/model/chinese/${TARGET_LANG%~*}-${lang%~*}.yaml"
-		else
-			# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
-			# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
-			export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
-		fi
+		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
+		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
+		export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
 	}
 
 	COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"
