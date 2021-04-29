@@ -13,5 +13,9 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		intel/mkl/2020.2 \
 		cuda/10.2 `# Marian doesn't support 11 properly yet` \
 		openssl-1.0.2k-gcc-5.4.0-lonhprt
+
+	# Target lowest common denominator on CSD3: the GPU nodes
+	export CFLAGS="-O2 -ftree-vectorize -funroll-loops -ffast-math -march=broadwell"
+	export CXXFLAGS="-O2 -ftree-vectorize -funroll-loops -ffast-math -march=broadwell"
 fi
 
