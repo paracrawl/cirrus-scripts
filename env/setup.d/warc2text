@@ -14,7 +14,7 @@ install() {
 
 	mkdir -p build && cd build
 
-	cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX
+	CXXFLAGS="-march=native" CFLAGS="-march native" cmake .. -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=Release
 	make -j8 warc2text
 	cp bin/warc2text $PREFIX/bin/
 

@@ -10,7 +10,7 @@ ls -l $batch/*.warc.gz > $output.$$/warc2text.log
 
 warc2text \
 	--tag-filters $SCRIPTS/mt-filter-list.annotated \
-	--url-filters $SCRIPTS/url-filter-list.annotated \
+	--url-filters $SCRIPTS/url-filter-list.optimised \
 	--output $output.$$ \
 	--pdfpass $output.$$/pdf.warc.gz \
 	--multilang \
