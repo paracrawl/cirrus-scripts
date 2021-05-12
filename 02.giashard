@@ -17,7 +17,7 @@ mkdir $SHARD_PATH.$$
 
 cat "$BATCH_LIST" \
 | awk "NR > $GROUP_START && NR <= $GROUP_END" \
-| xargs giashard -f text,url -b 1024 -n 8 -o $SHARD_PATH.$$
+| xargs giashard -d $SCRIPTS/domain-suffixes.txt -f text,url -b 1024 -n 8 -o $SHARD_PATH.$$
 
 # Fix filenames
 for BATCH in $SHARD_PATH.$$/*/*/; do
