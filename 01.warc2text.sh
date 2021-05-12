@@ -13,7 +13,7 @@ function make_batch_list_all() {
 
 	if $FORCE_INDEX_BATCHES || [[ ! -e $batch_list ]]; then
 		# This assumes all subdirectories are warc collections. Maybe a bit presumptuous.
-		find ${COLLECTIONS[$collection]}-warcs/ -mindepth 1 -maxdepth 1 -type d \
+		find -L ${COLLECTIONS[$collection]}-warcs/ -mindepth 1 -maxdepth 1 -type d \
 			> $batch_list
 	fi
 	
@@ -49,7 +49,7 @@ for collection in $@; do
 		if confirm; then
 			schedule \
 				-J warc2text-${collection} \
-				-a ${job_list}%16 \
+				-a ${job_list}%32 \
 				--time 24:00:00 \
 				--cpus-per-task 1\
 				-e ${SLURM_LOGS}/01.warc2text-%A_%a.err \
