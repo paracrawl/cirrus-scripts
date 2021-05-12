@@ -28,6 +28,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 
 	COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"
 	declare -A COLLECTIONS=(
+		["wide00016"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00016"
 		["wide00015"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00015"
 		["wide00006"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00006"
 		["hieu"]="$COLLECTION_ROOT/paracrawl/data/hieu/hieu"
