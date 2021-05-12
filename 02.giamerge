@@ -1,5 +1,6 @@
 #!/bin/bash
 set -euo pipefail
+shopt -s extglob
 ulimit -n 2048
 
 export JOB_LIST=$1
@@ -11,23 +12,25 @@ function merge_shard() {
 	for i in $(seq ${JOB_LIST/-/ }); do
 		batches=(
 			${batches[@]:-}
-			$(ls -d ${OUTPUT_DIR}/${LANGUAGE}.$(printf '%03d' $i)/${SHARD}/*/)
+			$(ls -d ${OUTPUT_DIR}/${LANGUAGE}.$(printf '%03d' $i)/${SHARD}/+([0-9])/)
 		)
 	done
 
 	printf '%s\n' "${batches[@]}"
 
-	giamerge \
-		-f plain_text,url,source \
-		-b 3072 \
-		-o ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$ \
+	mkdir -p ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$
+	batch_dedupe \
+		--verbose \
+		--bytes 3072 \
+		--limit 1024 \
+		--combined source.gz url.gz \
+		--derived text.gz \
+		--unique text.gz \
+		--output ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$ \
 		"${batches[@]}"
 	
 	# Move to permanent position
 	mv ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}{~$$,}
-	
-	# Delete the partial shards to free up space
-	#rm -r "${batches[@]}"
 }
 
 export -f merge_shard

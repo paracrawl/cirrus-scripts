@@ -16,8 +16,8 @@ install() {
 	cmake .. \
 		-DCMAKE_BUILD_TYPE=Release \
 		-DCMAKE_INSTALL_PREFIX=$PREFIX
-	make -j8
-	cp bin/* $PREFIX/bin/
+	make -j8 merge_sort
+	cp bin/merge_sort $PREFIX/bin/
 
 	popd
 }
