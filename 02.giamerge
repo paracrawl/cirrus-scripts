@@ -1,36 +1,50 @@
 #!/bin/bash
 set -euo pipefail
-shopt -s extglob
 ulimit -n 2048
 
 export JOB_LIST=$1
-export LANGUAGE=$2
+export L=$2
 export OUTPUT_DIR=$3
 
 function merge_shard() {
-	local SHARD=$1
-	for i in $(seq ${JOB_LIST/-/ }); do
-		batches=(
-			${batches[@]:-}
-			$(ls -d ${OUTPUT_DIR}/${LANGUAGE}.$(printf '%03d' $i)/${SHARD}/+([0-9])/)
-		)
-	done
+	set -euo pipefail
 
+	local SHARD=$1
+
+	# Find all paths to all batches for shard $SHARD across all job partitions
+	for i in $(seq ${JOB_LIST/-/ }); do
+		# Shards may not exist (because they're completely empty)
+		if [ -d "${OUTPUT_DIR}/${L}.$(printf '%03d' $i)/${SHARD}/" ]; then
+			batches=(
+				${batches[@]:-}
+				$(ls -d ${OUTPUT_DIR}/${L}.$(printf '%03d' $i)/${SHARD}/*/)
+			)
+		fi
+	done
+	
+	# Completely empty output shard? Make the output folder and be done.
+	if [ -z "${batches:-}" ]; then
+		printf '%d is an empty shard\n' $SHARD
+		mkdir -p ${OUTPUT_DIR}/${L}/${SHARD}
+		return
+	fi
+	
+	printf '%d batches:\n' "${#batches[@]}"
 	printf '%s\n' "${batches[@]}"
 
-	mkdir -p ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$
+	mkdir -p ${OUTPUT_DIR}/${L}/${SHARD}~$$
 	batch_dedupe \
 		--verbose \
-		--bytes 3072 \
-		--limit 1024 \
+		--bytes $(( 3 * 1024 * 1024 * 1024 )) \
+		--limit 4096 \
 		--combined source.gz url.gz \
-		--derived text.gz \
-		--unique text.gz \
-		--output ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}~$$ \
+		--derived plain_text.gz \
+		--unique plain_text.gz \
+		--output ${OUTPUT_DIR}/${L}/${SHARD}~$$ \
 		"${batches[@]}"
 	
 	# Move to permanent position
-	mv ${OUTPUT_DIR}/${LANGUAGE}/${SHARD}{~$$,}
+	mv ${OUTPUT_DIR}/${L}/${SHARD}{~$$,}
 }
 
 export -f merge_shard
