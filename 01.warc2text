@@ -3,20 +3,21 @@ set -euo pipefail
 
 batch="$2"
 output="$1/$(basename $batch)"
+TMPSFX=${JOB_ID:-$$}
 
-mkdir -p $output.$$
+mkdir -p $output.$TMPSFX
 
-ls -l $batch/*.warc.gz > $output.$$/warc2text.log
+ls -l $batch/*.warc.gz > $output.$TMPSFX/warc2text.log
 
 warc2text \
 	--tag-filters $SCRIPTS/mt-filter-list.annotated \
 	--url-filters $SCRIPTS/url-filter-list.optimised \
-	--output $output.$$ \
-	--pdfpass $output.$$/pdf.warc.gz \
+	--output $output.$TMPSFX \
+	--pdfpass $output.$TMPSFX/pdf.warc.gz \
 	--multilang \
 	${WARC2TEXT_OPTIONS:-} \
 	$batch/*.warc.gz \
-	2> >(tee -a $output.$$/warc2text.log >&2)
+	2> >(tee -a $output.$TMPSFX/warc2text.log >&2)
 
-mv $output.$$ $output
+mv $output.$TMPSFX $output
 
