@@ -19,11 +19,14 @@ shift
 
 # Note: tasks-per-batch here determines how many parts the sharding is split into
 case $collection in
-	wide*)
+	wide*|hieu)
 		BATCHES_PER_TASK=512
 		;;
+	cc-2017-30)
+		BATCHES_PER_TASK=16
+		;;
 	cc-*)
-		BATCHES_PER_TASK=4
+		BATCHES_PER_TASK=8
 		;;
 	*)
 		BATCHES_PER_TASK=128
