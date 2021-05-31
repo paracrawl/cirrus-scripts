@@ -5,9 +5,11 @@ is-installed() {
 }
 
 install() {
-	test -d gperftools-2.8 || curl -L https://github.com/gperftools/gperftools/releases/download/gperftools-2.8/gperftools-2.8.tar.gz | tar -zx
+	VERSION=2.9.1
 
-	pushd gperftools-2.8
+	test -d gperftools-$VERSION || curl -L "https://github.com/gperftools/gperftools/releases/download/gperftools-${VERSION}/gperftools-${VERSION}.tar.gz" | tar -zx
+
+	pushd gperftools-$VERSION
 
 	./configure --prefix $PREFIX
 	
