@@ -92,7 +92,7 @@ edit-module() {
 }
 
 list-modules() {
-	find $PREFIX/setup.d/ -mindepth 1 -maxdepth 1 -type f -iregex '.*/[a-z0-9][a-z0-9\-]*$' -printf '%f\n'
+	find $PREFIX/setup.d/ -mindepth 1 -maxdepth 1 -type f -iregex '.*/[a-z0-9][a-z0-9\-]*$' -printf '%f\n' | sort
 }
 
 list-dependencies() {
