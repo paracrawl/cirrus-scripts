@@ -2,6 +2,7 @@
 set -euo pipefail
 
 zcat $1/*/url.gz \
+| tr ' ' '\n' \
 | sed -r 's/^(https?:)?(\/\/)?([^\/]+)(\/.*)?$/\3/' \
 | sort \
 | uniq -c \
