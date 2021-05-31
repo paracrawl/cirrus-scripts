@@ -23,8 +23,8 @@ install() {
 		-DCOMPILE_CUDA=OFF \
 		-DUSE_STATIC_LIBS=ON
 
-	make -j8 marian_decoder
-	cp marian-decoder $PREFIX/bin/marian-decoder
+	make -j8 marian_decoder spm_encode
+	cp spm_encode marian-decoder $PREFIX/bin/marian-decoder
 
 	popd
 }
