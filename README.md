@@ -234,13 +234,18 @@ hashed, which decides in which shard the document will end up. Inside that shard
 the document is appended to the relative files, which are chopped into about 1GB
 max size until a new batch is opened.
 
-Note that sharding cannot be done in parallel like the other steps, we need a
-merge step at the end that isn't parallel. Jelmer has been able to do most
-sharding he did on Valhalla with just a single process but we can (and will
-need to) use giashard and then giamerge for collections larger than wide00006.
+Documents are also deduplicated based on their base64-encoded content using `batch_dedupe` in this step. Urls are of duplicate documents are combined in the `url.gz` file in each of the shards: a selection of those urls (currently 4096) are written as a single line (concatenated by spaces) for the deduplicated document.
 
-Since this step essentially completely duplicates all data from the batches it
-will have to run on Cirrus until CSD3 has more storage available...
+Sharding is first done in a couple of parallel `giashard` processes. All these batches of shards are then merged into one single batch of shards using `batch_dedupe`.
+
+During this process there are about two copies of all data for a language on disk: the partial shards, and the deduplicated merged shards.
+
+### Manually rerunning a merge step
+If you want to rerun *shard 67* of the *wide00016* collection, for *en*, when there were *93* different giashard processes:
+
+```bash
+SHARDS_PER_TASK=1 sbatch -J merge-shard-en-wide00016 -a68-68 --time 24:00:00 --cpus-per-task 4 --mem-per-cpu 4096 ./02.giamerge 1-93 en /home/cs-vand1/r/paracrawl/data/ia/wide00016-shards
+```
 
 ## 03.split-text
 Reads the lines from `plain_text.gz` and splits them into multiple lines if

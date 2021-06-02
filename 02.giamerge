@@ -49,13 +49,13 @@ function merge_shard() {
 
 export -f merge_shard
 
-SHARDS_PER_TASK=16
+SHARDS_PER_TASK=${SHARDS_PER_TASK:-16}
 SHARD_END=$((SLURM_ARRAY_TASK_ID * SHARDS_PER_TASK))
 SHARD_START=$((SHARD_END - SHARDS_PER_TASK))
 
 parallel \
 	-j${SLURM_TASKS_PER_NODE} \
 	--line-buffer \
-	--tag \
+	--tagstring '[{}]' \
 	merge_shard '{}' ::: $(seq $SHARD_START $((SHARD_END - 1)))
 
