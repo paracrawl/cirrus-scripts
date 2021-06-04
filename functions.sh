@@ -146,6 +146,10 @@ while (( "$#" )); do
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" -d "aftercorr:$2")
 			shift 2
 			;;
+		--mem-per-cpu)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --mem-per-cpu $2)
+			shift 2
+			;;
 		--steps)
 			IFS='-' read -a seq_args <<< "$2"
 			STEPS=$(seq ${seq_args[@]})
