@@ -1,6 +1,8 @@
 #!/bin/bash
 export PREFIX # So it's also available in job scripts
 
+export MOSES=$PREFIX/src/mosesdecoder
+export MOSES_BIN=$PREFIX/bin/moses2
 export PYTHON=$PREFIX/bin/python
 export PERL=perl
 export KPU=$PREFIX/src/preprocess

@@ -5,13 +5,19 @@ is-installed() {
 }
 
 depends() {
-	echo xmlrpc
+	echo env
 }
 
 install() {
 	pushd mosesdecoder
-
-	./bjam -j8 --prefix=$PREFIX moses2
+	
+	BOOST_BUILD_PATH=jam-files/boost-build \
+	./jam-files/bjam -j8 \
+		-a \
+		--with-boost=$PREFIX \
+		--prefix=$PREFIX \
+		--no-xmlrpc-c \
+		install
 
 	popd
 }

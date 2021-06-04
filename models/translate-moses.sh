@@ -9,9 +9,6 @@ ceil () {
 export MODEL=$(dirname $(realpath -es ${BASH_SOURCE[0]}))
 export SLANG=$(basename $MODEL | cut -d- -f1)
 export TRUECASE_MODEL=truecase-model.$SLANG
-export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/home/cs-wait1/sw/lib
-export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
-export MOSES=$PREFIX/src/mosesdecoder
 export NMOSI=$(ceil $THREADS / 16)
 export THREADS=$((THREADS / $NMOSI))
 

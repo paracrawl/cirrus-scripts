@@ -2,12 +2,6 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	# Use faster perl
 	export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 
-	# Use wwaites moses2 since I haven't been able to compile it succesfully yet.
-	export LD_LIBRARY_PATH=/home/cs-wait1/sw/lib:$LD_LIBRARY_PATH
-	
-	export MOSES=$PREFIX/src/mosesdecoder
-	export MOSES_BIN=/home/cs-wait1/src/mosesdecoder/bin/moses2
-
 	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/paracrawl/clean
 	
 	# Works better this way. (Jelmer 4 months later: Really? Well, don't change it if isn't broken...)
