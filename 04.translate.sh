@@ -11,11 +11,11 @@ collection=$1
 shift
 
 for lang in $*; do
-	# Load in translation model config so we know MODEL_ARCH
+	# Make sure we know how to translate this language pair
 	test -x $MODEL_DIR/${lang%~*}-${TARGET_LANG%~*}/translate.sh || (echo "No model: $MODEL_DIR/${lang%~*}-${TARGET_LANG%~*}/translate.sh" 1>&2 ; exit 255)
-	
+
+	# Optionally load any env overrides for this model (mostly SBATCH_CPUS_PER_TASK, but also difference between cpu/gpu models)
 	if [[ -f $MODEL_DIR/${lang%~*}-${TARGET_LANG%~*}/env.sh ]]; then
-		echo "Loading ${lang%~*}-${TARGET_LANG%~*}/env.sh"
 		source $MODEL_DIR/${lang%~*}-${TARGET_LANG%~*}/env.sh
 	fi
 
@@ -24,10 +24,6 @@ for lang in $*; do
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
-			# Note that you can control --cpus-per-task from here. However, it's a bit
-			# tricky to get the right value. Too many and the intgemm marian will cry
-			# about running out of memory (even though you're only asking for 128mb per
-			# process)
 			schedule \
 				-J translate-${lang%~*}-${collection} \
 				-a $job_list \
