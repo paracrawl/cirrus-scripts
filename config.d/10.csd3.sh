@@ -13,7 +13,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
 		export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
 		export BICLEANER_THRESHOLD="0.5"
-		export BICLEANER_PARAMS="--score_only -q"
+		export BICLEANER_PARAMS="-q" # --score_only is always supplied
 
 		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
 		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.

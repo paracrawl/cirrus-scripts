@@ -14,39 +14,50 @@ CLASSIFIED=$batch/classified.gz
 FILTERED=$batch/filtered${BICLEANER_THRESHOLD/./}.gz
 STATS=$batch/stats.txt
 
-if [ ! -z "${CLIP_URLS:-}" ]; then
-	read_urls() {
-		gzip -cd $@ | awk -F ' ' '{ print $1 }' # Read only one url from the space-separated rows
-	}
-else
-	read_urls() {
-		cat $@ # Just pass through
-	}
-fi
+# Note: the concept of source/target language differs in this repo and in 
+# bifixer & bicleaner. That is why the next set of lines flips all the column
+# orders.
 
 for match in $batch/aligned-+([0-9]).gz; do
 	echo $match 1>&2
 	matched_batch=$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')
 	paste <(gzip -cd ${match} \
-			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' \
+			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' `# bitextor's docjoin expects a score column, which it then ignores` \
 			| docjoin \
-				-r <(read_urls ${target_lang_data}/${shard}/${matched_batch}/url.gz) \
-				-l <(read_urls $(dirname ${match})/url.gz)) \
-			<(gzip -cd $match | cut -f4) \
-			<(gzip -cd $match | cut -f3) \
-			<(gzip -cd $match | cut -f5-)
+				-r ${target_lang_data}/${shard}/${matched_batch}/url.gz \
+				-l $(dirname ${match})/url.gz) `# 1,2: target & source url`\
+			<(gzip -cd $match | cut -f4) `# 3: target sentence (e.g. en)` \
+			<(gzip -cd $match | cut -f3) `# 4: source sentence (e.g. mt)`\
+			<(gzip -cd $match | cut -f7) `# 5: target checksum (skipping col 5: bleualign score)`\
+			<(gzip -cd $match | cut -f6) `# 6: source checksum`
 done \
-| cut -f1-4,6,7 \
 | parallel -j $THREADS --pipe --line-buffer --halt 2 \
-	bifixer - - ${TARGET_LANG%~*} ${lang} $BIFIXER_PARAMS \
+	bifixer - - ${TARGET_LANG%~*} ${lang} --sdeferredcol 5 --tdeferredcol 6 $BIFIXER_PARAMS `# 7,8: bifixer hash & score`\
 | ${SCRIPTS}/filter-unicode.py \
 > $TMP_FIXED
 
+# Columns in $TMP_FIXED
+# 1. target url
+# 2. source url
+# 3. target sentence
+# 4. source sentence
+# 5. target checksum
+# 6. source checksum
+# 7. bifixer hash (indicate similar sentence pairs)
+# 8. bifixer score (indicate which of the similar sentence pairs is the best)
+
+filter_takedowns() {
+	# Use fgrep to remove lines that match anything in filtered-terms.txt. Make 
+	# sure to remove any trailing newline from filtered-terms.txt because
+	# otehrwise that will match everything.
+	fgrep -ivf <(sed -z '$ s/\n$//' < ${SCRIPTS}/filtered-terms.txt) || true
+}
+
 cat $TMP_FIXED \
-| cache -k 3,4 $BICLEANER $BICLEANER_PARAMS - - $BICLEANER_MODEL \
-| paste $TMP_FIXED - \
-| (fgrep -ivf ${SCRIPTS}/filtered-terms.txt || true) \
-| sed -e "s/$/\t${collection}/" \
+| cache -k 3,4 $BICLEANER $BICLEANER_PARAMS --score_only - - $BICLEANER_MODEL \
+| paste $TMP_FIXED - `# add bicleaner score as the 9th column`\
+| filter_takedowns \
+| sed -e "s/$/\t${collection}/" `# add the collection as the 10th column`\
 | tee \
 	>(pigz -9c > $CLASSIFIED.$TMPSFX) \
 	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$TMPSFX) \
