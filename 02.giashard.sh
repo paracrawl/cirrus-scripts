@@ -20,7 +20,7 @@ shift
 # Note: tasks-per-batch here determines how many parts the sharding is split into
 case $collection in
 	wide*|hieu)
-		BATCHES_PER_TASK=4096
+		BATCHES_PER_TASK=1024
 		;;
 	cc-2017-30)
 		BATCHES_PER_TASK=16
@@ -35,6 +35,7 @@ esac
 export BATCHES_PER_TASK
 
 export TASKS_PER_BATCH=1 # more than 1 is not supported by 02.giashard
+export SHARDS_PER_TASK=16 # for 02.giamerge -> 1-16 * 16 = 256 shards
 
 for language in $@; do
 	batch_list=$(make_batch_list $collection $language)
@@ -53,7 +54,7 @@ for language in $@; do
 				-J shard-${language}-${collection} \
 				-a $job_list \
 				--time 24:00:00 \
-				--cpus-per-task 1\
+				--cpus-per-task 2\
 				-e ${SLURM_LOGS}/02.shard-${language}-%A_%a.err \
 				-o ${SLURM_LOGS}/02.shard-${language}-%A_%a.out \
 				${SCRIPTS}/02.giashard $batch_list $language $output_dir)
@@ -63,7 +64,7 @@ for language in $@; do
 				--dependency afterok:$shard_job_id \
 				-a 1-16 \
 				--time 24:00:00 \
-				--cpus-per-task 4 \
+				--cpus-per-task 8 `#really just need 4, but 8 for more memory and better spread` \
 				-e ${SLURM_LOGS}/02.merge-${language}-%A_%a.err \
 				-o ${SLURM_LOGS}/02.merge-${language}-%A_%a.out \
 				${SCRIPTS}/02.giamerge $job_list $language $output_dir)
