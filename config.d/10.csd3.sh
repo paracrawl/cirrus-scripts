@@ -11,13 +11,13 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		local lang=$1
 
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
-		export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
+		export BICLEANER=$PREFIX/bin/bicleaner-ai-classify
 		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="-q" # --score_only is always supplied
 
 		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
 		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
-		export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
+		export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/metadata.yaml
 	}
 
 	COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/bicleaner-ai-classify
+}
+
+depends() {
+	echo python kenlm
+}
+
+install() {
+	pip3 install -U bicleaner-ai tensorflow==2.3.2 psutil
+}
+
