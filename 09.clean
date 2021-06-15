@@ -8,6 +8,8 @@ target_lang_data=$3
 batch=$4
 shard=$(basename $(dirname $batch))
 
+export HF_DATASETS_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
 TMPSFX=${JOB_ID:-$$}
 TMP_FIXED=$batch/fixed.$TMPSFX
 CLASSIFIED=$batch/classified.gz
