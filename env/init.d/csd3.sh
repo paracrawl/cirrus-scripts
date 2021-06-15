@@ -13,6 +13,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		intel/mkl/2020.2 \
 		cuda/10.2 `# Marian doesn't support 11 properly yet` \
 		cuda/10.1 `# TF 2.3.2 needs cuda 10.1` \
+                cudnn/7.6_cuda-10.1 `# Needed for TF` \
 		openssl-1.0.2k-gcc-5.4.0-lonhprt
 
 	# Target lowest common denominator on CSD3: the GPU nodes
