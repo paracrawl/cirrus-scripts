@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+shopt -s extglob
+
+collection=$1
+lang=$2
+target_lang_data=$3
+batch=$4
+shard=$(basename $(dirname $batch))
+
+export HF_DATASETS_OFFLINE=1
+export TRANSFORMERS_OFFLINE=1
+TMPSFX=${JOB_ID:-$$}
+FIXED=$batch/fixed.gz
+SCORED=$batch/scored.gz
+
+zcat $FIXED \
+| cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS --score_only - - $BICLEANER_MODEL \
+| pigz -9c \
+> $SCORED.$TMPSFX \
+|| { 
+	echo "Error in pipeline: ${PIPESTATUS[@]}"
+	exit 1
+}
+
+mv $SCORED.$TMPSFX $SCORED
