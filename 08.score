@@ -11,10 +11,11 @@ shard=$(basename $(dirname $batch))
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 TMPSFX=${JOB_ID:-$$}
+HARDRULED=$batch/hardruled.gz
 FIXED=$batch/fixed.gz
 SCORED=$batch/scored.gz
 
-zcat $FIXED \
+paste <(zcat $FIXED) <(zcat $HARDRULED) \
 | cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS --score_only - - $BICLEANER_MODEL \
 | pigz -9c \
 > $SCORED.$TMPSFX \
