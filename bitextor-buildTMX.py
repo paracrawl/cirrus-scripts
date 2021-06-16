@@ -201,6 +201,7 @@ with open_xz_or_gzip_or_plain(options.clean_alignments, 'rt') if options.clean_a
             urls1 = set()
             urls2 = set()
             collections = set()
+            bestseg = dict(fieldsdict)
             urls1.update(fieldsdict['url1'].split(' '))
             urls2.update(fieldsdict['url2'].split(' '))
             if 'collection' in fieldsdict.keys():
