@@ -13,7 +13,7 @@ shift
 for lang in $*; do
 	# Load some language-spefic bicleaner & bifixer configurations (because they normally don't
 	# deal with zh or ko correctly. Read: time for the duct tape!
-	bicleaner_model $lang
+	bicleaner_ai_model $lang
 	batch_list=`make_batch_list 07 $collection $lang hardruled.gz`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then

@@ -9,6 +9,6 @@ depends() {
 }
 
 install() {
-	pip3 install -U bicleaner-ai tensorflow==2.3.2 psutil
+	pip3 install -U --force-reinstall bicleaner-ai tensorflow==2.3.2 psutil
 }
 

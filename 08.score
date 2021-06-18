@@ -16,7 +16,15 @@ FIXED=$batch/fixed.gz
 SCORED=$batch/scored.gz
 
 paste <(zcat $FIXED) <(zcat $HARDRULED) \
-| cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS --score_only - - $BICLEANER_MODEL \
+| cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS \
+	--score_only \
+	--processes $THREADS \
+	--tmp_dir $TMPDIR \
+	--disable_hardrules \
+	--disable_porn_removal \
+	--disable_lm_filter \
+	--disable_minimal_length \
+	- - $BICLEANER_MODEL \
 | pigz -9c \
 > $SCORED.$TMPSFX \
 || { 

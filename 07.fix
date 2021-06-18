@@ -34,9 +34,18 @@ done \
 | ${SCRIPTS}/filter-unicode.py \
 | tee \
 	>(pigz -9c > $FIXED.$TMPSFX) \
-| bicleaner-hardrules --score_only --metadata $BICLEANER_MODEL /dev/stdin /dev/stdout \
+| bicleaner-hardrules \
+	--score_only \
+	--tmp_dir $TMPDIR \
+	--processes $THREADS \
+	--source_lang ${TARGET_LANG%~*} \
+	--target_lang $lang \
+	--scol 3 \
+	--tcol 4 \
+	--metadata $BICLEANER_MODEL \
+	/dev/stdin /dev/stdout \
 | pigz -9c \
->$HARDRULED.TMPSFX
+>$HARDRULED.$TMPSFX
 
 mv $FIXED.$TMPSFX $FIXED
 mv $HARDRULED.$TMPSFX $HARDRULED

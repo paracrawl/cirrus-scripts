@@ -16,14 +16,14 @@ export SLURM_TASKS_PER_NODE=1 # No parallelism in generic.slurm plz, they'll hav
 export SBATCH_GRES=gpu:1
 
 for lang in $*; do
-	bicleaner_model $lang
-	batch_list=`make_batch_list 08 $score $lang scored.gz`
+	bicleaner_ai_model $lang
+	batch_list=`make_batch_list 08 $collection $lang scored.gz`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
 			schedule \
-				-J fix-${lang%~*}-${collection} \
+				-J score-${lang%~*}-${collection} \
 				-a $job_list \
 				--time 06:00:00 \
 				-e ${SLURM_LOGS}/08.score-%A_%a.err \
