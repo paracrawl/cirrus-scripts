@@ -15,7 +15,7 @@ CLASSIFIED=$batch/classified.gz
 FILTERED=$batch/filtered${BICLEANER_THRESHOLD/./}.gz
 STATS=$batch/stats.txt
 
-# Columns in $TMP_FIXED
+# Columns in fixed.gz
 # 1. target url
 # 2. source url
 # 3. target sentence
@@ -51,4 +51,4 @@ paste <(pigz -dc $FIXED) <(pigz -dc $SCORED) `# add bicleaner score as the 9th c
 mv $CLASSIFIED.$TMPSFX $CLASSIFIED
 mv $FILTERED.$TMPSFX $FILTERED
 mv $STATS.$TMPSFX $STATS
-rm $TMP_FIXED
+#rm fixed.gz
