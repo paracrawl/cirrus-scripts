@@ -21,8 +21,12 @@ for line in sys.stdin:
         sys.stderr.write(f"Error: unexpected score '{score}' at line {len(scores)+1}\n")
         sys.exit(1)
 
-# run command with the lines that have score 1
-output = check_output(sys.argv[1:], input='\n'.join(lines) + '\n', encoding='utf-8')
+if len(lines) > 0:
+    # run command with the lines that have score 1
+    output = check_output(sys.argv[1:], input='\n'.join(lines) + '\n', encoding='utf-8')
+else:
+    output = ''
+
 del lines
 
 p = iter(output.split("\n"))
