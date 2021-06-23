@@ -25,7 +25,7 @@ for lang in $*; do
 			schedule \
 				-J score-${lang%~*}-${collection} \
 				-a $job_list \
-				--time 06:00:00 \
+				--time 12:00:00 \
 				-e ${SLURM_LOGS}/08.score-%A_%a.err \
 				-o ${SLURM_LOGS}/08.score-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
