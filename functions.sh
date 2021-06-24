@@ -150,6 +150,10 @@ while (( "$#" )); do
 			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --mem-per-cpu $2)
 			shift 2
 			;;
+		--exclusive)
+			SCHEDULE_OPTIONS=("${SCHEDULE_OPTIONS[@]}" --exclusive)
+			shift
+			;;
 		--steps)
 			IFS='-' read -a seq_args <<< "$2"
 			STEPS=$(seq ${seq_args[@]})
@@ -164,16 +168,27 @@ while (( "$#" )); do
 			echo "  -j | --threads n     Specify number of threads, mostly for interactive stuff."
 			echo "  -t | --test          Just run all checks, don't schedule."
 			echo "  -r | --retry         Retry batches for which no output was found."
-			echo "  -t | --time t	     Override walltime limit for individual jobs."
+			echo "  -f | --force         Force (re)scanning of shards/batches/files."
+			echo "  -t | --time t	       Override walltime limit for individual jobs."
+			echo "  -i | --interactive	 Run jobs here and now in this process."
 			echo "  --after job-id       Run this job after prev job ended (however that happend)."
 			echo "  --afterok job-id     Run this job after prev job has finished."
 			echo "  --aftercorr job-id   Run each of the job array tasks after their counterpart."
 			echo "                       has finished."
+			if [[ $(type -t describe_cli_options) == "function" ]]; then
+				describe_cli_options;
+			fi
 			exit 0
 			;;
 		-*|--*)
-			echo "Uknown option $1" 1>&2
-			exit 1
+			# Allow each of the scheduling scripts to also define options by defining
+			# a "parse_cli_option" function before including functions.sh
+			if [[ $(type -t parse_cli_option) == "function" ]]; then
+				parse_cli_option "$@"
+			else
+				echo "Uknown option $1" 1>&2
+				exit 1
+			fi
 			;;
 		*)
 			break
