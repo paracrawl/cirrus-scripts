@@ -20,6 +20,17 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/cleaning/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
 	}
 
+
+	function bicleaner_ai_model {
+		local lang=$1
+
+		export BIFIXER_PARAMS="--aggressive_dedup -q"
+		export BICLEANER=$PREFIX/bin/bicleaner-ai-classify
+		export BICLEANER_THRESHOLD="0.5"
+		export BICLEANER_PARAMS="-q"
+		export BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/jelmervdl/bicleaner-models/full/${TARGET_LANG%~*}-${lang%~*}/metadata.yaml
+	}
+
 	COLLECTION_ROOT="/rds/project/rds-48gU72OtDNY"
 	declare -A COLLECTIONS=(
 		["wide00016"]="$COLLECTION_ROOT/paracrawl/data/ia/wide00016"

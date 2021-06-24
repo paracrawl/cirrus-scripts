@@ -14,21 +14,20 @@ for lang in $*; do
 	# Load some language-spefic bicleaner & bifixer configurations (because they normally don't
 	# deal with zh or ko correctly. Read: time for the duct tape!
 	bicleaner_ai_model $lang
-	output="filtered${BICLEANER_THRESHOLD/./}.gz"
-	batch_list=`make_batch_list 09 $collection $lang $output`
+	batch_list=`make_batch_list 07 $collection $lang hardruled.gz`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
 			schedule \
-				-J clean-${lang%~*}-${collection} \
+				-J fix-${lang%~*}-${collection} \
 				-a $job_list \
 				--time 24:00:00 \
 				--cpus-per-task 4 `#because more memory` \
-				-e ${SLURM_LOGS}/09.clean-%A_%a.err \
-				-o ${SLURM_LOGS}/09.clean-%A_%a.out \
+				-e ${SLURM_LOGS}/07.fix-%A_%a.err \
+				-o ${SLURM_LOGS}/07.fix-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \
-				${SCRIPTS}/09.clean ${collection} ${lang%~*} \
+				${SCRIPTS}/07.fix ${collection} ${lang%~*} \
 				${COLLECTIONS[$collection]}-shards/${TARGET_LANG}
 		fi
 	fi
