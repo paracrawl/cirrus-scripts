@@ -2,6 +2,7 @@
 
 ## create and submit the batches on csd3 for alignment
 set -euo pipefail
+shopt -s extglob
 
 . ./env/init.sh
 . ./config.sh
@@ -14,7 +15,7 @@ for lang in $*; do
 	# Load some language-spefic bicleaner & bifixer configurations (because they normally don't
 	# deal with zh or ko correctly. Read: time for the duct tape!
 	bicleaner_ai_model $lang
-	batch_list=`make_batch_list 07 $collection $lang hardruled.gz`
+	batch_list=`make_batch_list 07 $collection $lang hardruled.gz "aligned-+([0-9]*).gz"`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"

@@ -11,8 +11,7 @@ collection=$1
 shift
 
 for lang in $*; do
-	output="tokenised_${TARGET_LANG}.gz"
-	batch_list=$(make_batch_list 05 $collection $lang $output)
+	batch_list=$(make_batch_list 05 $collection $lang "tokenised_${TARGET_LANG}.gz" "sentences_${TARGET_LANG}.gz")
 	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"

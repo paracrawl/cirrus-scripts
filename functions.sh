@@ -49,15 +49,32 @@ function make_batch_list_all {
 }
 
 
+function batch_file_is_outdated {
+	local batch="$1" out_file="$2"
+	shift 2
+
+	for in_file in "$@"; do
+		for match in $batch/$in_file; do
+			if [[ "$match" -nt "$batch/$out_file" ]]; then
+				return 0
+			fi
+		done
+	done
+
+	return 1
+}
+
+
 function make_batch_list_retry {
-	local step="$1" collection="$2" lang="$3" output_file="$4"
+	local step="$1" collection="$2" lang="$3" output_file="$4" in_files="${@:5}"
+
 	local batch_list_retry=${COLLECTIONS[$collection]}-batches/${step}.${lang}.$(date '+%Y%m%d%H%M%S')
 
 	cat `make_batch_list_all "$@"` | while read BATCH; do
-		output=${BATCH}/${output_file}
-		if [[ ! -e ${output} ]]; then
-			echo ${output} 1>&2
-			echo ${BATCH}
+		output="${BATCH}/${output_file}"
+		if [[ ! -e $output ]] || batch_file_is_outdated "$BATCH" "$output_file" "$in_files"; then
+			echo "$output" 1>&2
+			echo "$BATCH"
 		fi
 	done > $batch_list_retry
 
@@ -67,9 +84,9 @@ function make_batch_list_retry {
 
 function make_batch_list {
 	if $RETRY; then
-		make_batch_list_retry $@
+		make_batch_list_retry "$@"
 	else
-		make_batch_list_all $@
+		make_batch_list_all "$@"
 	fi
 }
 

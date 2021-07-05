@@ -15,7 +15,7 @@ for lang in $*; do
 	# deal with zh or ko correctly. Read: time for the duct tape!
 	bicleaner_ai_model $lang
 	output="filtered${BICLEANER_THRESHOLD/./}.gz"
-	batch_list=`make_batch_list 09 $collection $lang $output`
+	batch_list=`make_batch_list 09 $collection $lang $output fixed.gz scored.gz`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"

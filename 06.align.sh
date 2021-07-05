@@ -28,7 +28,7 @@ function make_batch_list_retry {
 
 	cat `make_batch_list_all "$@"` | while read SRC_BATCH REF_BATCH; do
 		alignments=$SRC_BATCH/aligned-$(basename $REF_BATCH).gz
-		if [[ -e $SRC_BATCH/tokenised_${TARGET_LANG%~*}.gz ]] && [[ ! -e $alignments ]]; then
+		if [[ $SRC_BATCH/tokenised_${TARGET_LANG%~*}.gz -nt $alignments ]]; then
 			echo $alignments 1>&2
 			printf '%s\t%s\n' "$SRC_BATCH" "$REF_BATCH"
 		fi
