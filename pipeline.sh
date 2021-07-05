@@ -2,7 +2,7 @@
 set -euo pipefail
 
 STEPS=(
-	"04.translate.sh"
+	#"04.translate.sh"
 	"05.tokenise.sh"
 	"06.align.sh"
 	"07.fix.sh"
