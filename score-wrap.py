@@ -29,20 +29,23 @@ def stdin_to_child(out_queue, stdin, child_in):
     """Reads sys.stdin and queues all lines for writing output. Lines that need
     to be scored are also fed to the child process. Ends with putting a None on
     the queue to indicate the feeding is done."""
-    for line in stdin:
-        parts = line.rstrip("\n").split("\t")
-        
-        if parts[-1] == "0":
-            pass
-        elif parts[-1] == "1":
-            child_in.write("\t".join(parts[:4]) + "\n")
-        else:
-            raise Exception(f"Unknown input in score column: '{parts[-1]}'. Only expecting '0' or '1'.")
-        
-        out_queue.put(parts[-1])
-
-    out_queue.put(None)
-    child_in.close()
+    try:
+        for line in stdin:
+            parts = line.rstrip("\n").split("\t")
+            
+            if parts[-1] == "0":
+                pass
+            elif parts[-1] == "1":
+                child_in.write("\t".join(parts[:4]) + "\n")
+            else:
+                raise Exception(f"Unknown input in score column: '{parts[-1]}'. Only expecting '0' or '1'.")
+            
+            out_queue.put(parts[-1])
+        out_queue.put(None)
+    except Exception as e:
+        out_queue.put(e)
+    finally:
+        child_in.close()
 
 
 def child_to_stdout(out_queue, child_out, stdout):
@@ -55,6 +58,9 @@ def child_to_stdout(out_queue, child_out, stdout):
         # None is poison
         if line is None:
             break
+
+        if isinstance(line, Exception):
+            raise line
 
         # 0 skips child, just writes 0
         elif line == "0":
@@ -100,6 +106,8 @@ def main(argv):
     # child_to_stdout reads scores from queue, and if a score is 1 also the
     # actual score from child. Will stop when it encounters None in queue.
     child_to_stdout(queue, child.stdout, sys.stdout)
+
+    feeder.join()
 
     # Assuming we've processed all output, child should be finished producing
     # output by now.
