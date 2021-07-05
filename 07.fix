@@ -47,5 +47,10 @@ done \
 | pigz -9c \
 >$HARDRULED.$TMPSFX
 
+LC_HARDRULED=$(gzip -cd < $HARDRULED.$TMPSFX | wc -l)
+LC_FIXED=$(gzip -cd < $FIXED.$TMPSFX | wc -l)
+echo "hardrules.gz has $LC_HARDRULED lines, fixed.gz has $LC_FIXED lines."
+test $LC_HARDRULED -eq $LC_FIXED
+
 mv $FIXED.$TMPSFX $FIXED
 mv $HARDRULED.$TMPSFX $HARDRULED

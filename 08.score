@@ -15,6 +15,10 @@ HARDRULED=$batch/hardruled.gz
 FIXED=$batch/fixed.gz
 SCORED=$batch/scored.gz
 
+# Testing here because the errors in process substitution are hard to detect.
+test -r $FIXED
+test -r $HARDRULED
+
 paste <(zcat $FIXED) <(zcat $HARDRULED) \
 | cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS \
 	--score_only \

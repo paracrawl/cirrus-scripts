@@ -15,6 +15,9 @@ CLASSIFIED=$batch/classified.gz
 FILTERED=$batch/filtered${BICLEANER_THRESHOLD/./}.gz
 STATS=$batch/stats.txt
 
+test -r $FIXED
+test -r $SCORED
+
 # Columns in fixed.gz
 # 1. target url
 # 2. source url

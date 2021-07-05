@@ -14,23 +14,6 @@ TIME_FORMAT='{"user":"%U", "system":"%S", "elapsed":"%E", "cpu":"%P", "text":%X,
 
 TMPSFX=${JOB_ID:-$$}
 
-filter_long_pairs() {
-	# Prevent extreme stuff from making it to bleualign, which would be unhappy
-	while read -r line; do
-		if [ $(( $(cut -f4 <<< "$line" | base64 -d | wc -l) * $(cut -f5 <<< "$line" | base64 -d | wc -l)  )) -lt "$1" ]; then
-			echo "$line"
-		fi
-	done
-}
-
-export -f filter_long_pairs
-
-# Why is this line causing so much trouble, as if the output is no longer just
-# single lines but merged rubbish
-#| parallel --tmpdir=$TMPDIR -j4 --halt 2 --pipe --line-buffer filter_long_pairs 1000000000\
-# Other attempt, whichs works, but I rather not need (insert just before the parallel bleualign line)
-#| filter_long_pairs 2000000000\
-
 /usr/bin/time -f '{"task":"docalign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 ${DOCALIGN} -j ${DOCALIGN_THREADS:-$THREADS} --threshold 0.1 \
 	${SRC_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
@@ -52,6 +35,6 @@ parallel \
 	-l 1 \
 	${BLEUALIGN} --print-sent-hash --bleu-threshold 0.2 \
 | gzip -c \
-> ${SRC_BATCH}/aligned-${REF_BATCH_ID}.$TMPSFX.gz
-mv ${SRC_BATCH}/aligned-${REF_BATCH_ID}{.$TMPSFX,}.gz
+> ${SRC_BATCH}/aligned-${REF_BATCH_ID}.gz.$TMPSFX
+mv ${SRC_BATCH}/aligned-${REF_BATCH_ID}.gz{.$TMPSFX,}
 
