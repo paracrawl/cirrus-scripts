@@ -1,0 +1,20 @@
+#!/bin/bash
+
+install() {
+	test -d hunspell-1.7.0 || curl -L 'https://github.com/hunspell/hunspell/archive/refs/tags/v1.7.0.tar.gz' | tar -xz
+	pushd hunspell-1.7.0
+	autoreconf -vfi
+	./configure --prefix=$PREFIX
+	make -j8
+	make install
+	popd
+}
+
+depends() {
+	echo env
+}
+
+is-installed() {
+	test -x $PREFIX/bin/hunspell
+}
+
