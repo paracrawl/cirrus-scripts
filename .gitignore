@@ -24,4 +24,5 @@
 /env/src/lttoolbox-*
 /env/src/parallel-*
 /env/src/recode-*
+/env/src/hunspell-*
 filtered-terms.txt
