@@ -51,7 +51,7 @@ find_job_id() {
 
 schedule() {
 	echo "> " "$@" >&2
-	ALWAYS_YES=true "${@}"
+	ALWAYS_YES=true "./$1" "${@:2}"
 }
 
 schedule_batch_jobs() {
