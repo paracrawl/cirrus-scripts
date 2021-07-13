@@ -7,6 +7,13 @@ fi
 . $PREFIX/init.sh
 . $PREFIX/../config.sh
 
+PRINT_PATHS=false
+
+if [[ $1 == --paths ]]; then
+	PRINT_PATHS=true
+	shift
+fi
+
 for collection in $@; do
 	if [[ $collection =~ -.* ]]; then
 		unset COLLECTIONS[${collection#-}]
@@ -16,4 +23,8 @@ for collection in $@; do
 	fi
 done
 
-printf '%s\n' "${!COLLECTIONS[@]}" | sort
+if $PRINT_PATHS; then
+	printf '%s\n' "${COLLECTIONS[@]}"
+else
+	printf '%s\n' "${!COLLECTIONS[@]}"
+fi | sort
