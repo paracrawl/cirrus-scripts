@@ -8,6 +8,16 @@ install() {
 	make -j8
 	make install
 	popd
+
+	# Debian package hunspell as "libhunspell" while hunspell
+	# itself always adds a version number to its library?
+	# Anyway this confuses the hunspell python package, so
+	# we just symlink it without a version number as an alias.
+	pushd $PREFIX/include
+	for ext in a la so; do
+		ln -s libhunspell-1.7.${ext} libhunspell.${ext}
+	done
+	popd
 }
 
 depends() {

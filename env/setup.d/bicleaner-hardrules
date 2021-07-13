@@ -1,0 +1,19 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/bicleaner-hardrules
+}
+
+depends() {
+	echo python kenlm hunspell
+}
+
+install() {
+	# For the hunspell package, export our include path 🤷
+	# (https://github.com/blatinier/pyhunspell/blob/master/setup.py#L44)
+	export INCLUDE_PATH=$PREFIX/include
+	pip3 install -U --force-reinstall \
+		--no-binary hunspell \
+		bicleaner-hardrules==1.3.1
+}
+
