@@ -8,6 +8,12 @@ target_lang_data=$3
 batch=$4
 shard=$(basename $(dirname $batch))
 
+if [[ $lang == no ]]; then
+	bicleaner_lang=nb
+else
+	bicleaner_lang=$lang
+fi
+
 TMPSFX=${JOB_ID:-$$}
 FIXED=$batch/fixed.gz
 HARDRULED=$batch/hardruled.gz
@@ -34,7 +40,7 @@ for match in $batch/aligned-+([0-9]).gz; do
 		<(gzip -cd $match | cut -f6) `# 6: source checksum`
 done \
 | parallel -j $THREADS --pipe --line-buffer --halt 2 \
-	bifixer - - ${TARGET_LANG%~*} ${lang} --sdeferredcol 5 --tdeferredcol 6 $BIFIXER_PARAMS `# 7,8: bifixer hash & score`\
+	bifixer - - ${TARGET_LANG%~*} ${bicleaner_lang} --sdeferredcol 5 --tdeferredcol 6 $BIFIXER_PARAMS `# 7,8: bifixer hash & score`\
 | ${SCRIPTS}/filter-unicode.py \
 | remove_empty_lines \
 | tee \
@@ -44,7 +50,7 @@ done \
 	--tmp_dir $TMPDIR \
 	--processes $THREADS \
 	--source_lang ${TARGET_LANG%~*} \
-	--target_lang $lang \
+	--target_lang $bicleaner_lang \
 	--scol 3 \
 	--tcol 4 \
 	--metadata $BICLEANER_MODEL \
