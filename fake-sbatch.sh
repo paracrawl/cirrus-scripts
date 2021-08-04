@@ -27,7 +27,7 @@ done
 
 parse-array-sequence() {
 	if [[ $# == 2 ]]; then
-		seq $1 $2
+		seq $1 ${2%\%*} # remove any %32 that may have been specified
 	else
 		echo $1
 	fi
