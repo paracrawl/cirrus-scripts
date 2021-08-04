@@ -1,0 +1,54 @@
+#!/bin/bash
+set -euo pipefail
+module load singularity
+
+define(){
+	IFS='\n' read -r -d '' ${1} || true
+}
+
+random-port() {
+	read LOWER UPPER < /proc/sys/net/ipv4/ip_local_port_range
+	while :; do
+		PORT=$((RANDOM % (UPPER - LOWER) + LOWER))
+		# If I can't connect to this port, it must be free?
+		if ! (echo "" >/dev/tcp/127.0.0.1/${PORT}) 2>/dev/null; then
+			echo $PORT
+			break
+		fi
+	done
+}
+
+INPUT=$1
+
+OUTPUT=${1%/*}/pdf-text.warc.gz
+
+IMAGE=/home/cs-vand1/r/jelmervdl/paracrawl-pdf/parsr.sif
+SCRIPT=parsr-index.js
+
+PORT=$(random-port)
+
+singularity exec \
+	--contain \
+	--env TMPDIR=/tmp \
+	-B ${TMPDIR:-/tmp}:/tmp:rw \
+	-B ${TMPDIR:-/tmp}:/opt/app-root/src/api/server/dist/output:rw \
+	-B $SCRIPT:/opt/app-root/src/api/server/dist/index.js:ro \
+	$IMAGE /bin/bash -c "cd /opt/app-root/src/api/server && exec node dist/index.js $PORT" > /dev/null 2>&1 &
+parsr_pid=$!
+
+sleep 10 # give the server in the parsr container some time to start up
+
+# Test we can actually access the server now
+echo "" /dev/tcp/127.0.0.1/${PORT} || exit 1
+
+$PREFIX/src/pdfwarc2warc/pdfwarc2warc.py \
+	--fast \
+	--parsr-location "localhost:$PORT" \
+	--timeout 600 \
+	$INPUT > $OUTPUT.$$
+
+mv $OUTPUT{.$$,}
+
+# parsr may hang on some pdfs so kill it with force
+kill -9 $parsr_pid
+

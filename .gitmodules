@@ -29,3 +29,6 @@
 [submodule "env/src/bleualign-cpp"]
 	path = env/src/bleualign-cpp
 	url = https://github.com/bitextor/bleualign-cpp.git
+[submodule "env/src/pdfwarc2warc"]
+	path = env/src/pdfwarc2warc
+	url = https://github.com/jelmervdl/pdfwarc2warc.git
