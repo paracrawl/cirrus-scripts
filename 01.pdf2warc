@@ -26,24 +26,29 @@ IMAGE=/home/cs-vand1/r/jelmervdl/paracrawl-pdf/parsr.sif
 SCRIPT=parsr-index.js
 
 PORT=$(random-port)
+PARSR_TMPDIR=$(mktemp -d -p $TMPDIR)
+trap 'rm -rf $PARSR_TMPDIR' EXIT
 
 singularity exec \
 	--contain \
 	--env TMPDIR=/tmp \
-	-B ${TMPDIR:-/tmp}:/tmp:rw \
-	-B ${TMPDIR:-/tmp}:/opt/app-root/src/api/server/dist/output:rw \
+	-B ${PARSR_TMPDIR:-/tmp}:/tmp:rw \
+	-B ${PARSR_TMPDIR:-/tmp}:/opt/app-root/src/api/server/dist/output:rw \
 	-B $SCRIPT:/opt/app-root/src/api/server/dist/index.js:ro \
-	$IMAGE /bin/bash -c "cd /opt/app-root/src/api/server && exec node dist/index.js $PORT" > /dev/null 2>&1 &
+	$IMAGE /bin/bash -c "cd /opt/app-root/src/api/server && exec node dist/index.js $PORT" 2>&1 > /dev/null &
 parsr_pid=$!
 
-sleep 10 # give the server in the parsr container some time to start up
-
-# Test we can actually access the server now
-echo "" /dev/tcp/127.0.0.1/${PORT} || exit 1
+ATTEMPTS=60
+until $(curl --output /dev/null --silent --fail "http://127.0.0.1:$PORT/api/v1/default-config"); do
+	ATTEMPTS=$((ATTEMPTS - 1))
+	test $ATTEMPTS -gt 0 || exit 1
+	echo "Waiting 1s for parsr api to be up... $ATTEMPTS" >&2
+	sleep 1
+done
 
 $PREFIX/src/pdfwarc2warc/pdfwarc2warc.py \
 	--fast \
-	--parsr-location "localhost:$PORT" \
+	--parsr-location "127.0.0.1:$PORT" \
 	--timeout 600 \
 	$INPUT > $OUTPUT.$$
 
@@ -51,4 +56,3 @@ mv $OUTPUT{.$$,}
 
 # parsr may hang on some pdfs so kill it with force
 kill -9 $parsr_pid
-
