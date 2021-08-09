@@ -56,6 +56,7 @@ function batch_file_is_outdated {
 	for in_file in "$@"; do
 		for match in $batch/$in_file; do
 			if [[ "$match" -nt "$batch/$out_file" ]]; then
+				echo "$match is newer than $batch/$out_file" > /dev/stderr
 				return 0
 			fi
 		done
@@ -72,7 +73,8 @@ function make_batch_list_retry {
 
 	cat `make_batch_list_all "$@"` | while read BATCH; do
 		output="${BATCH}/${output_file}"
-		if [[ ! -e $output ]] || batch_file_is_outdated "$BATCH" "$output_file" "$in_files"; then
+		# Note: $in_files not quoted here because if it would be empty, that would result in an empty argument (but an argument nontheless)
+		if [[ ! -e $output ]] || batch_file_is_outdated "$BATCH" "$output_file" $in_files; then
 			echo "$output" 1>&2
 			echo "$BATCH"
 		fi

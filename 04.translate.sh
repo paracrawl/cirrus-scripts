@@ -19,7 +19,7 @@ for lang in $*; do
 		source $MODEL_DIR/${lang%~*}-${TARGET_LANG%~*}/env.sh
 	fi
 
-	batch_list=$(make_batch_list 04 $collection $lang sentences_${TARGET_LANG%~*}.gz)
+	batch_list=$(make_batch_list 04 $collection $lang sentences_${TARGET_LANG%~*}.gz sentences.gz)
 	job_list=$(make_job_list $batch_list)
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
