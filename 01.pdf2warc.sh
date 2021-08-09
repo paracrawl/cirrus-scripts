@@ -25,7 +25,7 @@ function make_batch_list_retry() {
 	local batch_list=${COLLECTIONS[$collection]}-batches/01.pdf2warc.$(date '+%Y%m%d%H%M%S')
 	cat $(make_batch_list_all $collection) | while read warc; do
 		if [ ! -f ${warc%/*}/pdf-text.warc.gz ]; then
-			echo $warc_collection;
+			echo $warc
 		fi
 	done > $batch_list
 	echo $batch_list
