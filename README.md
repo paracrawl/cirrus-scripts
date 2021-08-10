@@ -37,8 +37,15 @@ ${COLLECTIONS[$collection]}/
                               en-index, $lang-doc, $en-doc, $lang-translated-doc
                               The number refers to the $batch in en/$shard/$batch
                               it is aligned with.
-          classified.gz     : All aligned document pairs concatenated, and
-                              processed with bifixer and bicleaner.
+          fixed.gz          : All aligned document pairs concatenated, and
+                              processed with bifixer. Produced in step 07.
+          hardruled.gz      : bicleaner-hardrules.py scores of fixed.gz, with 0 for
+                              lines that should be ignored further down the pipeline.
+          scored.gz         : bicleaner-ai score column for fixed.gz
+                              (or 0 for those lines that got marked 0 by hardrules.)
+                              Produced in step 08, on GPU.
+          classified.gz     : fixed.gz, combined with the score column and source
+                              collection column (and takedown sentences removed)
           filtered05.gz     : File above, but filtered by score.
 
   ${collection}-batches/
@@ -50,24 +57,11 @@ ${COLLECTIONS[$collection]}/
                               ARRAY_ID matches a line in this file.
     06.$lang-$TARGET_LANG   : Same as above but Cartesian product of all batches
                               in ${lang}/${shard}/* and en/${shard}/*.
-    09.$lang-$TARGET_LANG
+    07.$lang-$TARGET_LANG
     ...
-    11.$lang-$TARGET_LANG   : List of 1GB chunks of an unclean corpus that need
-                              to be cleaned.
+    12.$lang-$TARGET_LANG   : Same as 05 really.
 
-  ${collection}-corpora/
-    ${collection}-unclean.en-${lang}.gz : Merged version of aligned-[0-9] with 
-                                          the urls merged back into them. Input
-                                          for bifixer + bicleaner.
-
-  ${collection}-cleaning/
-    ${TARGET_LANG}-${lang}/
-      0000.raw              : Unclean sentence pairs, split in chunks of 1GB.
-      0000.classified.gz    : Output of bicleaner, quality classification.
-      0000.filtered??.gz    : Segment of classification that meets threshold.
-      0000.stats            : line count and word count of filtered segment.
-
-  ${DATA}/cleaning/
+  ${DATA}/clean/
     ${TARGET_LANG}-${lang}/
       ${TARGET_LANG}-${lang}.${collections} …
       [..].classified.gz    : Concatenation of all classified sentence pairs
@@ -75,6 +69,7 @@ ${COLLECTIONS[$collection]}/
                               that met the threshold value.
       [..].tmx.gz           : Deduplicated tmx file generated from the filtered
                               sentence pairs.
+      [..].deferred.tmx.gz  : Same as above, but without the sentences themselves.
       [..].txt.gz           : Simple $TARGET_LANG [tab] $lang txt file of all
                               deduplicated sentence pairs. Derived from tmx file.
       
@@ -112,40 +107,48 @@ env/
 
 If you just need specific software, like bicleaner and bitextor, you can do this.
 The setup.sh script will figure out the dependencies.
+
 ```
 ./setup.sh install bicleaner bitextor
 ```
 
 If you expect to need everything, just do
+
 ```
 ./setup.sh install-all
 ```
 
 To see what's already installed, you can use
+
 ```
 ./setup.sh status
 ```
 
-Dependencies per step:
-01: giawarc  
-02: giashard  
+Dependencies per step:  
+01: warc2text  
+02: giashard, batch_dedupe  
 03: preprocess  
 04: preprocess; maybe marian-dev, moses2, subword, depends on your translation model  
 05: preprocess; maybe jieba, mecab  
 06: preprocess docalign bleualign  
-07:  
-08:  
-09: preprocess bifixer bicleaner  
+07: bifixer, bicleaner-hardrules  
+08: bicleaner-ai  
+09: bitextor  
 10:  
 11:  
-12: tmxt  
+12: bitextor, tmxt  
 
 
 # Running the pipeline
-Modify `config.d/10.csd3.sh` to your liking. Especially the paths.
+Modify `config.d/10.csd3.sh` to your liking. Especially the paths. Or just
+drop in more files with a higher number so they get loaded later. Easy way
+to add modifications that don't get tracked in git ;)
 
-Then run the individual steps. There used to be a `pipeline.sh` file, but that
-no longer functioned, or was very slow, and thus was removed for now.
+Then run the individual steps. There is a `pipeline.sh` file that tries to
+schedule the full pipeline for a language pair starting from step 4 by
+calling the individual step with `-r`. It should be able to pick up on
+jobs that have already finished and jobs that are currently queued/running
+but it is not the most robust.
 
 # Running individual steps (examples)
 First time (assuming output from step 2 is already there). Will ask you to
@@ -168,32 +171,31 @@ Scheduling step 4 to directly pick up after step 3:
 ./04.translate.sh --aftercorr {job-id from step 3 here} wide00006 mt
 ```
 
+For all possible options, use `--help` or look at `functions.sh`.
+
+One helpful addition is the `--interactive` option, which instead of scheduling
+the job will run it in your current terminal, but with all of the environment of
+the sbatch run job simulated for you. Useful for debugging/testing.
+
 
 ## Step scripts
 Each step consists of a couple of files, for example:
+
 ```
-03.split-text               : Actual code executed in this step for each batch
-03.split-text.sh            : Submission script that sets SLURM parameters.
+03.split-text            : Actual code executed in this step for each batch
+03.split-text.sh         : Submission script that sets SLURM parameters and is
+                           responsible for finding all files for the job array.                       
 ```
 
 Most scripts use `generic.slurm` as their "slurm" wrapper. This script functions
 a bit like `xargs`, in that it will run the command passed to it for each line
 in the batch list that is passed in as it's first argument. If it was started
 with --ntasks > 1, it will run ntasks in parallel. (To offload SLURM when there
-are many many batches to process, we have our own parallel executor.)
+are many many batches to process, we have our own parallel executor.) By default
+it will run the pseudo-jobs in serial (can be controlled with the `TPN` env
+variable.)
 
-All scheduling wrappers import `functions.sh` which parses some command line
-options:
-
-```
--j | --threads          : Number of threads (for the .check.sh scripts)
--r | --retry            : Only schedule jobs where output is missing
--t time | --time time   : Override wall time limit defined in the .slurm file
---after job-id          : Run job after a previous job finished/fails/whatever
---afterok job-id        : Run job after previous job finished without error
---aftercorr job-id.     : Run each job array element after the same element of
-                          a previous job finishes without error.
-```
+Additionally, `generic.slurm` creates a job specific `TMPDIR` on the local filesystem of the node and makes sure it cleans up after itself. Note: slurm job specific, not pseudo-job specific. *01.pdf2warc* still creates it's own TMPDIR for singularity so it can clean up after each file.
 
 ## Environment variables
 You can also control how many batches are to be processed per slurm job. For
@@ -209,6 +211,8 @@ this defaults to the same value as TPB.
 - **SBATCH**: allows you to override which program is called for `sbatch` by
 the schedule function in `functions.sh`. Useful for debugging, i.e. calling it
 with `fake-sbatchs.sh` which will just run the task instead of scheduling it.
+When you "schedule" a step with `--interactive` it will apply this SBATCH override
+for you.
 
 Note that the configuration is imported during submission. It uses Slurm to pick
 up and transport the ENV to the eventual executed script. This way you can do
@@ -217,15 +221,34 @@ hand, and you can change `config.csd3` without impacting already scheduled jobs.
 
 # Steps
 
-## 01.giawarc
-Splits `*.warc` files into `plain_text.gz`, `url.gz`, and `mime.gz`, split by
-language. The `plain_text.gz` contains base64-encoded documents. Each document
+## 01.warc2text
+Splits `*.warc` files into `text.gz`, `url.gz`, and `mime.gz`, split by
+language. The `text.gz` contains base64-encoded documents. Each document
 is already split into lines according to what the HTML dictates as being on a
 new line (i.e. `<li>` elements are separate lines, stuff wrapped in `<em>` wont
-cause a new line, etc.)
+cause a new line, etc.) PDFs are deposited into a warc archive `pdf.warc.gz`.
 
-The script in this repository is what is currently being run for wide00015 on
-Cirrus, adapted to the common structure of the scripts here.
+Records are filtered by `mt-filter-list.annotated` and `url-filter-list.optimised`. The first filters documents based on tags often found in autmatically translated webpages (mostly Wordpress websites with certain SEO plugins). The second filters a list of known trash websites (e.g. websites that list all possible phone numbers, ip addresses, license plate numbers). `url-filter-list.optimised` is just a more efficient regex, but semantically the same as `url-filter-list.annotated`. Because of the number of records that *warc2text* processes, this silly manual optimisation saves us something like 10% processing time 😅.
+
+Uses [warc2text](https://github.com/bitextor/warc2text), so don't forget to
+run `env/setup.sh install warc2text`.
+
+## 01.pdf2warc
+**Very much under development**
+
+Step to take that `pdf.warc.gz` and turn it into `pdf-text.warc.gz` which then can be run again through `warc2text`. No real workflow for this exists yet, but it will probably entail symlinking all the resulting `pdf-text.warc.gz` files into a single large collection, and then process that collection from start to end.
+
+Uses [pdfwarc2warc](https://github.com/jelmervdl/pdfwarc2warc) and for that to run, you'll need to build a singularity container of parsr.
+
+### Parsr & singularity
+This mostly entails running:
+
+```sh
+module load singularity
+singularity build parsr.sif docker://axarev/parsr:v1.2.2
+```
+
+and then adjusting the path in `02.pdf2warc.sh` to point to your `parsr.sif` file.
 
 ## 02.shard
 Splits/merges each language's `plain_text.gz`, `url.gz` and `mime.gz` into
@@ -257,9 +280,13 @@ in `translate.sh`. Uses `b64filter` to work on the base64-encoded docs and
 `cache` to make translating all the duplications (yes, we don't bother deduping)
 a bit less of a hassle.
 
-Note that there are two variants, a CPU and a GPU one. Only Pashto right now
-uses GPU translations. The submission wrapper will decide which one to submit
-using the info in `translate.sh`. CPU translation happens via Moses (2...)
+`04.translate` is basically a simple wrapper around `models/${lang}-en/translate.sh` which does the heavy lifting. Additionally you can have an `env.sh` file in that same language-specific directory to control the scheduling by exporting SBATCH variables. E.g. if your translation system does 32 threads, something like:
+
+```
+export SBATCH_CPUS_PER_TASK=32
+```
+
+In practice, I have a whole bunch of models in the `models/` directory on CSD3, all of them symlinking one of the four `translate-*.sh` files into their own directory as `translate.sh`. I also generally have multiple models per language pair, and then symlink the one I'm using as `${lang}-en` to make it easier to switch.
 
 ## 05.tokenise
 This tokenises the English translation. Or in the case of English, the
@@ -293,57 +320,16 @@ document-aligner itself uses a producer/consumer like structure to do parallel
 matching. However since its output needs to be sorted (which are the best pairs?)
 it does not produce intermediate output.
 
-## 07.unclean-corpus
-Generates an uncleaned corpus that fits what is expected by bitextor. Basically
-it takes the output of step 6, pastes the urls back in and concatenates it per
-language in a single gzipped file under `${collection}-corpora`.
+## 07.fix
+Runs *bifixer* on all of the `aligned-+([0-9]*).gz` files in a batch.
 
-```sh
-./07.unclean-corpus.sh wide00015 zh
-```
+It also runs *bicleaner-hardrules* to make an initial assessment of the sentence pairs. The output is a files with ones and zeros, zero indicating that that sentence pair is not good. We dot this step here to save time in the next step that uses precious GPU core hours. The 08.score step will only look at sentence pairs that have a 1 in the `hardruled.gz` file.
 
-This command has no "resume" or "retry" option. It just concatenates everything
-it can find. If something was missing, you will have to concat again.
-
-**Note**: From here on the scripts are more or less copied over from
-[paracrawl/clean-csd3](https://github.com/paracrawl/clean-csd3). If you have a 
-low resource language, you can also just use `clean.sh` which concatenates all
-of the following steps into a single script.
-
-## 08.extract
-Takes the uncleaned corpus and splits it into chunks of 1GB again.
-
-```sh
-./08.extract.sh wide00015 zh
-```
-
-Bit odd to first have shards & batches, then combine all of them, and then split
-then again right? I agree, and I would like to change it. But with the current
-set-up you'll see that some shards will yield much more than 1GB of sentence
-pairs while others will just yield a few kb. Some domains are just more
-interesting than others. Or larger. (I'm looking at you, dropbox.com…) By
-concatenating and then splitting again we're balancing them out again so all the
-cleaning job will run in about the same amount of time.
-
-This step generates a whole bunch of
-`${COLLECTION[$collection]}-cleaning/en-zh/????.raw` files, each plain text.
-
-Note that this command has no resume option at this moment. If you suddenly
-find more shard/batches, you wll have to re-run step 7 and that will invalidate
-all the work done from that point on.
+## 08.score
+Runs *bicleaner-neural* on all sentence pairs that have a 1 in their `hardruled.gz` file. This step uses GPUs. The scores (for the lines with 1 in `hardruled.gz`) are written to `scored.gz`. If the sentence pair already had a zero, that zero is also copied. So all in all `scored.gz` should have the same number of lines as `fixed.gz`.
 
 ## 09.clean
-Takes all the unclean chunks and pulls them through bifixer and bicleaner.
-
-bifixer fixes unicode errors, whitespace issues, etc. More importantly for the
-pipeline, it generates a hash that identifies the sentence pair. This hash is
-later used to deduplicate very similar sentence pairs from the tmx file.
-
-bicleaner classifies the quality of a sentence pair. This score is then used to
-filter out low quality sentence pairs (see `BICLEANER_THRESHOLD` in `config.csd3`)
-
-This step generates the 
-`$COLLECTIONS[$collection]-cleaning/en-zh/????.{classfied,filtered04}.gz} files.
+Combines `fixed.gz` with `scored.gz` by making a TSV, effectively. Also removes any lines that match any of the strings in `filtered-terms.txt`. This TSV is saved as `classified.gz`. Finally, a subset of this file, all sentences which make the threshold, will be written to `filtered05.gz` (where `05` depends on `BICLEANER_THRESHOLD`)
 
 ## 10.reduce-classified
 Just concatenates all classified sentence pair chunks. Not necessary for anything
@@ -357,7 +343,7 @@ used to combine multiple collections into a single release.
 ```
 
 This generates a file named 
-`$DATA/cleaning/en-zh/en-zh.hieu-wide00006-wide00015.classified.gz`.
+`$DATA/clean/en-zh/en-zh.hieu-wide00006-wide00015.classified.gz`.
 
 ## 11.reduce-filtered
 Concatenates all filtered sentence pair chunks.
@@ -367,7 +353,7 @@ Concatenates all filtered sentence pair chunks.
 ```
 
 The output will be something like 
-`$DATA/cleaning/en-zh/en-zh.hieu-wide00006-wide00015.filtered04.gz`.
+`$DATA/clean/en-zh/en-zh.hieu-wide00006-wide00015.filtered04.gz`.
 
 This step can be run in parallel to 10.
 
@@ -389,7 +375,7 @@ sentence pairs. No urls, no scores, etc.
 ```
 
 The output will be in 
-`$DATA/cleaning/en-zh.hieu-wide00006-wide00015.{tmx,txt}.gz`.
+`$DATA/clean/en-zh.hieu-wide00006-wide00015.{tmx,txt}.gz`.
 
 Note: Step 11 and 12 are not combined because step 11 needs many resources to
 sort all sentence pairs. Step 12 consists of just a single-threaded python
