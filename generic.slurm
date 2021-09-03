@@ -44,12 +44,14 @@ if [ ! -z "${SCRATCH:-}" ]; then
 	mkdir -p ${SCRATCH_BASED_TMPDIR} || exit 255
 	export TMPDIR=$SCRATCH_BASED_TMPDIR
 	echo "TMPDIR=$TMPDIR"
+	df -h $TMPDIR
 
 	chown :rds-48gU72OtDNY-users $SCRATCH_BASED_TMPDIR
 	chmod g+s $SCRATCH_BASED_TMPDIR
 
 	cleanup () {
 		echo "Cleaning up scratch director $SCRATCH_BASED_TMPDIR"
+		df -h $SCRATCH_BASED_TMPDIR
 		rm -rf $SCRATCH_BASED_TMPDIR
 	}
 	trap cleanup EXIT
