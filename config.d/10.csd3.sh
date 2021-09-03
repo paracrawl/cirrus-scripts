@@ -46,6 +46,7 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		["cc-2019-35"]="$COLLECTION_ROOT/paracrawl/data/common_crawl/CC-MAIN-2019-35"
 		#["merged"]="$COLLECTION_ROOT/paracrawl/data/merged/merged"
 		["marta"]="$COLLECTION_ROOT/paracrawl/data/marta/marta"
+		["pdf"]="$COLLECTION_ROOT/paracrawl/data/pdf/pdf"
 	)
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
