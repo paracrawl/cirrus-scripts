@@ -11,7 +11,6 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 		gcc/8 `# CUDA10.2 can't deal with gcc > 8` \
 		binutils-2.31.1-gcc-5.4.0-uyyspmn `# Nick: newer binutils is better` \
 		intel/mkl/2020.2 \
-		cuda/10.2 `# Marian doesn't support 11 properly yet` \
 		cuda/10.1 `# TF 2.3.2 needs cuda 10.1` \
 		cudnn/7.6_cuda-10.1 `# Needed for TF` \
 		openssl-1.0.2k-gcc-5.4.0-lonhprt
