@@ -21,7 +21,7 @@
 	url = https://github.com/bitextor/warc2text.git
 [submodule "env/src/marian-dev"]
 	path = env/src/marian-dev
-	url = git@github.com:browsermt/marian-dev.git
+	url = https://github.com/browsermt/marian-dev.git
 [submodule "env/src/prepocess-batch-dedupe"]
 	path = env/src/preprocess-batch-dedupe/
 	url = https://github.com/jelmervdl/preprocess.git
