@@ -9,7 +9,7 @@ depends() {
 }
 
 install() {
-	test -d boost_1_74_0 || curl -L https://dl.bintray.com/boostorg/release/1.74.0/source/boost_1_74_0.tar.gz | tar -zx
+	test -d boost_1_74_0 || curl -L https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz | tar -zx
 	pushd boost_1_74_0
 	rm -rf build
 	./bootstrap.sh --prefix=$PREFIX
