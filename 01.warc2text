@@ -14,10 +14,9 @@ warc2text \
 	--url-filters $SCRIPTS/url-filter-list.optimised \
 	--output $output.$TMPSFX \
 	--pdfpass $output.$TMPSFX/pdf.warc.gz \
-	--multilang \
+        --langid-model $FASTTEXT_LANGID \
 	${WARC2TEXT_OPTIONS:-} \
 	$batch/*.warc.gz \
 	2> >(tee -a $output.$TMPSFX/warc2text.log >&2)
 
 mv $output.$TMPSFX $output
-
