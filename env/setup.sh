@@ -216,7 +216,7 @@ case "$1" in
 		edit-module $2
 		;;
 	*)
-		echo "Usage: $0 list|edit|install|install-all" >&2
+		echo "Usage: $0 list|edit|status|install|install-all" >&2
 		exit 1
 		;;
 esac
