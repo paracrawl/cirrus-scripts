@@ -4,6 +4,9 @@ if [[ "$(hostname)" =~ "cirrus" ]]; then
 		exit 1
 	}
 
+        # https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.189.bin
+        export FASTTEXT_LANGID=/beegfs/paracrawl/lid.189.bin
+
 	# Note: may need to split this for warcs and processed data, I don't
 	# want to fill commoncrawl folders with processing data.
 	declare -A COLLECTIONS=(

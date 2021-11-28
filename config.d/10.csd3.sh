@@ -1,11 +1,16 @@
 if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
+        module add bzip2-1.0.6-gcc-5.4.0-xsgsccp
+
 	# Use faster perl
 	export PERL=/home/cs-vand1/perl5/perlbrew/perls/perl-5.32.0/bin/perl
 
 	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/paracrawl/clean
+
+        # https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.189.bin
+	export FASTTEXT_LANGID=/rds/project/rds-48gU72OtDNY/heafield/lid.189.bin
 	
-	# Works better this way. (Jelmer 4 months later: Really? Well, don't change it if isn't broken...)
-	export SCRATCH=/local
+	# Should be /local but this is broken in CSD3 icelake
+	export SCRATCH=/ramdisks
 
 	function bicleaner_model {
 		local lang=$1
@@ -50,11 +55,8 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	)
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
-	export SBATCH_ACCOUNT=t2-cs119-knl
-	export SBATCH_PARTITION=knl
-
 	export SBATCH_ACCOUNT=t2-cs119-cpu
-	export SBATCH_PARTITION=cclake,skylake
+	export SBATCH_PARTITION=icelake
 	export TASKS_PER_BATCH=${TPB:-1}
 
 	# How many resources should be allocated per slurm job. Defaults
