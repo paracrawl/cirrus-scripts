@@ -10,14 +10,14 @@ set -euo pipefail
 collection=$1
 shift
 
-export SBATCH_ACCOUNT=t2-cs119-gpu
-export SBATCH_PARTITION=pascal
+export SBATCH_ACCOUNT=t2-cs119-sl4-gpu
+export SBATCH_PARTITION=ampere
 export SLURM_TASKS_PER_NODE=1 # No parallelism in generic.slurm plz, they'll have to share the gpu otherwise.
 export SBATCH_GRES=gpu:1
 
 for lang in $*; do
 	bicleaner_ai_model $lang
-	batch_list=`make_batch_list 08 $collection $lang scored.gz fixed.gz hardruled.gz`
+	batch_list=`make_batch_list 08 $collection $lang scored.gz fixed.gz`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
@@ -25,7 +25,7 @@ for lang in $*; do
 			schedule \
 				-J score-${lang%~*}-${collection} \
 				-a $job_list \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				-e ${SLURM_LOGS}/08.score-%A_%a.err \
 				-o ${SLURM_LOGS}/08.score-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \

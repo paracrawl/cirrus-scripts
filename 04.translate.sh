@@ -28,7 +28,7 @@ for lang in $*; do
 				-J translate-${lang%~*}-${collection} \
 				-a $job_list \
 				--cpus-per-task=${SBATCH_CPUS_PER_TASK:-16} \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				-e $SLURM_LOGS/04.translate-${lang%~*}-%A_%a.err \
 				-o $SLURM_LOGS/04.translate-${lang%~*}-%A_%a.out \
 				$SCRIPTS/generic.slurm $batch_list \

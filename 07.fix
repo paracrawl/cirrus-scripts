@@ -10,8 +10,17 @@ shard=$(basename $(dirname $batch))
 
 if [[ $lang == no ]]; then
 	bicleaner_lang=nb
+elif [[ $lang == ukr ]]; then
+        bicleaner_lang=uk
+elif [[ $lang == eng ]]; then
+        bicleaner_lang=en
 else
 	bicleaner_lang=$lang
+fi
+
+bicleaner_target=${TARGET_LANG%~*}
+if [[ $bicleaner_target == eng ]]; then
+  bicleaner_target=en
 fi
 
 TMPSFX=${JOB_ID:-$$}
@@ -28,40 +37,42 @@ remove_empty_lines() {
 
 for match in $batch/aligned-+([0-9]).gz; do
 	echo $match 1>&2
+        gzip -cd $match |~/preprocess/build/bin/simple_cleaning -f 3 --min-chars 3 --scripts $bicleaner_lang |~/preprocess/build/bin/simple_cleaning -f 4 --min-chars 3 --scripts $bicleaner_target |gzip >${match}.clean.gz
 	matched_batch=$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')
-	paste <(gzip -cd ${match} \
-			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' `# bitextor's docjoin expects a score column, which it then ignores` \
+	paste <(gzip -cd ${match}.clean.gz \
+			| awk -F '\t' '{ print 0.0 "\t" $1 "\t"  $2}' \
 			| docjoin \
 				-r ${target_lang_data}/${shard}/${matched_batch}/url.gz \
 				-l $(dirname ${match})/url.gz) `# 1,2: target & source url`\
-		<(gzip -cd $match | cut -f4) `# 3: target sentence (e.g. en)` \
-		<(gzip -cd $match | cut -f3) `# 4: source sentence (e.g. mt)`\
-		<(gzip -cd $match | cut -f7) `# 5: target checksum (skipping col 5: bleualign score)`\
-		<(gzip -cd $match | cut -f6) `# 6: source checksum`
+		<(gzip -cd ${match}.clean.gz | cut -f4) `# 3: target sentence (e.g. en)` \
+		<(gzip -cd ${match}.clean.gz | cut -f3) `# 4: source sentence (e.g. mt)`\
+		<(gzip -cd ${match}.clean.gz | cut -f7) `# 5: target checksum (skipping col 5: bleualign score)`\
+		<(gzip -cd ${match}.clean.gz | cut -f6) `# 6: source checksum`
+        rm ${match}.clean.gz
 done \
-| parallel -j $THREADS --pipe --line-buffer --halt 2 \
-	bifixer - - ${TARGET_LANG%~*} ${bicleaner_lang} --sdeferredcol 5 --tdeferredcol 6 $BIFIXER_PARAMS `# 7,8: bifixer hash & score`\
-| ${SCRIPTS}/filter-unicode.py \
+| parallel -j $THREADS --pipe --line-buffer --halt 2 --block 100M -N 5000 \
+	bifixer - - ${bicleaner_target} ${bicleaner_lang} --sdeferredcol 5 --tdeferredcol 6 $BIFIXER_PARAMS `# 7,8: bifixer hash & score`\
 | remove_empty_lines \
-| tee \
-	>(pigz -9c > $FIXED.$TMPSFX) \
-| bicleaner-hardrules \
-	--score_only \
-	--tmp_dir $TMPDIR \
-	--processes $THREADS \
-	--source_lang ${TARGET_LANG%~*} \
-	--target_lang $bicleaner_lang \
-	--scol 3 \
-	--tcol 4 \
-	--metadata $BICLEANER_MODEL \
-	/dev/stdin /dev/stdout \
-| pigz -9c \
->$HARDRULED.$TMPSFX
+|pigz -9c > $FIXED.$TMPSFX
+#| tee \
+#	>(pigz -9c > $FIXED.$TMPSFX) \
+#| bicleaner-hardrules \
+#	--score_only \
+#	--tmp_dir $TMPDIR \
+#	--processes $THREADS \
+#	--source_lang $bicleaner_target \
+#	--target_lang $bicleaner_lang \
+#	--scol 3 \
+#	--tcol 4 \
+#	--metadata $BICLEANER_MODEL \
+#	/dev/stdin /dev/stdout \
+#| pigz -9c \
+#>$HARDRULED.$TMPSFX
 
-LC_HARDRULED=$(gzip -cd < $HARDRULED.$TMPSFX | wc -l)
-LC_FIXED=$(gzip -cd < $FIXED.$TMPSFX | wc -l)
-echo "hardrules.gz has $LC_HARDRULED lines, fixed.gz has $LC_FIXED lines."
-test $LC_HARDRULED -eq $LC_FIXED
+#LC_HARDRULED=$(gzip -cd < $HARDRULED.$TMPSFX | wc -l)
+#LC_FIXED=$(gzip -cd < $FIXED.$TMPSFX | wc -l)
+#echo "hardrules.gz has $LC_HARDRULED lines, fixed.gz has $LC_FIXED lines."
+#test $LC_HARDRULED -eq $LC_FIXED
 
 mv $FIXED.$TMPSFX $FIXED
-mv $HARDRULED.$TMPSFX $HARDRULED
+#mv $HARDRULED.$TMPSFX $HARDRULED

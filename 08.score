@@ -11,16 +11,16 @@ shard=$(basename $(dirname $batch))
 export HF_DATASETS_OFFLINE=1
 export TRANSFORMERS_OFFLINE=1
 TMPSFX=${JOB_ID:-$$}
-HARDRULED=$batch/hardruled.gz
 FIXED=$batch/fixed.gz
 SCORED=$batch/scored.gz
 
+BICLEANER_MODEL=/rds/project/rds-48gU72OtDNY/jelmervdl/bicleaner-models/full/en-xx/metadata.yaml #Kludge
+
 # Testing here because the errors in process substitution are hard to detect.
 test -r $FIXED
-test -r $HARDRULED
 
-paste <(zcat $FIXED) <(zcat $HARDRULED) \
-| cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS \
+zcat $FIXED \
+| cache -k 3,4 $BICLEANER $BICLEANER_PARAMS \
 	--score_only \
 	--processes $THREADS \
 	--tmp_dir $TMPDIR \

@@ -3,20 +3,22 @@ set -euo pipefail
 
 batch="$2"
 output="$1/$(basename $batch)"
-TMPSFX=${JOB_ID:-$$}
 
-mkdir -p $output.$TMPSFX
+tmpdir=/rds/project/rds-48gU72OtDNY/paracrawl/data/temp/$(basename $batch)_${JOB_ID}_$$
+mkdir -p $tmpdir
 
-ls -l $batch/*.warc.gz > $output.$TMPSFX/warc2text.log
+ls -l $batch/*.warc.gz > $tmpdir/warc2text.log
 
 warc2text \
 	--tag-filters $SCRIPTS/mt-filter-list.annotated \
 	--url-filters $SCRIPTS/url-filter-list.optimised \
-	--output $output.$TMPSFX \
-	--pdfpass $output.$TMPSFX/pdf.warc.gz \
+	--output $tmpdir \
         --langid-model $FASTTEXT_LANGID \
 	${WARC2TEXT_OPTIONS:-} \
 	$batch/*.warc.gz \
-	2> >(tee -a $output.$TMPSFX/warc2text.log >&2)
+	2> >(tee -a $tmpdir/warc2text.log >&2)
 
-mv $output.$TMPSFX $output
+#	--pdfpass $output.$TMPSFX/pdf.warc.gz \
+
+mkdir -p "$1"
+mv $tmpdir "$output"

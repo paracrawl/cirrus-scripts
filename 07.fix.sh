@@ -15,16 +15,16 @@ for lang in $*; do
 	# Load some language-spefic bicleaner & bifixer configurations (because they normally don't
 	# deal with zh or ko correctly. Read: time for the duct tape!
 	bicleaner_ai_model $lang
-	batch_list=`make_batch_list 07 $collection $lang hardruled.gz "aligned-+([0-9]*).gz"`
+	batch_list=`make_batch_list 07 $collection $lang fixed.gz "aligned-+([0-9]*).gz"`
 	job_list=`make_job_list $batch_list`
 	if [ ! -z $job_list ]; then
 		prompt "Scheduling $job_list\n"
 		if confirm; then
 			schedule \
 				-J fix-${lang%~*}-${collection} \
+				--time 12:00:00 \
+				--cpus-per-task 72 `#because more memory` \
 				-a $job_list \
-				--time 24:00:00 \
-				--cpus-per-task 4 `#because more memory` \
 				-e ${SLURM_LOGS}/07.fix-%A_%a.err \
 				-o ${SLURM_LOGS}/07.fix-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \

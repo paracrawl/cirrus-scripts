@@ -10,6 +10,7 @@ SPLIT="perl $KPU/moses/ems/support/split-sentences.perl"
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/plain_text.gz gzip -dc \
+| ~/preprocess/build/bin/remove_invalid_utf8_base64 \
 | $SPLIT -k -q -n -d -l $SLANG -c 524288 \
 | gzip -9c \
 > ${TMPDIR}/sentences.$$.gz

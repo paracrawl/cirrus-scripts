@@ -50,7 +50,7 @@ for collection in $@; do
 			schedule \
 				-J warc2text-${collection} \
 				-a ${job_list}%32 \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				--cpus-per-task 1\
 				-e ${SLURM_LOGS}/01.warc2text-%A_%a.err \
 				-o ${SLURM_LOGS}/01.warc2text-%A_%a.out \

@@ -20,7 +20,7 @@ shift
 # Note: tasks-per-batch here determines how many parts the sharding is split into
 case $collection in
 	wide*|hieu)
-		BATCHES_PER_TASK=1024
+		BATCHES_PER_TASK=256
 		;;
 	cc-2017-30)
 		BATCHES_PER_TASK=16
@@ -53,7 +53,7 @@ for language in $@; do
 			shard_job_id=$(schedule \
 				-J shard-${language}-${collection} \
 				-a $job_list \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				--cpus-per-task 2\
 				-e ${SLURM_LOGS}/02.shard-${language}-%A_%a.err \
 				-o ${SLURM_LOGS}/02.shard-${language}-%A_%a.out \
@@ -63,7 +63,7 @@ for language in $@; do
 				-J merge-shard-${language}-${collection} \
 				--dependency afterok:$shard_job_id \
 				-a 1-16 \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				--cpus-per-task 8 `#really just need 4, but 8 for more memory and better spread` \
 				-e ${SLURM_LOGS}/02.merge-${language}-%A_%a.err \
 				-o ${SLURM_LOGS}/02.merge-${language}-%A_%a.out \

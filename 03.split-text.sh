@@ -19,7 +19,7 @@ for lang in $*; do
 			schedule \
 				-J split-${lang}-${collection} \
 				-a $job_list \
-				--time 24:00:00 \
+				--time 12:00:00 \
 				-e ${SLURM_LOGS}/03.split-%A_%a.err \
 				-o ${SLURM_LOGS}/03.split-%A_%a.out \
 				${SCRIPTS}/generic.slurm $batch_list \

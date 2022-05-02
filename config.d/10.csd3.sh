@@ -1,4 +1,4 @@
-if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
+#if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]] || [[ "$(hostname -A)" =~ "fabric.cluster" ]] || [[ .data.cluster ]]; then
         module add bzip2-1.0.6-gcc-5.4.0-xsgsccp
 
 	# Use faster perl
@@ -7,7 +7,8 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	export DATA_CLEANING=/rds/project/rds-48gU72OtDNY/paracrawl/clean
 
         # https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.189.bin
-	export FASTTEXT_LANGID=/rds/project/rds-48gU72OtDNY/heafield/lid.189.bin
+        # https://dl.fbaipublicfiles.com/fasttext/supervised-models/lid.218a.bin
+	export FASTTEXT_LANGID=/rds/project/rds-48gU72OtDNY/heafield/lid.218a.bin
 	
 	# Should be /local but this is broken in CSD3 icelake
 	export SCRATCH=/ramdisks
@@ -55,8 +56,8 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	)
 
 	# Where jobs should be executed. Values used in functions.sh/schedule.
-	export SBATCH_ACCOUNT=t2-cs119-cpu
-	export SBATCH_PARTITION=icelake
+	export SBATCH_ACCOUNT=t2-cs119-sl4-cpu
+	export SBATCH_PARTITION=icelake #,cclake,skylake
 	export TASKS_PER_BATCH=${TPB:-1}
 
 	# How many resources should be allocated per slurm job. Defaults
@@ -64,5 +65,5 @@ if [[ "$(hostname -A)" =~ "hpc.cam.ac.uk" ]]; then
 	# .slurm job definitions define how many cpus should be allocated per
 	# task.
 	export SLURM_TASKS_PER_NODE=${TPN:-1}
-fi
+#fi
 
