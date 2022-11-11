@@ -222,7 +222,7 @@ hand, and you can change `config.csd3` without impacting already scheduled jobs.
 # Steps
 
 ## 01.warc2text
-Splits `*.warc` files into `text.gz`, `url.gz`, and `mime.gz`, split by
+Splits `*.warc` files into `plain_text.gz`, `url.gz`, and `mime.gz`, split by
 language. The `text.gz` contains base64-encoded documents. Each document
 is already split into lines according to what the HTML dictates as being on a
 new line (i.e. `<li>` elements are separate lines, stuff wrapped in `<em>` wont
@@ -290,7 +290,7 @@ In practice, I have a whole bunch of models in the `models/` directory on CSD3, 
 
 ## 05.tokenise
 This tokenises the English translation. Or in the case of English, the
-sentence-split version of plain_text.gz. Uses the Moses `tokenizer.perl`.
+sentence-split version of plain_text.gz, that is, sentences.gz. Uses the Moses `tokenizer.perl`.
 
 Why? Good question. The translate script already tokenises and then detokenises
 everything. The document-aligner consumes tokenised input, but bleualign does
