@@ -37,7 +37,7 @@ ${COLLECTIONS[$collection]}/
                               en-index, $lang-doc, $en-doc, $lang-translated-doc
                               The number refers to the $batch in en/$shard/$batch
                               it is aligned with.
-          fixed.gz          : All aligned document pairs concatenated, and
+          fixed.gz          : All aligned sentence pairs concatenated, and
                               processed with bifixer. Produced in step 07.
           hardruled.gz      : bicleaner-hardrules.py scores of fixed.gz, with 0 for
                               lines that should be ignored further down the pipeline.
