@@ -33,7 +33,7 @@ ${COLLECTIONS[$collection]}/
                               sentences.gz. Generated during step 4.
           tokenised_en.gz.  : Tokenised version of sentences_en.gz. Generated
                               in step 5.
-          aligned-[0-9].gz. : Aligned document pairs in the form of $lang-index,
+          aligned-[0-9].gz. : Aligned sentence pairs in the form of $lang-index,
                               en-index, $lang-doc, $en-doc, $lang-translated-doc
                               The number refers to the $batch in en/$shard/$batch
                               it is aligned with.
