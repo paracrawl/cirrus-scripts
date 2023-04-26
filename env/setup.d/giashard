@@ -4,8 +4,12 @@ is-installed() {
 	test -x $GOPATH/bin/giashard
 }
 
+depends() {
+	echo go
+}
+
 install() {
-	go get -u github.com/paracrawl/giashard/cmd/giashard
+	go install github.com/paracrawl/giashard/cmd/giashard@latest
 }
 
 
