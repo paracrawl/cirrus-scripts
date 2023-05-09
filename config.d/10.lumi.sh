@@ -1,0 +1,46 @@
+if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
+	PROJ_DIR=/projappl/project_462000252/zaragoza
+	SCRATCH_DIR=/scratch/project_462000252/zaragoza
+
+	function bicleaner_model {
+		local lang=$1
+
+		export BIFIXER_PARAMS="--aggressive_dedup -q"
+		export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
+		export BICLEANER_THRESHOLD="0.5"
+		export BICLEANER_PARAMS="-q" # --score_only is always supplied
+
+		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
+		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
+		export BICLEANER_MODEL=$PROJ_DIR/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
+
+		export BIFIXER_PARAMS="--aggressive_dedup -q"
+		export BICLEANER=$PREFIX/bin/bicleaner-ai-classify
+		export BICLEANER_THRESHOLD="0.5"
+		export BICLEANER_PARAMS="-q"
+		export BICLEANER_MODEL=$PROJ_DIR/bicleaner-ai-models/full/${TARGET_LANG%~*}-${lang%~*}/metadata.yaml
+	}
+
+	export DATA_CLEANING=$SCRATCH_DIR/clean
+	COLLECTION_ROOT="/scratch/project_462000252/zaragoza/data"
+	declare -A COLLECTIONS=(
+		["output_wide15_filtered_sample3"]="$COLLECTION_ROOT/output_wide15_filtered_sample3"
+		["output_wide15_filtered_sample12"]="$COLLECTION_ROOT/output_wide15_filtered_sample12"
+		["output_CommonCrawl40_filtered_sample"]="$COLLECTION_ROOT/output_CommonCrawl40_filtered_sample"
+	)
+
+	# Where jobs should be executed. Values used in functions.sh/schedule.
+	export SBATCH_ACCOUNT=project_462000252
+	#TODO should investigate if this variable has to be set depending on the step
+	# small partition is allocatable by resources
+	# standard partition is allocatable by node
+	export SBATCH_PARTITION=small
+	export SLURM_LOGS=$PROJ_DIR/logs
+	export TASKS_PER_BATCH=${TPB:-1}
+
+	# How many resources should be allocated per slurm job. Defaults
+	# to as many as necessary to process all tasks in parallel. Individual
+	# .slurm job definitions define how many cpus should be allocated per
+	# task.
+	export SLURM_TASKS_PER_NODE=${TPN:-1}
+fi
