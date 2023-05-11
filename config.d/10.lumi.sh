@@ -2,6 +2,12 @@ if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 	PROJ_DIR=/projappl/project_462000252/zaragoza
 	SCRATCH_DIR=/scratch/project_462000252/zaragoza
 
+	# Override binaries called by env variable
+	# they should be available in PATH for lumi
+	export DOCALIGN=docalign
+	export DOCJOIN=docjoin
+	export BLEUALIGN=bleualign_cpp
+
 	function bicleaner_model {
 		local lang=$1
 
