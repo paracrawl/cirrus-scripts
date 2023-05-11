@@ -12,7 +12,7 @@ if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 		local lang=$1
 
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
-		export BICLEANER=$PREFIX/bin/bicleaner-classify-lite
+		export BICLEANER=bicleaner-classify-lite
 		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="-q" # --score_only is always supplied
 
@@ -20,8 +20,9 @@ if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
 		export BICLEANER_MODEL=$PROJ_DIR/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
 
+	function bicleaner_ai_model {
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
-		export BICLEANER=$PREFIX/bin/bicleaner-ai-classify
+		export BICLEANER=bicleaner-ai-classify
 		export BICLEANER_THRESHOLD="0.5"
 		export BICLEANER_PARAMS="-q"
 		export BICLEANER_MODEL=$PROJ_DIR/bicleaner-ai-models/full/${TARGET_LANG%~*}-${lang%~*}/metadata.yaml
