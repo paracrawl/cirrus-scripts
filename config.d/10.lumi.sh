@@ -19,6 +19,7 @@ if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 		# Default path: here instead of in config.csd3 because path depends on $lang and the exceptions
 		# above don't follow this pattern very well, which is why it's not in the 09.clean code itself.
 		export BICLEANER_MODEL=$PROJ_DIR/bicleaner-models/${TARGET_LANG%~*}-${lang%~*}/${TARGET_LANG%~*}-${lang%~*}.yaml
+	}
 
 	function bicleaner_ai_model {
 		export BIFIXER_PARAMS="--aggressive_dedup -q"
