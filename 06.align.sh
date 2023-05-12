@@ -45,13 +45,6 @@ declare -a OPTIONS=(
 	-o ${SLURM_LOGS}/06.align-%A_%a.out
 )
 
-# Quick hack, should be a --option option, but functions.sh doesn't
-# allow for that at the moment. Someday...
-if [[ ! -z ${OOM_PROOF:-} ]]; then
-	OPTIONS+=(--mem-per-cpu 12G)
-	export BLEUALIGN_THREADS=4
-fi
-
 collection=$1
 shift
 
