@@ -27,3 +27,4 @@
 /env/src/hunspell-*
 filtered-terms.txt
 *.swp
+models/??-??
