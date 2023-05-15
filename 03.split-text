@@ -12,19 +12,15 @@ echo "Processing (${SLANG}) ${BATCH}"
 < ${BATCH}/plain_text.gz gzip -dc \
 | $SPLIT -k -q -n -d -l $SLANG -c 524288 \
 | gzip -9c \
-> ${TMPDIR}/sentences.$$.gz
+> ${BATCH}/sentences.$$.gz
 
 echo "Testing output"
 
 docs_pt=$(gzip -cd ${BATCH}/plain_text.gz | wc -l)
-docs_st=$(gzip -cd ${TMPDIR}/sentences.$$.gz | wc -l)
+docs_st=$(gzip -cd ${BATCH}/sentences.$$.gz | wc -l)
 echo "Expecting $docs_pt documents, found $docs_st"
 test $docs_pt -eq $docs_st || exit 1
 
-# Move in two steps. First copies it to the shared fs which
-# might fail because it hits a quota. Second marks it as
-# the real thing.
-mv ${TMPDIR}/sentences.$$.gz ${BATCH}/sentences.$$.gz
 mv ${BATCH}/sentences.$$.gz ${BATCH}/sentences.gz
 echo "Copied result (${SLANG}) ${BATCH}"
 
