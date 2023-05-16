@@ -18,7 +18,6 @@ TMPSFX=${JOB_ID:-$$}
 ${DOCALIGN} -j ${DOCALIGN_THREADS:-$THREADS} --threshold 0.1 \
 	${SRC_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
 	${REF_BATCH}/tokenised_${TARGET_LANG%~*}.gz \
-| tee ${SRC_BATCH}/pairs-${TARGET_LANG%~*}-${REF_BATCH_ID}.txt \
 | cut -f2- \
 | ${DOCJOIN} \
 	-li\
