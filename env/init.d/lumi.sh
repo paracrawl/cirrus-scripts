@@ -15,7 +15,8 @@ if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 	export CXXFLAGS="-O2 -funroll-loops -ffast-math"
 	export IS_LUMI=true
 
-	export PATH="/pfs/lustrep1/projappl/project_462000252/zaragoza/test_env/conda_env/bin:$PATH"
+	#export PATH="/pfs/lustrep1/projappl/project_462000252/zaragoza/test_env/conda_env/bin:$PATH"
+	export PATH="/pfs/lustrep1/projappl/project_462000252/zaragoza/bitextor-8.1/bin:$PATH"
 
 	export SQUEUE_FORMAT="%.18i %.9P %.20j %.8u %.2t %.10M %.6D %R"
 fi
