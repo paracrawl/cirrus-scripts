@@ -1,5 +1,6 @@
 if [[ $(hostname -A) =~ "uan"[0-9][0-9] ]]; then
 	module purge
+	module load Boost/1.81.0-cpeCray-23.03 # This must be changed if boost version changes in env/setup.d/paracrawl
 	#module purge && module load \
 	#	PrgEnv-cray/8.3.3 \
 	#	craype-x86-milan \

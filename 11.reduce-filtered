@@ -7,8 +7,8 @@ shift
 
 # Set up temp directory
 TMPSFX=${JOB_ID:-$$}
-#TMPDIR=$(mktemp -d --tmpdir=$(dirname $output_file) --suffix=_$TMPSFX)
-TMPDIR=$(mktemp -d --tmpdir=$SCRATCH --suffix=_$TMPSFX)
+TMPDIR=$(mktemp -d --tmpdir=$(dirname $output_file) --suffix=_$TMPSFX)
+#TMPDIR=$(mktemp -d --tmpdir=$SCRATCH --suffix=_$TMPSFX)
 test -d "$TMPDIR"
 trap "rm -rf $TMPDIR" EXIT
 
