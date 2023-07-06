@@ -8,7 +8,7 @@ shift 2
 filtered_input=$@
 
 pigz -cd $filtered_input \
-| PYTHONPATH=$PREFIX/src/bitextor python3 ${SCRIPTS}/bitextor-buildTMX.py \
+| python3 bitextor-buildTMX.py \
 	--lang1 ${TARGET_LANG%~*} --lang2 ${lang} \
 	-c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection,lengthratio,numTokensSL,numTokensTL" \
 	--dedup "bifixerhash" \
