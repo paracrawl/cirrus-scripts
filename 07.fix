@@ -26,6 +26,10 @@ remove_empty_lines() {
 	awk -F"\t" '$3 != "" && $4 != "" { print }'
 }
 
+# Fix bicleaner model path for non-huggingface tools (aka bicleaner-hardrules)
+BICLEANER_MODEL_GIT_DIR=$HUGGINGFACE_HUB_CACHE/models--${BICLEANER_MODEL//\//--}
+BICLEANER_MODEL=${BICLEANER_MODEL_GIT_DIR}/snapshots/$(cat $BICLEANER_MODEL_GIT_DIR/refs/main)
+
 for match in $batch/aligned-+([0-9]).gz; do
 	echo $match 1>&2
 	matched_batch=$(echo $match | sed 's/.*-\([0-9]*\)\.gz/\1/')
@@ -52,7 +56,7 @@ done \
 	--target_lang $bicleaner_lang \
 	--scol 3 \
 	--tcol 4 \
-	--metadata $BICLEANER_MODEL \
+	--metadata $BICLEANER_MODEL/metadata.yaml \
 	/dev/stdin /dev/stdout \
 | pigz -9c \
 >$HARDRULED.$TMPSFX
