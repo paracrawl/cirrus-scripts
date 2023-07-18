@@ -23,7 +23,7 @@ export -f tokenise
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/${INPUT}.gz gzip -dc \
-| b64filter cache bash -c tokenise \
+| b64filter bash -c tokenise \
 | gzip -9c \
 > ${BATCH}/${OUTPUT}.$TMPSFX.gz
 
