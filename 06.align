@@ -27,6 +27,7 @@ ${DOCALIGN} -j ${DOCALIGN_THREADS:-$THREADS} --threshold 0.1 \
 	-l ${SRC_BATCH}/sentences_${TARGET_LANG%~*}.gz\
 | /usr/bin/time -f '{"task":"bleualign", "pair":'"$PAIR_FORMAT"', "time":'"$TIME_FORMAT"'}' \
 parallel \
+	--will-cite \
 	--tmpdir=$TMPDIR \
 	-j${BLEUALIGN_THREADS:-$THREADS} \
 	--halt 2 \
