@@ -60,10 +60,11 @@ fi
 GROUP_END=$(( $TASKS_PER_BATCH * $SLURM_ARRAY_TASK_ID ))
 GROUP_START=$(( $GROUP_END - $TASKS_PER_BATCH ))
 
-echo "Processing $GROUP_START to $GROUP_END with $THREADS threads"
+echo "Processing $GROUP_START to $GROUP_END in ${SLURM_TASKS_PER_NODE} parallel jobs each with $THREADS threads"
 
 awk "NR > $GROUP_START && NR <= $GROUP_END" $BATCHES \
 | parallel \
+	--will-cite \
 	-j${SLURM_TASKS_PER_NODE} \
 	--line-buffer \
 	--colsep $'\t' \

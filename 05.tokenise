@@ -23,25 +23,22 @@ export -f tokenise
 echo "Processing (${SLANG}) ${BATCH}"
 
 < ${BATCH}/${INPUT}.gz gzip -dc \
-| b64filter cache bash -c tokenise \
+| b64filter bash -c tokenise \
 | gzip -9c \
-> ${TMPDIR}/${OUTPUT}.$TMPSFX.gz
+> ${BATCH}/${OUTPUT}.$TMPSFX.gz
 
 echo "Checking output"
 
 docs_st=$(gzip -cd ${BATCH}/${INPUT}.gz | wc -l)
-docs_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$TMPSFX.gz | wc -l)
+docs_tk=$(gzip -cd ${BATCH}/${OUTPUT}.$TMPSFX.gz | wc -l)
 echo "Expecting $docs_st documents, found $docs_tk"
 test $docs_st -eq $docs_tk || exit 1
 
 lines_st=$(gzip -cd ${BATCH}/${INPUT}.gz | base64 -d | wc -l)
-lines_tk=$(gzip -cd ${TMPDIR}/${OUTPUT}.$TMPSFX.gz | base64 -d | wc -l)
+lines_tk=$(gzip -cd ${BATCH}/${OUTPUT}.$TMPSFX.gz | base64 -d | wc -l)
 echo "Expecting $lines_st lines, found $lines_tk"
 test $lines_st -eq $lines_tk || exit 1
 
-# Two-step move because the first one might fail and leave an
-# incomplete file behind, which is tricky to detect.
-mv ${TMPDIR}/${OUTPUT}.$TMPSFX.gz ${BATCH}/${OUTPUT}.$TMPSFX.gz
 mv ${BATCH}/${OUTPUT}.$TMPSFX.gz ${BATCH}/${OUTPUT}.gz
 
 echo "Moved result (${SLANG}) ${BATCH}/${OUTPUT}.gz"

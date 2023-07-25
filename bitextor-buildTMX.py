@@ -39,8 +39,7 @@ import os
 import unicodedata
 from xml.sax.saxutils import escape
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)) + "/utils")
-from utils.common import open_xz_or_gzip_or_plain, dummy_open
+from bitextor.utils.common import open_xz_or_gzip_or_plain, dummy_open
 
 def remove_control_characters(text):
     return "".join(ch for ch in text if unicodedata.category(ch)[0]!="C")

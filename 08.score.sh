@@ -10,10 +10,17 @@ set -euo pipefail
 collection=$1
 shift
 
-export SBATCH_ACCOUNT=t2-cs119-gpu
-export SBATCH_PARTITION=pascal
-export SLURM_TASKS_PER_NODE=1 # No parallelism in generic.slurm plz, they'll have to share the gpu otherwise.
-export SBATCH_GRES=gpu:1
+if [ "$IS_LUMI" = true ]; then
+	export SBATCH_PARTITION="small-g"
+	export SLURM_TASKS_PER_NODE=1 # No parallelism in generic.slurm plz, they'll have to share the gpu otherwise.
+	export SBATCH_GPUS_PER_TASK=1
+	unset SBATCH_MEM_PER_CPU # If we are setting this for small partition, we don't need it for gpu jobs
+else
+	export SBATCH_ACCOUNT=t2-cs119-gpu
+	export SBATCH_PARTITION=pascal
+	export SLURM_TASKS_PER_NODE=1 # No parallelism in generic.slurm plz, they'll have to share the gpu otherwise.
+	export SBATCH_GRES=gpu:1
+fi
 
 for lang in $*; do
 	bicleaner_ai_model $lang

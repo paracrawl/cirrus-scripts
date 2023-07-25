@@ -26,3 +26,5 @@
 /env/src/recode-*
 /env/src/hunspell-*
 filtered-terms.txt
+*.swp
+models/??-??

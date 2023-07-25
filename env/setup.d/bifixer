@@ -9,8 +9,5 @@ depends() {
 }
 
 install() {
-	pip3 install -r bifixer/requirements.txt
-	echo "python3 $PREFIX/src/bifixer/bifixer/bifixer.py \"\$@\"" \
-		> $PREFIX/bin/bifixer
-	chmod +x $PREFIX/bin/bifixer
+	pip install "bifixer==0.8.8"
 }
