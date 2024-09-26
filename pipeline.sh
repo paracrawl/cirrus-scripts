@@ -78,14 +78,14 @@ main() {
 
 	local collections=($(./collections.sh -gwb))
 
-	case $lang in
-		ca|eu|gl|oc)
-			export TARGET_LANG=es
-			;;
-		en|ga|hr|is|nn|no|nb)
-			collections=(${collections[@]} gwb)
-			;;
-	esac
+	#case $lang in
+	#	ca|eu|gl|oc)
+	#		export TARGET_LANG=es
+	#		;;
+	#	en|ga|hr|is|nn|no|nb)
+	#		collections=(${collections[@]} gwb)
+	#		;;
+	#esac
 
 	for collection in ${collections[@]}; do
 		job_id=$(schedule_batch_jobs $collection $lang)

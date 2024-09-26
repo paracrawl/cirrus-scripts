@@ -17,6 +17,6 @@ install() {
 	cmake .. -DKENLM_MAX_ORDER=7 -DCMAKE_INSTALL_PREFIX:PATH=$PREFIX
 	make -j8 install
 
-	pip3 install .. --install-option="--max_order 7"
+	pip3 install .. --config-settings="--build-option=--max_order=7"
 	popd
 }

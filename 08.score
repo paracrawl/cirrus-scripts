@@ -2,6 +2,11 @@
 set -euo pipefail
 shopt -s extglob
 
+if [ "$IS_LUMI" = true ]; then
+	module load CrayEnv
+	module load rocm/5.2.3
+fi
+
 collection=$1
 lang=$2
 target_lang_data=$3
@@ -22,7 +27,6 @@ test -r $HARDRULED
 paste <(zcat $FIXED) <(zcat $HARDRULED) \
 | cache -k 3,4 ./score-wrap.py $BICLEANER $BICLEANER_PARAMS \
 	--score_only \
-	--processes $THREADS \
 	--tmp_dir $TMPDIR \
 	--disable_hardrules \
 	--disable_porn_removal \

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/go/bin/go
+}
+
+install() {
+	pushd ..
+	wget -O go.linux-amd64.tgz https://go.dev/dl/go1.20.3.linux-amd64.tar.gz
+	tar xvf go.linux-amd64.tgz
+	rm go.linux-amd64.tgz
+	popd
+}

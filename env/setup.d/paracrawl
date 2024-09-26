@@ -1,0 +1,32 @@
+#!/bin/bash
+
+is-installed() {
+	test -x $PREFIX/bin/batch_dedupe
+}
+
+depends() {
+	if [ "$IS_LUMI" == "true" ]; then
+		echo env
+	else
+		echo boost preprocess
+	fi
+}
+
+install() {
+	pushd paracrawl
+
+	mkdir -p build && cd build
+
+	if [ "$IS_LUMI" == "true" ]; then
+		module load Boost/1.81.0-cpeCray-23.03 ICU
+	fi
+
+	cmake .. \
+		-DCMAKE_BUILD_TYPE=Release
+	make -j8
+	cp lib/libparacrawl_util.a $PREFIX/lib/
+	cp bin/* $PREFIX/bin/
+	cd .. && rm -r build
+
+	popd
+}

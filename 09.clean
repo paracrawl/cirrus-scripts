@@ -42,7 +42,7 @@ paste <(pigz -dc $FIXED) <(pigz -dc $SCORED) `# add bicleaner score as the 9th c
 	>(pigz -9c > $CLASSIFIED.$TMPSFX) \
 	>(wc -wl | sed 's/^ \+//' | tr -s ' ' '\t' > $STATS.$TMPSFX) \
 | awk -F"\t" "\$9 >= ${BICLEANER_THRESHOLD}" \
-| python3 $BITEXTOR/bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection" -s \
+| python3 bitextor-elrc-filtering.py -c "url1,url2,seg1,seg2,checksum1,checksum2,bifixerhash,bifixerscore,bicleaner,collection" -s \
 | LC_ALL=C sort -t$'\t' -k7,7 -k8,8nr \
 | pigz -9c \
 > $FILTERED.$TMPSFX \
